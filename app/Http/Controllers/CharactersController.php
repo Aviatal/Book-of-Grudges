@@ -8,6 +8,6 @@ class CharactersController extends Controller
 {
     public function getCharacterSheet()
     {
-        return view('pages.character-sheet');
+        return view('Pages.character-sheet');
     }
 }

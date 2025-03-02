@@ -8,11 +8,11 @@ class SkillsAndTalentsController extends Controller
 {
     public function getSkills()
     {
-        return view('pages.skills');
+        return view('Pages.skills');
     }
 
     public function getTalents()
     {
-        return view('pages.talents');
+        return view('Pages.talents');
     }
 }
