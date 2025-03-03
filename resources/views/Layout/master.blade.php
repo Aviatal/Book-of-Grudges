@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base-url" content="{{ url('/') }}/">
     <title>Book of Grudges</title>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -25,7 +26,7 @@
     <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
         <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
         <ul class="space-y-2">
-            <li><a href="{{ route('character-sheet') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
+            <li><a href="{{ route('character-sheet', ['id' => 1]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
             <li><a href="{{ route('skills') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
             <li><a href="{{ route('talents') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
         </ul>
