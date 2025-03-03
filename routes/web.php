@@ -6,7 +6,7 @@ use App\Http\Controllers\SkillsAndTalentsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/karta-postaci');
+    return redirect('/karta-postaci/1');
 });
 
 Route::group(['prefix' => 'karta-postaci'], function () {
