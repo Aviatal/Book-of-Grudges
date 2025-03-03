@@ -9,6 +9,7 @@ class Hero extends Model
 {
     protected $table = 'heros';
 
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

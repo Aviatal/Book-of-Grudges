@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('heros', function (Blueprint $table) {
+        Schema::create('heroes', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('user_id');
             $table->string('name');
@@ -37,10 +37,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('heros', function (Blueprint $table) {
+        Schema::table('heroes', function (Blueprint $table) {
             $table->dropForeign(['current_profession_id', 'previous_profession_id', 'user_id']);
         });
-        Schema::dropIfExists('heros');
+        Schema::dropIfExists('heroes');
         Schema::dropIfExists('professions');
     }
 };
