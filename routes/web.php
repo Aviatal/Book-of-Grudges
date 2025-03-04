@@ -17,3 +17,10 @@ Route::group(['prefix' => 'karta-postaci'], function () {
 Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('skills');
 Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('professions-get');
 Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('talents');
+
+Route::get('/migrate-fresh', function(){
+    ini_set('memory_limit', '4069M');
+    ini_set('max_execution_time', 5000);
+    \Artisan::call('migrate:fresh', ['--seed' => true]);
+    dd("Migracje zostały wykonane");
+});
