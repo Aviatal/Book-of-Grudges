@@ -20,8 +20,8 @@ class HeroFactory extends Factory
             'updated_at' => Carbon::now(),
 
             'user_id' => 1,
-            'current_profession_id' => $this->faker->randomNumber(),
-            'previous_profession_id' => $this->faker->randomNumber(),
+            'current_profession_id' => $this->faker->randomDigit(),
+            'previous_profession_id' => $this->faker->randomDigit(),
         ];
     }
 }
