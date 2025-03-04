@@ -12,6 +12,7 @@ Route::get('/', function () {
 Route::group(['prefix' => 'karta-postaci'], function () {
     Route::get('/{id}', [CharactersController::class, 'getCharacterSheet'])->name('character-sheet');
     Route::post('/{hero}/update-hero-data', [CharactersController::class, 'updateHeroData'])->name('character-sheet.update-hero-data');
+    Route::post('/{hero}/update-hero-description', [CharactersController::class, 'updateHeroDescription'])->name('character-sheet.update-hero-description');
 });
 
 Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('skills');

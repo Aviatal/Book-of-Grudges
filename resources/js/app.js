@@ -6,13 +6,11 @@ import {createVuetify} from "vuetify";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
 
-import { VTextField, VBtn, VSelect } from 'vuetify/components';
+import { VTextField, VBtn, VSelect, VCol, VRow } from 'vuetify/components';
 
 const vuetify = createVuetify({
     components: {
-        VTextField,
-        VBtn,
-        VSelect
+        VTextField, VBtn, VSelect, VCol, VRow
     }
 });
 

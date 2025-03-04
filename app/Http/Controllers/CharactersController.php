@@ -9,7 +9,7 @@ class CharactersController extends Controller
 {
     public function getHero(int $id)
     {
-        return Hero::with('previousProfession', 'currentProfession')->find($id);
+        return Hero::with('previousProfession', 'currentProfession', 'description')->find($id);
     }
     public function getCharacterSheet(int $id)
     {
@@ -19,6 +19,11 @@ class CharactersController extends Controller
     public function updateHeroData(Request $request, Hero $hero)
     {
         $hero->update($request->all());
+        return $this->getHero($hero->id);
+    }
+    public function updateHeroDescription(Request $request, Hero $hero)
+    {
+        $hero->description()->update($request->except(['id', 'hero_id', 'updated_at', 'created_at']));
         return $this->getHero($hero->id);
     }
 }
