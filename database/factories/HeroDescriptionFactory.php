@@ -13,7 +13,7 @@ class HeroDescriptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'age' => $this->faker->randomNumber(),
+            'age' => rand(0, 200),
             'gender' => $this->faker->randomElement(['K', 'M']),
             'eye_color' => $this->faker->word(),
             'hair_color' => $this->faker->word(),
