@@ -8,16 +8,21 @@
             :description-data="hero.description"
             v-on:update-hero-descriptions="updateHeroDescription"
         ></hero-description-section>
+        <hero-characteristic-section
+            :characteristic-data="hero.characteristic"
+            v-on:update-hero-characteristic="updateHeroCharacteristic"
+        ></hero-characteristic-section>
     </div>
 </template>
 
 <script>
 import HeroSection from "./sections/HeroSection.vue";
 import HeroDescriptionSection from "./sections/HeroDescriptionSection.vue";
+import HeroCharacteristicSection from "./sections/HeroCharacteristicSection.vue";
 
 export default {
     name: "CharacterSheet",
-    components: {HeroDescriptionSection, HeroSection},
+    components: {HeroDescriptionSection, HeroSection, HeroCharacteristicSection},
     props: {
         initHero: {
             type: Object
@@ -52,6 +57,17 @@ export default {
                 .catch(error => {
                     console.log(error);
                     this.$toast.error('Wystąpił błąd podczas aktualizacji opisu bohatera!')
+                })
+        },
+        updateHeroCharacteristic() {
+            axios.post('karta-postaci/' + this.hero.id + '/update-hero-characteristic', this.hero.characteristic)
+                .then(response => {
+                    this.hero = response.data;
+                    this.$toast.success('Zaktualizowano cechy bohatera!')
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji cech bohatera!')
                 })
         }
     }

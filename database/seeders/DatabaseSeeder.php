@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProfessionSeeder::class,
             HeroSeeder::class,
-            HeroDescriptionSeeder::class
+            HeroDescriptionSeeder::class,
+            HeroCharacteristicSeeder::class
         ]);
     }
 }
