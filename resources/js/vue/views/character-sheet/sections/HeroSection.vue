@@ -2,7 +2,7 @@
     <div class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
         <div
             @click="toggleOpen"
-            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
+            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#42413b] transition-colors duration-300"
         >
             <h2 class="font-semibold text-xl text-[#e4d8b4]">Bohater</h2>
             <svg
@@ -34,7 +34,7 @@
                     <v-select
                         label="Rasa"
                         v-model="hero.race"
-                        :items="['Krasnolud', 'Niziołek', 'Człowiek', 'Elf']"
+                        :options="['Krasnolud', 'Niziołek', 'Człowiek', 'Elf']"
                         class="custom-select w-full"
                         variant="filled"
                         @blur="updateHero"
@@ -43,13 +43,11 @@
 
                 <v-col cols="12" sm="6" lg="6">
                     <v-select
-                        label="Poprzednia profesja"
                         v-model="hero.previous_profession_id"
-                        :items="professions"
-                        item-title="text"
-                        item-value="id"
+                        :options="professions"
+                        :reduce="profession => profession.id"
+                        label="text"
                         class="custom-select w-full"
-                        variant="filled"
                         @blur="updateHero"
                     ></v-select>
                 </v-col>
