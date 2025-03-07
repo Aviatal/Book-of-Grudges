@@ -10,7 +10,11 @@ class CharactersController extends Controller
 {
     public function getHero(int $id)
     {
-        return Hero::with('previousProfession', 'currentProfession', 'description', 'characteristic')->find($id);
+        return Hero::with(
+            'previousProfession', 'currentProfession', 'description',
+            'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits'
+        )
+            ->find($id);
     }
     public function getCharacterSheet(int $id)
     {

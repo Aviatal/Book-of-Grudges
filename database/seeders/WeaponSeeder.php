@@ -1,0 +1,561 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Weapon;
+use Illuminate\Database\Seeder;
+
+class WeaponSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        Weapon::insert([
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Bez broni',
+                    'price' => null,
+                    'loading' => null,
+                    'category' => 'zwykła',
+                    'power' => 'S-4',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => null
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Broń dwuręczna',
+                    'price' => 20 * 240,
+                    'loading' => 200,
+                    'category' => 'zwykła',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Bron improwizowana',
+                    'price' => null,
+                    'loading' => 35,
+                    'category' => 'zwykła',
+                    'power' => 'S-4',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => null
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Bron jednoręczna',
+                    'price' => 10 * 240,
+                    'loading' => 50,
+                    'category' => 'zwykła',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Halabarda',
+                    'price' => 15 * 240,
+                    'loading' => 175,
+                    'category' => 'dwuręczna',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Kij',
+                    'price' => 3 * 12,
+                    'loading' => 50,
+                    'category' => 'zwykła',
+                    'power' => 'S-2',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'duża'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Kopia',
+                    'price' => 15 * 240,
+                    'loading' => 100,
+                    'category' => 'kawaleryjska',
+                    'power' => 'S+1',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'rzadka'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Korbacz',
+                    'price' => 15 * 240,
+                    'loading' => 95,
+                    'category' => 'korbacz',
+                    'power' => 'S+1',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Lanca',
+                    'price' => 20 * 240,
+                    'loading' => 75,
+                    'category' => 'kawaleryjska',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Lewak',
+                    'price' => 2 * 240,
+                    'loading' => 10,
+                    'category' => 'parująca',
+                    'power' => 'S-4',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Łamacz mieczy',
+                    'price' => 5 * 240,
+                    'loading' => 40,
+                    'category' => 'parująca',
+                    'power' => 'S-3',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Morgensztern',
+                    'price' => 15 * 240,
+                    'loading' => 60,
+                    'category' => 'korbacz',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Puklerz',
+                    'price' => 4 * 240,
+                    'loading' => 15,
+                    'category' => 'parująca',
+                    'power' => 'S-3',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Rapier',
+                    'price' => 18 * 240,
+                    'loading' => 40,
+                    'category' => 'szermiercza',
+                    'power' => 'S-1',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Rękawica/kastet',
+                    'price' => 1 * 240,
+                    'loading' => 1,
+                    'category' => 'zwykła',
+                    'power' => 'S-3',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przecietna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Szpada',
+                    'price' => 18 * 240,
+                    'loading' => 40,
+                    'category' => 'szermiercza',
+                    'power' => 'S-2',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'rzadka'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Sztylet',
+                    'price' => 1 * 240,
+                    'loading' => 10,
+                    'category' => 'zwykła',
+                    'power' => 'S-3',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Tarcza',
+                    'price' => 10 * 240,
+                    'loading' => 50,
+                    'category' => 'zwykła',
+                    'power' => 'S-2',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Włócznia',
+                    'price' => 10 * 240,
+                    'loading' => 50,
+                    'category' => 'zwykła',
+                    'power' => 'S',
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Arkan',
+                    'price' => 1 * 240,
+                    'loading' => 10,
+                    'category' => 'unieruchamiająca',
+                    'power' => null,
+                    'short_range' => 8,
+                    'long_range' => null,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'duża'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Bicz',
+                    'price' => 2 * 240,
+                    'loading' => 40,
+                    'category' => 'unieruchamiająca',
+                    'power' => 'S-4',
+                    'short_range' => 6,
+                    'long_range' => null,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Bolas',
+                    'price' => 7 * 12,
+                    'loading' => 20,
+                    'category' => 'unieruchamiająca',
+                    'power' => 'S-1',
+                    'short_range' => 8,
+                    'long_range' => 16,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'sporadyczna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Długi łuk',
+                    'price' => 15 * 240,
+                    'loading' => 90,
+                    'category' => 'długi łuk',
+                    'power' => '3',
+                    'short_range' => 30,
+                    'long_range' => 60,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Elfi łuk',
+                    'price' => 70 * 240,
+                    'loading' => 75,
+                    'category' => 'długi łuk',
+                    'power' => '3',
+                    'short_range' => 36,
+                    'long_range' => 72,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Garłacz',
+                    'price' => 70 * 240,
+                    'loading' => 50,
+                    'category' => 'palna',
+                    'power' => '3',
+                    'short_range' => 32,
+                    'long_range' => null,
+                    'reload_time' => '3 Rundy',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Improwizowana',
+                    'price' => null,
+                    'loading' => 10,
+                    'category' => 'zwykła',
+                    'power' => 'S-4',
+                    'short_range' => 6,
+                    'long_range' => null,
+                    'reload_time' => 'Akcja',
+                    'availability' => null
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Krótki łuk',
+                    'price' => 7 * 240,
+                    'loading' => 75,
+                    'category' => 'zwykła',
+                    'power' => '3',
+                    'short_range' => 16,
+                    'long_range' => 32,
+                    'reload_time' => 'Akcja',
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Kusza pistoletowa',
+                    'price' => 35 * 240,
+                    'loading' => 25,
+                    'category' => 'kusza',
+                    'power' => '2',
+                    'short_range' => 8,
+                    'long_range' => 16,
+                    'reload_time' => 'Runda',
+                    'availability' => 'rzadka'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Kusza samopowtarzalna',
+                    'price' => 100 * 240,
+                    'loading' => 150,
+                    'category' => 'kusza',
+                    'power' => '2',
+                    'short_range' => 16,
+                    'long_range' => 32,
+                    'reload_time' => 'natychmiastowa',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Kusza',
+                    'price' => 25 * 240,
+                    'loading' => 120,
+                    'category' => 'zwykła',
+                    'power' => '4',
+                    'short_range' => 30,
+                    'long_range' => 60,
+                    'reload_time' => 'runda',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Łuk',
+                    'price' => 10 * 240,
+                    'loading' => 80,
+                    'category' => 'zwykła',
+                    'power' => '3',
+                    'short_range' => 24,
+                    'long_range' => 48,
+                    'reload_time' => 'akcja',
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Muszkiet Hochlandzki',
+                    'price' => 450 * 240,
+                    'loading' => 70,
+                    'category' => 'mechaniczna',
+                    'power' => '4',
+                    'short_range' => 48,
+                    'long_range' => 96,
+                    'reload_time' => '2 rundy',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Nóż',
+                    'price' => 3 * 240,
+                    'loading' => 10,
+                    'category' => 'rzucana',
+                    'power' => 'S-3',
+                    'short_range' => 6,
+                    'long_range' => 12,
+                    'reload_time' => 'akcja',
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Gwiazdka do rzucania',
+                    'price' => 3 * 240,
+                    'loading' => 10,
+                    'category' => 'rzucana',
+                    'power' => 'S-3',
+                    'short_range' => 6,
+                    'long_range' => 12,
+                    'reload_time' => 'akcja',
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Oszczep',
+                    'price' => 10 * 240,
+                    'loading' => 50,
+                    'category' => 'zwykła',
+                    'power' => 'S',
+                    'short_range' => 8,
+                    'long_range' => null,
+                    'reload_time' => 'akcja',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Pistolet',
+                    'price' => 200 * 240,
+                    'loading' => 25,
+                    'category' => 'palna',
+                    'power' => '4',
+                    'short_range' => 8,
+                    'long_range' => 16,
+                    'reload_time' => '2 rundy',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Pistolet wielostrzałowy',
+                    'price' => 400 * 240,
+                    'loading' => 25,
+                    'category' => 'mechaniczna',
+                    'power' => '4',
+                    'short_range' => 8,
+                    'long_range' => 16,
+                    'reload_time' => 'natychmiastowa',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Proca',
+                    'price' => 4 * 240,
+                    'loading' => 10,
+                    'category' => 'proca',
+                    'power' => '3',
+                    'short_range' => 16,
+                    'long_range' => 32,
+                    'reload_time' => 'akcja',
+                    'availability' => 'przeciętna'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Proca drzewcowa',
+                    'price' => 6 * 240,
+                    'loading' => 50,
+                    'category' => 'proca',
+                    'power' => '4',
+                    'short_range' => 24,
+                    'long_range' => 48,
+                    'reload_time' => 'akcja',
+                    'availability' => 'rzadka'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Rusznica',
+                    'price' => 300 * 240,
+                    'loading' => 30,
+                    'category' => 'palna',
+                    'power' => '4',
+                    'short_range' => 24,
+                    'long_range' => 48,
+                    'reload_time' => '2 rundy',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Sieć',
+                    'price' => 3 * 240,
+                    'loading' => 60,
+                    'category' => 'unieruchamiająca',
+                    'power' => null,
+                    'short_range' => 4,
+                    'long_range' => 8,
+                    'reload_time' => 'runda',
+                    'availability' => 'duża'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Rusznica wielostrzałowa',
+                    'price' => 600 * 240,
+                    'loading' => 30,
+                    'category' => 'mechaniczna',
+                    'power' => 4,
+                    'short_range' => 24,
+                    'long_range' => 48,
+                    'reload_time' => 'natychmiastowa',
+                    'availability' => 'znikoma'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Topór do rzucania',
+                    'price' => 5 * 240,
+                    'loading' => 40,
+                    'category' => 'rzucana',
+                    'power' => 'S-2',
+                    'short_range' => 8,
+                    'long_range' => null,
+                    'reload_time' => 'akcja',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Młot do rzucania',
+                    'price' => 5 * 240,
+                    'loading' => 40,
+                    'category' => 'rzucana',
+                    'power' => 'S-2',
+                    'short_range' => 8,
+                    'long_range' => null,
+                    'reload_time' => 'akcja',
+                    'availability' => 'mała'
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Włócznia',
+                    'price' => 25 * 12,
+                    'loading' => 30,
+                    'category' => 'zwykła',
+                    'power' => 'S-1',
+                    'short_range' => 8,
+                    'long_range' => 16,
+                    'reload_time' => 'akcja',
+                    'availability' => 'przeciętna'
+                ],
+            ]
+        );
+
+
+    }
+}

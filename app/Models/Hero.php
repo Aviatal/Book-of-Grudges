@@ -6,6 +6,7 @@ use App\Helpers\Traits\HasManyKeyBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -37,5 +38,20 @@ class Hero extends Model
     public function characteristic(): HasMany
     {
         return $this->hasManyKeyBy('short_name', HeroCharacteristic::class);
+    }
+
+    public function weapons(): BelongsToMany
+    {
+        return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id');
+    }
+
+    public function coldWeapons(): BelongsToMany
+    {
+        return $this->weapons()->where('is_ranged', 0);
+    }
+
+    public function rangedWeapons(): BelongsToMany
+    {
+        return $this->weapons()->where('is_ranged', 1);
     }
 }
