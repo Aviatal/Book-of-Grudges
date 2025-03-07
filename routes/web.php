@@ -19,6 +19,9 @@ Route::group(['prefix' => 'karta-postaci'], function () {
 Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('skills');
 Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('professions-get');
 Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('talents');
+Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('get-skills');
+Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
+Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('get-talents');
 
 Route::get('/migrate-fresh', function(){
     ini_set('memory_limit', '4069M');
