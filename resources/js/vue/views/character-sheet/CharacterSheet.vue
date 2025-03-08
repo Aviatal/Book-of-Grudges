@@ -24,6 +24,9 @@
             :skills-data="skills"
             v-on:update-hero-skills="updateHeroSkills"
         ></hero-skills-section>
+        <hero-talents-section
+            :talents-data="hero.talents"
+        ></hero-talents-section>
     </div>
 </template>
 
@@ -34,10 +37,12 @@ import HeroCharacteristicSection from "./sections/HeroCharacteristicSection.vue"
 import HeroWeaponsSection from "./sections/HeroWeaponsSection.vue";
 import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
+import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 
 export default {
     name: "CharacterSheet",
     components: {
+        HeroTalentsSection,
         HeroSkillsSection,
         HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection},
     props: {

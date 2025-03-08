@@ -10,6 +10,7 @@ import VueSelect  from "vue-select";
 import { VTextField, VBtn, VCol, VRow, VDataTable } from 'vuetify/components';
 import ArmorsIndex from "./vue/views/armors/ArmorsIndex.vue";
 import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
+import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 
 const vuetify = createVuetify({
     components: {
@@ -47,5 +48,6 @@ app.component('character-sheet', CharacterSheet);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
 app.component('skills-index', SkillsIndex);
+app.component('talents-index', TalentsIndex);
 
 app.mount('#app');

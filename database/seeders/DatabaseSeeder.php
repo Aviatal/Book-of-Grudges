@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             WeaponTraitSeeder::class,
             ArmorsSeeder::class,
             SkillsSeeder::class,
+            TalentsSeeder::class,
         ]);
     }
 }

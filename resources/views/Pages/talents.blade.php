@@ -1,5 +1,5 @@
 @extends('Layout.master')
 
 @section('content')
-    Zdolności
+    <talents-index></talents-index>
 @endsection

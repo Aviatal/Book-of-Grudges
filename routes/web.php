@@ -31,8 +31,12 @@ Route::group(['prefix' => 'umiejetnosci'], function () {
     Route::get('/get-skills', [SkillsAndTalentsController::class, 'getSkills'])->name('skills-and-talents.get-skills');
 });
 
+Route::group(['prefix' => 'zdolnosci'], function () {
+    Route::get('/', [SkillsAndTalentsController::class, 'talentsIndex'])->name('skills-and-talents.talents-index');
+    Route::get('/get-talents', [SkillsAndTalentsController::class, 'getTalents'])->name('skills-and-talents.get-talents');
+});
+
 Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
-Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('get-talents');
 
 Route::get('/migrate-fresh', function(){
     ini_set('memory_limit', '4069M');

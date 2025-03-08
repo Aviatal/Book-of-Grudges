@@ -48,6 +48,10 @@ class Hero extends Model
     {
         return $this->belongsToMany(Skill::class)->withPivot(['additional_skill_name', 'first_level', 'second_level']);
     }
+    public function talents(): BelongsToMany
+    {
+        return $this->belongsToMany(Talent::class, 'hero_talent', 'hero_id', 'talent_id')->withPivot(['additional_talent_name']);
+    }
 
     public function armors(): BelongsToMany
     {

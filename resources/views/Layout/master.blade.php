@@ -30,7 +30,7 @@
             <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
             <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
             <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
-            <li><a href="{{ route('get-talents') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
+            <li><a href="{{ route('skills-and-talents.talents-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
         </ul>
     </aside>
 </main>

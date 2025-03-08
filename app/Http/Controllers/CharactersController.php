@@ -14,7 +14,7 @@ class CharactersController extends Controller
         return Hero::with(
             'previousProfession', 'currentProfession', 'description',
             'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-            'skills'
+            'skills', 'talents'
         )
             ->find($id);
     }
