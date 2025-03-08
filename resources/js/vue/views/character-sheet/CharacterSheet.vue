@@ -17,6 +17,9 @@
             :ranged-weapons-data="hero.ranged_weapons"
             v-on:update-hero-characteristic="updateHeroWeapons"
         ></hero-weapons-section>
+        <hero-armors-section
+            :armors-data="hero.armors"
+        ></hero-armors-section>
     </div>
 </template>
 
@@ -25,10 +28,11 @@ import HeroSection from "./sections/HeroSection.vue";
 import HeroDescriptionSection from "./sections/HeroDescriptionSection.vue";
 import HeroCharacteristicSection from "./sections/HeroCharacteristicSection.vue";
 import HeroWeaponsSection from "./sections/HeroWeaponsSection.vue";
+import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 
 export default {
     name: "CharacterSheet",
-    components: {HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection},
+    components: {HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection},
     props: {
         initHero: {
             type: Object

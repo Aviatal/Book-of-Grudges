@@ -45,6 +45,11 @@ class Hero extends Model
         return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id');
     }
 
+    public function armors(): BelongsToMany
+    {
+        return $this->belongsToMany(Armor::class, 'hero_armors', 'hero_id', 'armor_id');
+    }
+
     public function coldWeapons(): BelongsToMany
     {
         return $this->weapons()->where('is_ranged', 0);
