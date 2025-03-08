@@ -64,6 +64,26 @@
                         @blur="updateHero"
                     ></v-select>
                 </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.current_experience"
+                        label="Obecne PD"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.all_experience"
+                        label="Wszystkie PD"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
             </v-row>
         </div>
     </div>
