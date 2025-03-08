@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SkillsAndTalentsController;
@@ -20,6 +21,10 @@ Route::group(['prefix' => 'karta-postaci'], function () {
 Route::group(['prefix' => 'bronie'], function () {
     Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');
     Route::get('/get-weapons', [WeaponsController::class, 'getWeapons'])->name('weapons.get-weapons');
+});
+Route::group(['prefix' => 'opanczerzenie'], function () {
+    Route::get('/', [ArmorsController::class, 'index'])->name('armors.index');
+    Route::get('/get-armors', [ArmorsController::class, 'getArmors'])->name('armors.get-armors');
 });
 
 Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('get-skills');

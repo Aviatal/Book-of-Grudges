@@ -28,6 +28,7 @@
         <ul class="space-y-2">
             <li><a href="{{ route('character-sheet', ['id' => 1]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
             <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
+            <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
             <li><a href="{{ route('get-skills') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
             <li><a href="{{ route('get-talents') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
         </ul>
