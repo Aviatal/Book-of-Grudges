@@ -23,6 +23,22 @@ const app = createApp({})
     .use(vuetify)
     .use(ToastPlugin);
 
+app.config.globalProperties.$calculatePrice = (price) => {
+    let priceInGold = price / 240;
+    if (price < 1) {
+        let priceInSilver = price / 12
+        if (priceInSilver < 1) {
+            if (price) {
+                return price + ' p'
+            } else {
+                return '-'
+            }
+        }
+        return priceInSilver + ' s'
+    }
+    return priceInGold + ' zk'
+};
+
 app.component('v-select', VueSelect);
 
 app.component('character-sheet', CharacterSheet);
