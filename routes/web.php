@@ -18,7 +18,7 @@ Route::group(['prefix' => 'karta-postaci'], function () {
 });
 
 Route::group(['prefix' => 'bronie'], function () {
-    Route::get('/bronie', [WeaponsController::class, 'index'])->name('weapons.index');
+    Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');
     Route::get('/get-weapons', [WeaponsController::class, 'getWeapons'])->name('weapons.get-weapons');
 });
 
