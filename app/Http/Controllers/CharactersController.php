@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Hero;
 use App\Models\HeroCharacteristic;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 
 class CharactersController extends Controller
@@ -12,14 +13,16 @@ class CharactersController extends Controller
     {
         return Hero::with(
             'previousProfession', 'currentProfession', 'description',
-            'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations'
+            'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
+            'skills'
         )
             ->find($id);
     }
     public function getCharacterSheet(int $id)
     {
         $hero = $this->getHero($id);
-        return view('Pages.character-sheet', compact('hero'));
+        $skills = Skill::whereNotIn('id', $hero->skills->pluck('id'))->get();
+        return view('Pages.character-sheet', compact('hero', 'skills'));
     }
     public function updateHeroData(Request $request, Hero $hero)
     {
