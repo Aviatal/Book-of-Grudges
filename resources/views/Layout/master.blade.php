@@ -27,8 +27,7 @@
         <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
         <ul class="space-y-2">
             <li><a href="{{ route('character-sheet', ['id' => 1]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
-            <li><a href="{{ route('skills') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
-            <li><a href="{{ route('talents') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
+            <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
             <li><a href="{{ route('get-skills') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
             <li><a href="{{ route('get-talents') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
         </ul>

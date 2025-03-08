@@ -3,6 +3,7 @@
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SkillsAndTalentsController;
+use App\Http\Controllers\WeaponsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,9 +17,11 @@ Route::group(['prefix' => 'karta-postaci'], function () {
     Route::post('/{hero}/update-hero-characteristic', [CharactersController::class, 'updateHeroCharacteristic'])->name('character-sheet.update-hero-characteristic');
 });
 
-Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('skills');
-Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('professions-get');
-Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('talents');
+Route::group(['prefix' => 'bronie'], function () {
+    Route::get('/bronie', [WeaponsController::class, 'index'])->name('weapons.index');
+    Route::get('/get-weapons', [WeaponsController::class, 'getWeapons'])->name('weapons.get-weapons');
+});
+
 Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('get-skills');
 Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
 Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('get-talents');

@@ -1,8 +1,9 @@
 import './bootstrap';
 
 import { createApp } from 'vue';
-import CharacterSheet from "./vue/views/character-sheet/CharacterSheet.vue";
 import {createVuetify} from "vuetify";
+import CharacterSheet from "./vue/views/character-sheet/CharacterSheet.vue";
+import WeaponsIndex from "./vue/views/weapons/WeaponsIndex.vue";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
 import VueSelect  from "vue-select";
@@ -25,5 +26,6 @@ const app = createApp({})
 app.component('v-select', VueSelect);
 
 app.component('character-sheet', CharacterSheet);
+app.component('weapons-index', WeaponsIndex);
 
 app.mount('#app');
