@@ -26,8 +26,11 @@ Route::group(['prefix' => 'opanczerzenie'], function () {
     Route::get('/', [ArmorsController::class, 'index'])->name('armors.index');
     Route::get('/get-armors', [ArmorsController::class, 'getArmors'])->name('armors.get-armors');
 });
+Route::group(['prefix' => 'umiejetnosci'], function () {
+    Route::get('/', [SkillsAndTalentsController::class, 'skillsIndex'])->name('skills-and-talents.skills-index');
+    Route::get('/get-skills', [SkillsAndTalentsController::class, 'getSkills'])->name('skills-and-talents.get-skills');
+});
 
-Route::get('/umiejetnosci', [SkillsAndTalentsController::class, 'getSkills'])->name('get-skills');
 Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
 Route::get('/zdolnosci', [SkillsAndTalentsController::class, 'getTalents'])->name('get-talents');
 

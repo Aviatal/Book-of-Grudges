@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Skill;
 use Illuminate\Http\Request;
 
 class SkillsAndTalentsController extends Controller
 {
-    public function getSkills()
+    public function skillsIndex()
     {
         return view('Pages.skills');
     }
@@ -14,5 +15,11 @@ class SkillsAndTalentsController extends Controller
     public function getTalents()
     {
         return view('Pages.talents');
+    }
+
+    public function getSkills()
+    {
+        $skills = Skill::all();
+        return response()->json($skills);
     }
 }
