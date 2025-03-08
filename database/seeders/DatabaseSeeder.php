@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
             HeroDescriptionSeeder::class,
             HeroCharacteristicSeeder::class,
             WeaponSeeder::class,
-            WeaponTraitSeeder::class
+            WeaponTraitSeeder::class,
+            ArmorsSeeder::class
         ]);
     }
 }
