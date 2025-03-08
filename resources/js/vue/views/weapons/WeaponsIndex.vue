@@ -27,7 +27,7 @@
             <div v-for="weapon in rangedWeapons" :key="weapon.name"
                  class="bg-gray-800 border border-gray-600 p-4 rounded-lg shadow-lg">
                 <h3 class="text-lg font-semibold text-white">{{ weapon.name }}</h3>
-                <div><b>Cena: </b>{{ calculateWeaponPrice(weapon.price) }}</div>
+                <div><b>Cena: </b>{{ $calculatePrice(weapon.price) }}</div>
                 <div><b>Obciążenie: </b>{{ weapon.loading ?? '-' }}</div>
                 <div><b>Kategoria: </b>{{ weapon.category }}</div>
                 <div><b>Siła broni: </b>{{ weapon.power }}</div>
