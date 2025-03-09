@@ -40,6 +40,11 @@ class Hero extends Model
         return $this->hasManyKeyBy('short_name', HeroCharacteristic::class);
     }
 
+    public function inventory(): HasMany
+    {
+        return $this->hasMany(HeroInventory::class);
+    }
+
     public function weapons(): BelongsToMany
     {
         return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id');

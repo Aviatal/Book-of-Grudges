@@ -27,6 +27,10 @@
         <hero-talents-section
             :talents-data="hero.talents"
         ></hero-talents-section>
+        <hero-inventory-section
+            :hero-data="hero"
+            v-on:get-hero="refreshHero"
+        ></hero-inventory-section>
     </div>
 </template>
 
@@ -38,10 +42,12 @@ import HeroWeaponsSection from "./sections/HeroWeaponsSection.vue";
 import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
+import HeroInventorySection from "./sections/HeroInventorySection.vue";
 
 export default {
     name: "CharacterSheet",
     components: {
+        HeroInventorySection,
         HeroTalentsSection,
         HeroSkillsSection,
         HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection},
@@ -104,6 +110,17 @@ export default {
                 .catch(error => {
                     console.log(error);
                     this.$toast.error('Wystąpił błąd podczas aktualizacji umiejętności bohatera!')
+                })
+        },
+        refreshHero() {
+            axios.get('karta-postaci/' + this.hero.id + '?wantsJson=true')
+                .then(response => {
+                    this.hero = response.data;
+                    this.$toast.success('Zaktualizowano bohatera!')
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera!')
                 })
         }
     }

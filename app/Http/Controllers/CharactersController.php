@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Hero;
 use App\Models\HeroCharacteristic;
+use App\Models\HeroInventory;
 use App\Models\Skill;
 use Illuminate\Http\Request;
 
@@ -14,13 +15,16 @@ class CharactersController extends Controller
         return Hero::with(
             'previousProfession', 'currentProfession', 'description',
             'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-            'skills', 'talents'
+            'skills', 'talents', 'inventory'
         )
             ->find($id);
     }
-    public function getCharacterSheet(int $id)
+    public function getCharacterSheet(Request $request, int $id)
     {
         $hero = $this->getHero($id);
+        if ($request->get('wantsJson')) {
+            return response()->json($hero);
+        }
         $skills = Skill::whereNotIn('id', $hero->skills->pluck('id'))->get();
         return view('Pages.character-sheet', compact('hero', 'skills'));
     }
@@ -52,5 +56,14 @@ class CharactersController extends Controller
         HeroCharacteristic::upsert($upsertData, ['id'], ['start_value', 'advancement', 'current_value']);
 
         return $this->getHero($hero->id);
+    }
+    public function addItem(Request $request, int $id)
+    {
+        return HeroInventory::query()->create([
+            'hero_id' => $id,
+            'name' => $request->get('name'),
+            'loading' => $request->get('loading'),
+            'description' => $request->get('description')
+        ]);
     }
 }

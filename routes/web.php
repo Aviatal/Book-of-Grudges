@@ -16,6 +16,7 @@ Route::group(['prefix' => 'karta-postaci'], function () {
     Route::post('/{hero}/update-hero-data', [CharactersController::class, 'updateHeroData'])->name('character-sheet.update-hero-data');
     Route::post('/{hero}/update-hero-description', [CharactersController::class, 'updateHeroDescription'])->name('character-sheet.update-hero-description');
     Route::post('/{hero}/update-hero-characteristic', [CharactersController::class, 'updateHeroCharacteristic'])->name('character-sheet.update-hero-characteristic');
+    Route::post('/{hero}/add-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
 });
 
 Route::group(['prefix' => 'bronie'], function () {
