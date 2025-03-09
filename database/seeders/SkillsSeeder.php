@@ -294,6 +294,12 @@ class SkillsSeeder extends Seeder
                 'name' => 'Nauka',
                 'characteristic' => 'Int',
                 'description' => 'Ta umiejętność wykorzystywana jest do zapamiętywania ważniejszych informacji i liczb, jak też (gdy Bohater posiada materiały pomocnicze i odpowiednie zasoby) do badań naukowych. Wymaga intensywnych studiów, lecz zapewnia znacznie szerszą i jednocześnie bardziej szczegółową znajomość problemu niż w przypadku wiedzy ogólnej. Nauka nie jest pojedynczą umiejętnością, lecz kategorią obejmującą różne, odrębnie traktowane umiejętności. Każda z nich musi zostać wykupiona oddzielnie. Musisz wydać 100 PD za każdą opanowaną naukę (w nawiasie wpisujesz nazwę wyuczonej specjalności). Na przykład umiejętność nauka (teologia) jest odrębną umiejętnością niż nauka (historia).'
+            ],
+            [
+                'type' => 'ZAAWANSOWANA',
+                'name' => 'Otwieranie zamków',
+                'characteristic' => 'Zr',
+                'description' => 'Bohater potrafi otwierać wszelkiego rodzaju zamki i kłódki.'
             ]
         ]);
     }
