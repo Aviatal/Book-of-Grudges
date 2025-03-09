@@ -20,9 +20,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ProfessionSeeder::class,
-            HeroSeeder::class,
-            HeroDescriptionSeeder::class,
-            HeroCharacteristicSeeder::class,
             WeaponSeeder::class,
             WeaponTraitSeeder::class,
             ArmorsSeeder::class,
