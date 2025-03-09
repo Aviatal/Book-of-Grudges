@@ -28,6 +28,7 @@
                     <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">K</th>
                     <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Odp</th>
                     <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Zr</th>
+                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Int</th>
                     <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">SW</th>
                     <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Ogd</th>
                 </tr>
@@ -79,6 +80,13 @@
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
+                            v-model="characteristic['Int'].start_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateHero" hide-details></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
                             v-model="characteristic['Ogd'].start_value"
                             class="custom-input w-full"
                             variant="filled"
@@ -124,6 +132,13 @@
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
                             v-model="characteristic['SW'].advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateHero" hide-details></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Int'].advancement"
                             class="custom-input w-full"
                             variant="filled"
                             @change="updateHero" hide-details></v-text-field>
@@ -194,6 +209,19 @@
                         <v-text-field
 
                             v-model="characteristic['Zr'].current_value"
+
+                            class="custom-input w-full"
+
+                            variant="filled"
+
+                            @change="updateHero" hide-details></v-text-field>
+
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+
+                        <v-text-field
+
+                            v-model="characteristic['Int'].current_value"
 
                             class="custom-input w-full"
 
