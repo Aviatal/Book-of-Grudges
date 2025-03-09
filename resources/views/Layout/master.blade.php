@@ -26,7 +26,7 @@
     <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
         <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
         <ul class="space-y-2">
-            <li><a href="{{ route('character-sheet', ['id' => 1]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
+            <li><a href="{{ route('character-sheet', ['id' => Auth::user()->getAuthIdentifier()]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
             <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
             <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
             <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
