@@ -42,6 +42,56 @@
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.current_wounds"
+                        label="Aktualna żywotność"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.fortune_points"
+                        label="Punkty Szczęścia"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.gold_crowns"
+                        label="Złote Korony"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.silver_shillings"
+                        label="Srebrne szylingi"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
+                    <v-text-field
+                        v-model="hero.brass_pennies"
+                        label="Miedziane pensy"
+                        class="custom-input w-full"
+                        variant="filled"
+                        @change="updateHero"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6" lg="6">
                     <v-select
                         v-model="hero.previous_profession_id"
                         :options="professions"

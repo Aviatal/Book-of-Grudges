@@ -50,6 +50,9 @@ class CharactersController extends Controller
                 $characteristic['current_value'] != $hero->getRelation('characteristic')[$key]->current_value
             ) {
                 unset($characteristic['created_at'], $characteristic['updated_at']);
+                if ($characteristic['short_name'] == 'Zyw' && $hero->getRelation('characteristic')[$key]->current_value == $hero->current_wounds) {
+                    $hero->update(['current_wounds' => $characteristic['current_value']]);
+                }
                 $upsertData[] = $characteristic;
             }
         }
