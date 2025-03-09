@@ -6,26 +6,31 @@ use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
 use App\Models\Skill;
+use Auth;
 use Illuminate\Http\Request;
 
 class CharactersController extends Controller
 {
-    public function getHero(int $id)
+    public function getHero(int $userId)
     {
         return Hero::with(
             'previousProfession', 'currentProfession', 'description',
             'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
             'skills', 'talents', 'inventory'
         )
-            ->find($id);
+            ->where('user_id', $userId)
+            ->first();
     }
     public function getCharacterSheet(Request $request, int $id)
     {
+        if ($id !== Auth::user()->getAuthIdentifier()) {
+            abort(404);
+        }
         $hero = $this->getHero($id);
         if ($request->get('wantsJson')) {
             return response()->json($hero);
         }
-        $skills = Skill::whereNotIn('id', $hero->skills->pluck('id'))->get();
+        $skills = Skill::whereNotIn('id', $hero && $hero->skills ? $hero->skills->pluck('id') : [])->get();
         return view('Pages.character-sheet', compact('hero', 'skills'));
     }
     public function updateHeroData(Request $request, Hero $hero)

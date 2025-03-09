@@ -31,6 +31,14 @@
             <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
             <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
             <li><a href="{{ route('skills-and-talents.talents-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
+            @auth
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
+                    </form>
+                </li>
+            @endauth
         </ul>
     </aside>
 </main>
