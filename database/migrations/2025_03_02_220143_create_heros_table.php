@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('race', ['Krasnolud', 'Elf', 'Niziołek', 'Człowiek']);
             $table->unsignedInteger('current_profession_id');
-            $table->unsignedInteger('previous_profession_id');
+            $table->unsignedInteger('previous_profession_id')->nullable();
             $table->timestamps();
 
             $table->foreign('current_profession_id')->references('id')->on('professions');
