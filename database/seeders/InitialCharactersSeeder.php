@@ -14,21 +14,24 @@ class InitialCharactersSeeder extends Seeder
 {
     public function run(): void
     {
-        Hero::create([
-            'user_id' => 1,
-            'name' => "Safis'traks (Nadchodzaca zmierzch)",
-            'race' => "Elf",
-            'current_profession_id' => 57,
-            'previous_profession_id' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'current_experience' => 100,
-            'all_experience' => 550,
-            'current_wounds' => 5,
-            'gold_crowns' => 15,
-            'silver_shillings' => 1,
-            'brass_pennies' => 14,
-            'fortune_points' => 1,
+        DB::table('heroes')->insert([
+            [
+                'id' => 1,
+                'user_id' => 1,
+                'name' => "Safis'traks (Nadchodzaca zmierzch)",
+                'race' => "Elf",
+                'current_profession_id' => 57,
+                'previous_profession_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'current_experience' => 100,
+                'all_experience' => 550,
+                'current_wounds' => 5,
+                'gold_crowns' => 15,
+                'silver_shillings' => 1,
+                'brass_pennies' => 14,
+                'fortune_points' => 1,
+            ]
         ]);
         HeroDescription::create([
             'hero_id' => 1,
@@ -425,21 +428,24 @@ class InitialCharactersSeeder extends Seeder
         ]);
 
 
-        Hero::create([
-            'user_id' => 2,
-            'name' => "Ludo (Szczurzy pasterz)",
-            'race' => "Niziołek",
-            'current_profession_id' => 56,
-            'previous_profession_id' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'current_experience' => 70,
-            'all_experience' => 525,
-            'current_wounds' => 11,
-            'gold_crowns' => 6,
-            'silver_shillings' => 0,
-            'brass_pennies' => 0,
-            'fortune_points' => 2,
+        DB::table('heroes')->insert([
+            [
+                'id' => 2,
+                'user_id' => 2,
+                'name' => "Ludo (Szczurzy pasterz)",
+                'race' => "Niziołek",
+                'current_profession_id' => 56,
+                'previous_profession_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'current_experience' => 70,
+                'all_experience' => 525,
+                'current_wounds' => 11,
+                'gold_crowns' => 6,
+                'silver_shillings' => 0,
+                'brass_pennies' => 0,
+                'fortune_points' => 2,
+            ]
         ]);
         HeroDescription::create([
             'hero_id' => 2,
@@ -757,21 +763,24 @@ class InitialCharactersSeeder extends Seeder
             ],
         ]);
 
-        Hero::create([
-            'user_id' => 3,
-            'name' => "Santiago",
-            'race' => "Człowiek",
-            'current_profession_id' => 34,
-            'previous_profession_id' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'current_experience' => 180,
-            'all_experience' => null,
-            'current_wounds' => 11,
-            'gold_crowns' => 5,
-            'silver_shillings' => 16,
-            'brass_pennies' => 10,
-            'fortune_points' => 2,
+        DB::table('heroes')->insert([
+            [
+                'id' => 3,
+                'user_id' => 3,
+                'name' => "Santiago",
+                'race' => "Człowiek",
+                'current_profession_id' => 34,
+                'previous_profession_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'current_experience' => 180,
+                'all_experience' => null,
+                'current_wounds' => 11,
+                'gold_crowns' => 5,
+                'silver_shillings' => 16,
+                'brass_pennies' => 10,
+                'fortune_points' => 2,
+            ]
         ]);
         HeroDescription::create([
             'hero_id' => 3,
