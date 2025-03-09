@@ -28,6 +28,15 @@
                     hide-default-footer
                     no-data-text="Nie posiadasz broni białej"
                 >
+                    <template v-slot:item.additional_weapon_name="{ item }">
+                        <v-text-field
+                            v-model="item.pivot.additional_weapon_name"
+                            class="custom-input w-full"
+                            variant="filled"
+                            hide-details
+                        >
+                        </v-text-field>
+                    </template>
                     <template v-slot:item.traits="{ item }">
                         <span v-for="(trait, index) in item.traits" :key="index" class="trait-pill">
                             {{ trait.name }}<span v-if="index < item.traits.length - 1">, </span>
@@ -47,6 +56,15 @@
                     hide-default-footer
                     no-data-text="Nie posiadasz broni strzeleckiej"
                 >
+                    <template v-slot:item.additional_weapon_name="{ item }">
+                        <v-text-field
+                            v-model="item.pivot.additional_weapon_name"
+                            class="custom-input w-full"
+                            variant="filled"
+                            hide-details
+                        >
+                        </v-text-field>
+                    </template>
                     <template v-slot:item.range="{ item }">
                         {{ item.short_range }}/{{ item.long_range }}
                     </template>
@@ -75,14 +93,16 @@ export default {
             rangedWeapons: this.rangedWeaponsData,
 
             coldWeaponHeaders: [
-                {title: 'Nazwa', align: 'start', sortable: true, value: 'name'},
+                {title: 'Broń', align: 'start', sortable: true, value: 'name'},
+                {title: 'Nazwa', align: 'start', sortable: true, value: 'additional_weapon_name'},
                 {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
                 {title: 'Kategoria', align: 'start', sortable: true, value: 'category'},
                 {title: 'Siła broni', align: 'start', sortable: true, value: 'power'},
                 {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
             ],
             rangedWeaponHeaders: [
-                {title: 'Nazwa', align: 'start', sortable: true, value: 'name'},
+                {title: 'Broń', align: 'start', sortable: true, value: 'name'},
+                {title: 'Nazwa', align: 'start', sortable: true, value: 'additional_weapon_name'},
                 {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
                 {title: 'Kategoria', align: 'start', sortable: true, value: 'category'},
                 {title: 'Siła broni', align: 'start', sortable: true, value: 'power'},

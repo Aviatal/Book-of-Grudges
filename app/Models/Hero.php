@@ -47,7 +47,7 @@ class Hero extends Model
 
     public function weapons(): BelongsToMany
     {
-        return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id');
+        return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id')->withPivot(['additional_weapon_name']);;
     }
     public function skills(): BelongsToMany
     {
