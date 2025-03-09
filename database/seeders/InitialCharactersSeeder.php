@@ -154,7 +154,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'Mag',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 1,
@@ -162,7 +162,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'PO',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 1,
@@ -565,7 +565,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'Mag',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 2,
@@ -573,7 +573,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'PO',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 2,
@@ -897,7 +897,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'Mag',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 3,
@@ -905,7 +905,7 @@ class InitialCharactersSeeder extends Seeder
                 'short_name' => 'PO',
                 'start_value' => 0,
                 'advancement' => null,
-                'current_value' => null,
+                'current_value' => 0,
             ],
             [
                 'hero_id' => 3,
