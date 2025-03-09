@@ -104,13 +104,11 @@
 
                 <v-col cols="12" sm="6" lg="6">
                     <v-select
-                        label="Obecna profesja"
                         v-model="hero.current_profession_id"
-                        :items="professions"
-                        item-title="text"
-                        item-value="id"
+                        :options="professions"
+                        :reduce="profession => profession.id"
+                        label="text"
                         class="custom-select w-full"
-                        variant="filled"
                         @blur="updateHero"
                     ></v-select>
                 </v-col>
