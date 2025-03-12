@@ -1,36 +1,41 @@
 <template>
     <div>
-        <hero-section
-            :hero-data="hero"
-            v-on:update-hero="updateHero"
-        ></hero-section>
-        <hero-description-section
-            :description-data="hero.description"
-            v-on:update-hero-descriptions="updateHeroDescription"
-        ></hero-description-section>
-        <hero-characteristic-section
-            :characteristic-data="hero.characteristic"
-            v-on:update-hero-characteristic="updateHeroCharacteristic"
-        ></hero-characteristic-section>
-        <hero-weapons-section
-            :cold-weapons-data="hero.cold_weapons"
-            :ranged-weapons-data="hero.ranged_weapons"
-        ></hero-weapons-section>
-        <hero-armors-section
-            :armors-data="hero.armors"
-        ></hero-armors-section>
-        <hero-skills-section
-            :hurdled-skills-data="hero.skills"
-            :skills-data="skills"
-            v-on:update-hero-skills="updateHeroSkills"
-        ></hero-skills-section>
-        <hero-talents-section
-            :talents-data="hero.talents"
-        ></hero-talents-section>
-        <hero-inventory-section
-            :hero-data="hero"
-            v-on:get-hero="refreshHero"
-        ></hero-inventory-section>
+        <template v-if="!isLoading">
+            <hero-section
+                :hero-data="hero"
+            ></hero-section>
+            <hero-description-section
+                :description-data="hero.description"
+            ></hero-description-section>
+            <hero-characteristic-section
+                :characteristic-data="hero.characteristic"
+                v-on:update-hero-characteristic="updateHeroCharacteristic"
+            ></hero-characteristic-section>
+            <hero-weapons-section
+                :cold-weapons-data="hero.cold_weapons"
+                :ranged-weapons-data="hero.ranged_weapons"
+            ></hero-weapons-section>
+            <hero-armors-section
+                :armors-data="hero.armors"
+            ></hero-armors-section>
+            <hero-skills-section
+                :hurdled-skills-data="hero.skills"
+                v-on:update-hero-skills="updateHeroSkills"
+            ></hero-skills-section>
+            <hero-talents-section
+                :talents-data="hero.talents"
+            ></hero-talents-section>
+            <hero-inventory-section
+                :hero-data="hero"
+                v-on:get-hero="getHero"
+            ></hero-inventory-section>
+        </template>
+        <template v-else>
+            <div class="text-center py-8">
+                <v-progress-circular indeterminate color="amber"></v-progress-circular>
+                <p class="mt-4 text-amber-400">Ładowanie danych bohatera...</p>
+            </div>
+        </template>
     </div>
 </template>
 
@@ -43,6 +48,8 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
+import {reactive, ref} from "vue";
+import {useToast} from "vue-toast-notification";
 
 export default {
     name: "CharacterSheet",
@@ -50,22 +57,37 @@ export default {
         HeroInventorySection,
         HeroTalentsSection,
         HeroSkillsSection,
-        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection},
-    props: {
-        initHero: {
-            type: Object
-        },
-        skills: {
-            type: Array,
-        }
+        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection
     },
-    data() {
-        return {
-            hero: {},
-        };
+    props: {
+        userId: {
+            type: Number
+        },
+    },
+    setup(props) {
+        let isLoading = ref(true)
+        const hero = reactive({});
+        const toast = useToast();
+
+        const getHero = () => {
+            isLoading.value = true;
+            axios.get('karta-postaci/' + props.userId + '/get-hero')
+                .then(response => {
+                    Object.assign(hero, response.data);
+                })
+                .catch(error => {
+                    console.log(error);
+                    toast.error('Wystąpił błąd podczas pobierania bohatera!')
+                })
+                .finally(() => {
+                    isLoading.value = false;
+                })
+        }
+
+        return {hero, getHero, isLoading}
     },
     created() {
-        this.hero = this.initHero;
+        this.getHero();
     },
     methods: {
         updateHero() {
@@ -112,17 +134,6 @@ export default {
                     this.$toast.error('Wystąpił błąd podczas aktualizacji umiejętności bohatera!')
                 })
         },
-        refreshHero() {
-            axios.get('karta-postaci/' + this.hero.id + '?wantsJson=true')
-                .then(response => {
-                    this.hero = response.data;
-                    this.$toast.success('Zaktualizowano bohatera!')
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera!')
-                })
-        }
     }
 };
 </script>

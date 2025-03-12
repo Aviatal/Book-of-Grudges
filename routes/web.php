@@ -31,11 +31,12 @@ Route::middleware('auth')->group(function (){
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     });
     Route::group(['prefix' => 'karta-postaci'], function () {
-        Route::get('/{id}', [CharactersController::class, 'getCharacterSheet'])->name('character-sheet');
-        Route::post('/{hero}/update-hero-data', [CharactersController::class, 'updateHeroData'])->name('character-sheet.update-hero-data');
-        Route::post('/{hero}/update-hero-description', [CharactersController::class, 'updateHeroDescription'])->name('character-sheet.update-hero-description');
+        Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
+        Route::get('/{id}/get-hero', [CharactersController::class, 'getHero'])->name('character-sheet.get-hero');
+        Route::post('/{hero}/update-hero', [CharactersController::class, 'updateHero'])->name('character-sheet.update-hero');
+        Route::post('/{hero}/update-description', [CharactersController::class, 'updateHeroDescription'])->name('character-sheet.update-hero-description');
         Route::post('/{hero}/update-hero-characteristic', [CharactersController::class, 'updateHeroCharacteristic'])->name('character-sheet.update-hero-characteristic');
-        Route::post('/{hero}/add-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
+        Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');

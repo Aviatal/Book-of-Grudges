@@ -56,13 +56,11 @@
 export default {
     props: {
         hurdledSkillsData: Object,
-        skillsData: Object
     },
     data() {
         return {
             isOpen: false,
             hurdledSkills: this.hurdledSkillsData,
-            skills: this.skillsData,
 
             skillsHeaders: [
                 {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},

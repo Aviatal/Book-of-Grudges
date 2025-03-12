@@ -26,7 +26,7 @@
                         label="Imię"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('name')"
                     ></v-text-field>
                 </v-col>
 
@@ -37,7 +37,7 @@
                         :options="['Krasnolud', 'Niziołek', 'Człowiek', 'Elf']"
                         class="custom-select w-full"
                         variant="filled"
-                        @blur="updateHero"
+                        @blur="updateHero('race')"
                     ></v-select>
                 </v-col>
 
@@ -47,7 +47,7 @@
                         label="Aktualna żywotność"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('current_wounds')"
                     ></v-text-field>
                 </v-col>
 
@@ -57,7 +57,7 @@
                         label="Punkty Szczęścia"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('fortune_points')"
                     ></v-text-field>
                 </v-col>
 
@@ -67,7 +67,7 @@
                         label="Złote Korony"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('gold_crowns')"
                     ></v-text-field>
                 </v-col>
 
@@ -77,7 +77,7 @@
                         label="Srebrne szylingi"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('silver_shillings')"
                     ></v-text-field>
                 </v-col>
 
@@ -87,7 +87,7 @@
                         label="Miedziane pensy"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('brass_pennies')"
                     ></v-text-field>
                 </v-col>
 
@@ -98,7 +98,7 @@
                         :reduce="profession => profession.id"
                         label="text"
                         class="custom-select w-full"
-                        @blur="updateHero"
+                        @blur="updateHero('previous_profession_id')"
                     ></v-select>
                 </v-col>
 
@@ -109,7 +109,7 @@
                         :reduce="profession => profession.id"
                         label="text"
                         class="custom-select w-full"
-                        @blur="updateHero"
+                        @blur="updateHero('current_profession_id')"
                     ></v-select>
                 </v-col>
 
@@ -119,7 +119,7 @@
                         label="Obecne PD"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('current_experience')"
                     ></v-text-field>
                 </v-col>
 
@@ -129,7 +129,7 @@
                         label="Wszystkie PD"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHero"
+                        @change="updateHero('all_experience')"
                     ></v-text-field>
                 </v-col>
             </v-row>
@@ -145,7 +145,6 @@ export default {
     },
     data() {
         return {
-            hero: this.heroData,
             professions: [],
 
             isOpen: false
@@ -154,12 +153,25 @@ export default {
     created() {
         this.getProfessions();
     },
+    computed: {
+        hero() {
+            return this.heroData
+        }
+    },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
-        updateHero() {
-            this.$emit('update-hero', this.hero);
+        updateHero(field) {
+            axios.post('karta-postaci/' + this.hero.id + '/update-hero', {
+                field: field, value: this.hero[field]
+            })
+                .then(() => {
+                    this.$toast.success('Udało się zaktualizować bohatera')
+                })
+                .catch((error) => {
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
+                })
         },
         getProfessions() {
             axios.get('professions/get-professions')

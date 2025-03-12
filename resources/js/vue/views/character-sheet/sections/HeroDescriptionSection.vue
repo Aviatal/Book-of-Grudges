@@ -26,7 +26,7 @@
                         label="Wiek"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('age')"
                     ></v-text-field>
                 </v-col>
 
@@ -37,7 +37,7 @@
                         :items="['M', 'K']"
                         class="custom-select w-full"
                         variant="filled"
-                        @blur="updateHeroDescription"
+                        @blur="updateDescription('gender')"
                     ></v-select>
                 </v-col>
 
@@ -47,7 +47,7 @@
                         label="Kolor oczu"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('eye_color')"
                     ></v-text-field>
                 </v-col>
 
@@ -57,7 +57,7 @@
                         label="Kolor włosów"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('hair_color')"
                     ></v-text-field>
                 </v-col>
 
@@ -67,7 +67,7 @@
                         label="Znak gwiezdny"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('star_sign')"
                     ></v-text-field>
                 </v-col>
 
@@ -77,7 +77,7 @@
                         label="Waga"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('weight')"
                     ></v-text-field>
                 </v-col>
 
@@ -87,7 +87,7 @@
                         label="Wzrost"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('height')"
                     ></v-text-field>
                 </v-col>
 
@@ -97,7 +97,7 @@
                         label="Rodzeństwo"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('siblings')"
                     ></v-text-field>
                 </v-col>
 
@@ -107,7 +107,7 @@
                         label="Miejsce urodzenia"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('place_of_birth')"
                     ></v-text-field>
                 </v-col>
 
@@ -117,7 +117,7 @@
                         label="Znaki szczególne"
                         class="custom-input w-full"
                         variant="filled"
-                        @change="updateHeroDescription"
+                        @change="updateDescription('distinguishing_signs')"
                     ></v-text-field>
                 </v-col>
             </v-row>
@@ -132,20 +132,28 @@ export default {
     },
     data() {
         return {
-            heroDescriptions: this.descriptionData,
-
             isOpen: false
         };
     },
-    created() {
-        console.log(this.descriptionData)
+    computed: {
+        heroDescriptions() {
+            return this.descriptionData;
+        }
     },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
-        updateHeroDescription() {
-            this.$emit('update-hero-descriptions', this.heroDescriptions);
+        updateDescription(field) {
+            axios.post('karta-postaci/' + this.heroDescriptions.hero_id + '/update-description', {
+                field: field, value: this.heroDescriptions[field]
+            })
+                .then(() => {
+                    this.$toast.success('Udało się zaktualizować bohatera')
+                })
+                .catch((error) => {
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
+                })
         },
     }
 };

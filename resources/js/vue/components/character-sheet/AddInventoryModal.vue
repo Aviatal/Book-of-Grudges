@@ -77,11 +77,11 @@ export default {
     methods: {
         addItem() {
             if (this.isFormValid) {
-                axios.post('karta-postaci/' + this.heroId + '/add-item', this.newItem)
-                    .then(() => {
+                axios.post('karta-postaci/' + this.heroId + '/add-inventory-item', this.newItem)
+                    .then((response) => {
                         this.dialog = false;
                         this.newItem = { name: '', loading: '', description: '' };
-                        this.$emit('refresh-hero')
+                        this.$emit('item-added', response.data)
                     })
                     .catch(error => {
                         console.error(error);

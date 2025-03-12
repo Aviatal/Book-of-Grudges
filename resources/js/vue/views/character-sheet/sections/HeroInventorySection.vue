@@ -23,7 +23,7 @@
                 <div class="flex justify-end items-center mb-4">
                     <add-inventory-modal
                         :hero-id="heroData.id"
-                        v-on:refresh-hero="refreshData"
+                        v-on:item-added="handleNewItem"
                     ></add-inventory-modal>
                 </div>
                 <v-data-table
@@ -50,7 +50,6 @@ export default {
     data() {
         return {
             isOpen: false,
-            inventory: this.heroData.inventory,
 
             headers: [
                 {title: 'Przedmiot', align: 'start', sortable: true, value: 'name'},
@@ -59,19 +58,17 @@ export default {
             ],
         };
     },
+    computed: {
+        inventory() {
+            return this.heroData.inventory || [];
+        }
+    },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
-        isLevelChecked(level, item) {
-          return Boolean(item.pivot[level])
-        },
-        removeSkill(skillId) {
-            this.skills.filter(skill => skill.id !== skillId)
-            this.updateHeroSkills()
-        },
-        refreshData() {
-            this.$emit('get-hero');
+        handleNewItem(newItem) {
+            this.inventory.push(newItem);
         },
     }
 };

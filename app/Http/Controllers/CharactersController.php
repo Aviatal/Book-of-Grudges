@@ -13,35 +13,45 @@ class CharactersController extends Controller
 {
     public function getHero(int $userId)
     {
-        return Hero::with(
-            'previousProfession', 'currentProfession', 'description',
-            'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-            'skills', 'talents', 'inventory'
-        )
-            ->where('user_id', $userId)
-            ->first();
-    }
-    public function getCharacterSheet(Request $request, int $id)
-    {
-        if ($id !== Auth::user()->getAuthIdentifier()) {
+        if ($userId !== Auth::user()->getAuthIdentifier()) {
             abort(404);
         }
-        $hero = $this->getHero($id);
-        if ($request->get('wantsJson')) {
-            return response()->json($hero);
-        }
-        $skills = Skill::whereNotIn('id', $hero && $hero->skills ? $hero->skills->pluck('id') : [])->get();
-        return view('Pages.character-sheet', compact('hero', 'skills'));
+
+        return response()->json(
+            Hero::with(
+                'previousProfession', 'currentProfession', 'description',
+                'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
+                'skills', 'talents', 'inventory'
+            )
+                ->where('user_id', $userId)
+                ->first()
+        );
     }
-    public function updateHeroData(Request $request, Hero $hero)
+    public function index(Request $request, int $id)
     {
-        $hero->update($request->all());
-        return $this->getHero($hero->id);
+        return view('Pages.character-sheet', compact('id'));
+    }
+    public function updateHero(Request $request, Hero $hero)
+    {
+        try {
+            if (!$request->has(['field', 'value'])) {
+                throw new \Exception('Nie przesłano wymaganych danych');
+            }
+            $hero->update([$request->get('field') => $request->get('value')]);
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()]);
+        }
     }
     public function updateHeroDescription(Request $request, Hero $hero)
     {
-        $hero->description()->update($request->except(['id', 'hero_id', 'updated_at', 'created_at']));
-        return $this->getHero($hero->id);
+        try {
+            if (!$request->has(['field', 'value'])) {
+                throw new \Exception('Nie przesłano wymaganych danych');
+            }
+            $hero->description()->update([$request->get('field') => $request->get('value')]);
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()]);
+        }
     }
     public function updateHeroCharacteristic(Request $request, Hero $hero)
     {
@@ -67,11 +77,11 @@ class CharactersController extends Controller
     }
     public function addItem(Request $request, int $id)
     {
-        return HeroInventory::query()->create([
+        return response()->json(HeroInventory::query()->create([
             'hero_id' => $id,
             'name' => $request->get('name'),
             'loading' => $request->get('loading'),
             'description' => $request->get('description')
-        ]);
+        ]));
     }
 }
