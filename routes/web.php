@@ -34,8 +34,8 @@ Route::middleware('auth')->group(function (){
         Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
         Route::get('/{id}/get-hero', [CharactersController::class, 'getHero'])->name('character-sheet.get-hero');
         Route::post('/{hero}/update-hero', [CharactersController::class, 'updateHero'])->name('character-sheet.update-hero');
-        Route::post('/{hero}/update-description', [CharactersController::class, 'updateHeroDescription'])->name('character-sheet.update-hero-description');
-        Route::post('/{hero}/update-hero-characteristic', [CharactersController::class, 'updateHeroCharacteristic'])->name('character-sheet.update-hero-characteristic');
+        Route::post('/{hero}/update-description', [CharactersController::class, 'updateDescription'])->name('character-sheet.update-description');
+        Route::post('/{hero}/update-characteristic', [CharactersController::class, 'updateCharacteristic'])->name('character-sheet.update-characteristic');
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
     });
 

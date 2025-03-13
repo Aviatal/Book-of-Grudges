@@ -7,6 +7,7 @@ use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
 use App\Models\Skill;
 use Auth;
+use DB;
 use Illuminate\Http\Request;
 
 class CharactersController extends Controller
@@ -27,10 +28,12 @@ class CharactersController extends Controller
                 ->first()
         );
     }
+
     public function index(Request $request, int $id)
     {
         return view('Pages.character-sheet', compact('id'));
     }
+
     public function updateHero(Request $request, Hero $hero)
     {
         try {
@@ -42,7 +45,8 @@ class CharactersController extends Controller
             return response()->json(['message' => $exception->getMessage()]);
         }
     }
-    public function updateHeroDescription(Request $request, Hero $hero)
+
+    public function updateDescription(Request $request, Hero $hero)
     {
         try {
             if (!$request->has(['field', 'value'])) {
@@ -53,28 +57,45 @@ class CharactersController extends Controller
             return response()->json(['message' => $exception->getMessage()]);
         }
     }
-    public function updateHeroCharacteristic(Request $request, Hero $hero)
+
+    public function updateCharacteristic(Request $request, Hero $hero)
     {
         $hero->loadMissing('characteristic');
-        $upsertData = [];
-
-        foreach ($request->all() as $key => $characteristic) {
-            if (
-                $characteristic['start_value'] != $hero->getRelation('characteristic')[$key]->start_value ||
-                $characteristic['advancement'] != $hero->getRelation('characteristic')[$key]->advancement ||
-                $characteristic['current_value'] != $hero->getRelation('characteristic')[$key]->current_value
-            ) {
-                unset($characteristic['created_at'], $characteristic['updated_at']);
-                if ($characteristic['short_name'] == 'Zyw' && $hero->getRelation('characteristic')[$key]->current_value == $hero->current_wounds) {
-                    $hero->update(['current_wounds' => $characteristic['current_value']]);
-                }
-                $upsertData[] = $characteristic;
+        try {
+            DB::beginTransaction();
+            if (!$request->has('characteristic')) {
+                throw new \Exception('Nie przesłano wymaganych pól');
             }
+            $characteristic = $request->get("characteristic");
+            $hero->characteristic()->syncWithoutDetaching([
+                $characteristic['id'] => [
+                    'start_value' => $characteristic['pivot']['start_value'],
+                    'advancement' => $characteristic['pivot']['advancement'],
+                    'current_value' => $characteristic['pivot']['current_value']
+                ]
+            ]);
+            $changeCurrentWounds = 0;
+            if (
+                $characteristic['short_name'] == 'Zyw' &&
+                $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value == $hero->current_wounds
+            ) {
+                $hero->update(['current_wounds' => $characteristic['pivot']['current_value']]);
+                $changeCurrentWounds = $characteristic['pivot']['current_value'];
+            }
+            DB::commit();
+        } catch (\Throwable $exception) {
+            try {
+                DB::rollBack();
+            } catch (\Throwable $e) {
+                \Log::error('FATAL ERROR DURING ROLLBACK CHANGE ' . $e->getMessage());
+                return response()->json(['message' => $exception->getMessage()]);
+            }
+            return response()->json(['message' => $exception->getMessage()]);
         }
-        HeroCharacteristic::upsert($upsertData, ['id'], ['start_value', 'advancement', 'current_value']);
 
-        return $this->getHero($hero->id);
+        return response()->json(['message' => 'Udało się zakutalizować cechę bohatera', 'changeCurrentWounds' => $changeCurrentWounds]);
     }
+
     public function addItem(Request $request, int $id)
     {
         return response()->json(HeroInventory::query()->create([

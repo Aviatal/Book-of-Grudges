@@ -37,224 +37,238 @@
                 <tr>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['WW'].start_value"
+                            v-model="characteristic['WW'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('WW')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['US'].start_value"
+                            v-model="characteristic['US'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('US')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['K'].start_value"
+                            v-model="characteristic['K'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('K')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Odp'].start_value"
+                            v-model="characteristic['Odp'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Odp')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Zr'].start_value"
+                            v-model="characteristic['Zr'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Zr')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['SW'].start_value"
+                            v-model="characteristic['SW'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('SW')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Int'].start_value"
+                            v-model="characteristic['Int'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Int')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Ogd'].start_value"
+                            v-model="characteristic['Ogd'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['WW'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['US'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['K'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Odp'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Zr'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['SW'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Int'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Ogd'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Ogd')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                 </tr>
                 <tr>
                     <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['WW'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('WW')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['US'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('US')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['K'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('K')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Odp'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Odp')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Zr'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['SW'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('SW')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Int'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Int')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Ogd'].pivot.advancement"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Ogd')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['WW'].current_value"
-
+                            v-model="characteristic['WW'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('WW')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['US'].current_value"
-
+                            v-model="characteristic['US'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('US')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['K'].current_value"
-
+                            v-model="characteristic['K'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('K')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['Odp'].current_value"
-
+                            v-model="characteristic['Odp'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Odp')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['Zr'].current_value"
-
+                            v-model="characteristic['Zr'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Zr')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['Int'].current_value"
-
+                            v-model="characteristic['Int'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Int')"
+                            hide-details
+                        ></v-text-field>
 
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['SW'].current_value"
-
+                            v-model="characteristic['SW'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
-
+                            @change="updateCharacteristic('SW')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
 
                         <v-text-field
-
-                            v-model="characteristic['Ogd'].current_value"
-
+                            v-model="characteristic['Ogd'].pivot.current_value"
                             class="custom-input w-full"
-
                             variant="filled"
-
-                            @change="updateHero" hide-details></v-text-field>
-
+                            @change="updateCharacteristic('Ogd')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                 </tr>
                 </tbody>
@@ -277,175 +291,223 @@
                 <tr>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['A'].start_value"
+                            v-model="characteristic['A'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('A')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Zyw'].start_value"
+                            v-model="characteristic['Zyw'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Zyw')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['S'].start_value"
+                            v-model="characteristic['S'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('S')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Wt'].start_value"
+                            v-model="characteristic['Wt'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Wt')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Sz'].start_value"
+                            v-model="characteristic['Sz'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Sz')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Mag'].start_value"
+                            v-model="characteristic['Mag'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Mag')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['PO'].start_value"
+                            v-model="characteristic['PO'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('PO')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['PP'].start_value"
+                            v-model="characteristic['PP'].pivot.start_value"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['A'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Zyw'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['S'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Wt'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Sz'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['Mag'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['PO'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        <v-text-field
-                            v-model="characteristic['PP'].advancement"
-                            class="custom-input w-full"
-                            variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('PP')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                 </tr>
                 <tr>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['A'].current_value"
+                            v-model="characteristic['A'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('A')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Zyw'].current_value"
+                            v-model="characteristic['Zyw'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Zyw')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['S'].current_value"
+                            v-model="characteristic['S'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('S')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Wt'].current_value"
+                            v-model="characteristic['Wt'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Wt')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Sz'].current_value"
+                            v-model="characteristic['Sz'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Sz')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['Mag'].current_value"
+                            v-model="characteristic['Mag'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('Mag')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['PO'].current_value"
+                            v-model="characteristic['PO'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('PO')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                     <td class="border border-[#8b5a2b]">
                         <v-text-field
-                            v-model="characteristic['PP'].current_value"
+                            v-model="characteristic['PP'].pivot.advancement"
                             class="custom-input w-full"
                             variant="filled"
-                            @change="updateHero" hide-details></v-text-field>
+                            @change="updateCharacteristic('PP')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['A'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('A')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Zyw'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Zyw')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['S'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('S')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Wt'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Wt')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Sz'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Sz')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['Mag'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('Mag')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['PO'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('PO')"
+                            hide-details
+                        ></v-text-field>
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        <v-text-field
+                            v-model="characteristic['PP'].pivot.current_value"
+                            class="custom-input w-full"
+                            variant="filled"
+                            @change="updateCharacteristic('PP')"
+                            hide-details
+                        ></v-text-field>
                     </td>
                 </tr>
                 </tbody>
@@ -455,7 +517,6 @@
 </template>
 
 
-
 <script>
 export default {
     props: {
@@ -463,16 +524,36 @@ export default {
     },
     data() {
         return {
-            characteristic: this.characteristicData,
-            isOpen: false
+            isOpen: false,
+            heroId: Object.values(this.characteristicData)[0].pivot.hero_id
         };
+    },
+    computed: {
+        characteristic() {
+            return this.characteristicData;
+        }
     },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
-        updateHero() {
-            this.$emit('update-hero-characteristic', this.characteristic);
+        updateCharacteristic(characteristicName) {
+            axios.post('karta-postaci/' + this.heroId + '/update-characteristic', {
+                characteristic: this.characteristic[characteristicName]
+            })
+                .then((response) => {
+                    this.$toast.success(response.data.message)
+                    this.$emit(
+                        'add-characteristic',
+                        characteristicName,
+                        this.characteristic[characteristicName].pivot,
+                        response.data.changeCurrentWounds
+                    )
+                })
+                .catch((error) => {
+                    console.log(error)
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji cechy: ' + error.data.message);
+                })
         },
     }
 };

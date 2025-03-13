@@ -9,7 +9,7 @@
             ></hero-description-section>
             <hero-characteristic-section
                 :characteristic-data="hero.characteristic"
-                v-on:update-hero-characteristic="updateHeroCharacteristic"
+                v-on:add-characteristic="handleAddCharacteristic"
             ></hero-characteristic-section>
             <hero-weapons-section
                 :cold-weapons-data="hero.cold_weapons"
@@ -84,45 +84,19 @@ export default {
                 })
         }
 
-        return {hero, getHero, isLoading}
+        const handleAddCharacteristic = (characteristicName, characteristic, changeCurrentWounds) => {
+            hero.characteristic[characteristicName].pivot = characteristic
+            if (changeCurrentWounds > 0) {
+                hero.current_wounds = changeCurrentWounds
+            }
+        }
+
+        return {hero, getHero, isLoading, handleAddCharacteristic}
     },
     created() {
         this.getHero();
     },
     methods: {
-        updateHero() {
-            axios.post('karta-postaci/' + this.hero.id + '/update-hero-data', this.hero)
-                .then(response => {
-                    this.hero = response.data;
-                    this.$toast.success('Zaktualizowano bohatera!')
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera!')
-                })
-        },
-        updateHeroDescription() {
-            axios.post('karta-postaci/' + this.hero.id + '/update-hero-description', this.hero.description)
-                .then(response => {
-                    this.hero = response.data;
-                    this.$toast.success('Zaktualizowano opis bohatera!')
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji opisu bohatera!')
-                })
-        },
-        updateHeroCharacteristic() {
-            axios.post('karta-postaci/' + this.hero.id + '/update-hero-characteristic', this.hero.characteristic)
-                .then(response => {
-                    this.hero = response.data;
-                    this.$toast.success('Zaktualizowano cechy bohatera!')
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji cech bohatera!')
-                })
-        },
         updateHeroSkills() {
             axios.post('karta-postaci/' + this.hero.id + '/update-hero-skills', this.hero.skills)
                 .then(response => {
