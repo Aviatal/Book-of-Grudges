@@ -36,7 +36,7 @@ return new class extends Migration {
         $wtId = 12;
         $szId = 13;
         $magId = 14;
-        $posId = 15;
+        $poId = 15;
         $ppId = 16;
         DB::table('characteristics')->insert([
             [
