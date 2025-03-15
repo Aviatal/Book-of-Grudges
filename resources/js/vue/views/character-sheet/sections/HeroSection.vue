@@ -34,7 +34,7 @@
                     <div class="select-wrapper">
                         <select
                             v-model="hero.race"
-                            class="custom-select w-full"
+                            class="race-select w-full"
                             @change="updateHero('race')"
                         >
                             <option value="Krasnolud">Krasnolud</option>
@@ -195,12 +195,12 @@ export default {
     width: 100%;
 }
 
-.custom-select {
+.race-select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     width: 100%;
-    padding: 10px 15px;
+    padding: 15px 15px;
     font-size: 16px;
     border: 1px solid #807a69;
     border-radius: 4px;
@@ -217,7 +217,7 @@ export default {
     pointer-events: none;
 }
 
-.custom-select:focus {
+.race-select:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);

@@ -171,7 +171,7 @@ export default {
     -webkit-appearance: none;
     -moz-appearance: none;
     width: 100%;
-    padding: 10px 15px;
+    padding: 15px 15px;
     font-size: 16px;
     border: 1px solid #807a69;
     border-radius: 4px;
