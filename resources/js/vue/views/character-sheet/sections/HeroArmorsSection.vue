@@ -20,12 +20,19 @@
 
         <transition name="fade">
             <div v-show="isOpen" class="mt-4">
+                <div class="flex justify-end items-center mb-4">
+                    <add-armor-modal
+                        :hero-id="heroId"
+                        v-on:armor-added="handleNewArmor"
+                    ></add-armor-modal>
+                </div>
                 <v-data-table
                     :headers="armorHeaders"
                     :items="armors"
                     class="custom-table mb-6"
+                    key="id"
                     hide-default-footer
-                    no-data-text="Nie posiadasz broni pancerza"
+                    no-data-text="Nie posiadasz pancerza"
                 >
                     <template v-slot:item.locations="{ item }">
                         <span v-if="item.locations.length < 1">-</span>
@@ -34,6 +41,20 @@
                             {{ location.name }}
                         </span>
                         </div>
+                    </template>
+                    <template v-slot:item.options="{ item, index }">
+                        <v-row no-gutters>
+                            <v-col cols="12">
+                                <v-btn @click="dropArmor(item, index)" block class="delete-button">
+                                    Usuń
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-btn @click="unequip(item, index)" block class="unequip-button">
+                                    Schowaj
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </template>
                 </v-data-table>
 
@@ -45,35 +66,35 @@
                         <div class="flex flex-col justify-between h-full pl-4 py-8">
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Głowa (01-15)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.head" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="headArmorPoints" disabled>
                             </div>
 
 
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Prawa ręka (16-35)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.arms" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="armsArmorPoints" disabled>
                             </div>
 
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Prawa noga (81-90)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.legs" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="legsArmorPoints" disabled>
                             </div>
                         </div>
 
                         <div class="flex flex-col justify-between h-full pr-4 py-8">
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Korpus (56-80)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.torso" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="torsoArmorPoints" disabled>
                             </div>
 
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Lewa ręka (36-55)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.arms" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="armsArmorPoints" disabled>
                             </div>
 
                             <div class="flex flex-col items-center">
                                 <div class="text-[#e4d8b4] mb-1 text-center">Lewa noga (91-00)</div>
-                                <input type="text" maxlength="1" class="armor-input text-center" v-model="armorPoints.legs" disabled>
+                                <input type="text" maxlength="1" class="armor-input text-center" :value="legsArmorPoints" disabled>
                             </div>
                         </div>
                     </div>
@@ -85,14 +106,16 @@
 
 <script>
 import heroSvg from '@/assets/images/hero.svg?raw';
+import AddArmorModal from "../../../components/character-sheet/AddArmorModal.vue";
 export default {
+    components: {AddArmorModal},
     props: {
         armorsData: Object,
+        heroId: Number
     },
     data() {
         return {
             isOpen: false,
-            armors: this.armorsData,
             heroSvgContent: heroSvg,
             armorPoints: {
                 head: 0,
@@ -114,20 +137,38 @@ export default {
                 {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
                 {title: 'Lokacja ciała', align: 'start', sortable: true, value: 'locations'},
                 {title: 'Punkty zbroi', align: 'start', sortable: true, value: 'armor_points'},
+                {title: 'Opcje', align: 'start', sortable: true, value: 'options'},
             ],
         };
     },
-    created() {
-        ['head', 'arms', 'torso', 'legs'].forEach((location) => {
-            this.calculateArmorPoints(location)
-        })
+    computed: {
+        armors() {
+            return this.armorsData;
+        },
+        headArmorPoints() {
+            return this.calculateArmorPoints('head')
+        },
+        torsoArmorPoints() {
+            return this.calculateArmorPoints('torso')
+        },
+        armsArmorPoints() {
+            return this.calculateArmorPoints('arms')
+        },
+        legsArmorPoints() {
+            return this.calculateArmorPoints('legs')
+        },
     },
+    // created() {
+    //     ['head', 'arms', 'torso', 'legs'].forEach((location) => {
+    //         this.calculateArmorPoints(location)
+    //     })
+    // },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
         calculateArmorPoints(location) {
-            this.armorPoints[location] = this.armorsData.reduce((currentValue, armor) => {
+            return this.armorsData.reduce((currentValue, armor) => {
                 for (let item of armor.locations) {
                     if (item.name === this.locationsMap[location]) {
                         return currentValue + parseInt(armor.armor_points);
@@ -135,8 +176,37 @@ export default {
                 }
                 return currentValue;
             }, 0)
-        }
-    }
+        },
+        dropArmor(armor, index) {
+            if (!confirm('Czy na pewno chcesz usunąć zbroję?')) {
+                return;
+            }
+            axios.post('karta-postaci/' + this.heroId + '/drop-armor', {armor: armor})
+                .then(response => {
+                    this.armors.splice(index, 1)
+                    this.$toast.success(response.data.message)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas usuwania zbroi')
+                })
+        },
+        unequip(armor, index) {
+            axios.post('karta-postaci/' + this.heroId + '/unequip-armor', {armor: armor})
+                .then(response => {
+                    this.armors.splice(index, 1)
+                    this.$toast.success(response.data.message)
+                    this.$emit('unequip-armor', response.data.inventory)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas chowania zbroi do ekwipunku')
+                })
+        },
+        handleNewArmor(newArmor) {
+            this.armors.push(newArmor)
+        },
+    },
 };
 </script>
 
@@ -188,5 +258,45 @@ export default {
     border-color: #e4d8b4;
     outline: none;
     box-shadow: 0 0 0 2px rgba(228, 216, 180, 0.3);
+}
+
+.delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #ff1a1a;
+}
+
+.delete-button:active {
+    background-color: #e60000;
+}
+
+.unequip-button {
+    background-color: #d4af37;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.unequip-button:hover {
+    background-color: #b99932;
+}
+
+.unequip-button:active {
+    background-color: #8d7525;
 }
 </style>

@@ -45,3 +45,73 @@
 .v-toast {
     z-index: 2500 !important;
 }
+
+.cancel-button {
+    background-color: transparent;
+    color: #999;
+    border: 1px solid #999;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.cancel-button:hover {
+    color: #c09f80;
+    border-color: #c09f80;
+}
+
+.add-button {
+    background-color: #c09f80;
+    color: #1c1c1c;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.add-button:hover {
+    background-color: #d4b38a;
+}
+
+.v-autocomplete :deep(.v-input__control) {
+    background-color: #3b3a36;
+    color: #fff;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.v-autocomplete :deep(.v-input__control:hover) {
+    border-color: #d4b38a;
+}
+
+.v-autocomplete :deep(.v-input__control:focus) {
+    border-color: #d4b38a;
+    box-shadow: 0 0 5px #d4b38a;
+}
+
+
+.v-autocomplete :deep(.v-list) {
+    background-color: #2a2926;
+    border: 1px solid #c09f80;
+    color: #fff;
+    border-radius: 6px;
+}
+
+.v-autocomplete :deep(.v-list-item) {
+    background-color: transparent;
+    color: #c09f80;
+}
+
+.v-autocomplete :deep(.v-list-item:hover) {
+    background-color: #3b3a36;
+    color: #d4b38a;
+}
+
+.v-autocomplete :deep(.v-label) {
+    color: #c09f80;
+}
+
+.v-autocomplete :deep(.v-label.v-label--active) {
+    color: #d4b38a;
+}

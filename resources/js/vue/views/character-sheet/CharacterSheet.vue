@@ -18,7 +18,9 @@
                 @unequip-weapon="addWeaponToInventory"
             ></hero-weapons-section>
             <hero-armors-section
+                :hero-id="hero.id"
                 :armors-data="hero.armors"
+                @unequip-armor="addArmorToInventory"
             ></hero-armors-section>
             <hero-skills-section
                 :hurdled-skills-data="hero.skills"
@@ -96,8 +98,14 @@ export default {
         const addWeaponToInventory = (weapon) => {
             hero.inventory.push(weapon)
         }
+        const addArmorToInventory = (armor) => {
+            hero.inventory.push(armor)
+        }
 
-        return {hero, isLoading, getHero, handleAddCharacteristic, addWeaponToInventory}
+        return {
+            hero, isLoading,
+            getHero, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory
+        }
     },
     created() {
         this.getHero();

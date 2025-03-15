@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Armor;
 use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
@@ -155,6 +156,42 @@ class CharactersController extends Controller
         ]);
 
         return response()->json(['message' => 'Pomyślnie schowano broń do ekwipunku', 'inventory' => $newInventoryItem]);
+    }
+
+    public function addArmor(Request $request, Hero $hero)
+    {
+        $armor = Armor::query()->with('locations')->find($request->get('armorId'));
+        try {
+            if (DB::table('hero_armors')->where('hero_id', $hero->id)->where('armor_id', $armor->id)->first()) {
+                throw new \Exception('Już nosisz taką zbroję!');
+            }
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()], 500);
+        }
+        $hero->armors()->syncWithoutDetaching($armor->id);
+
+        return response()->json($armor);
+    }
+
+    public function dropArmor(Request $request, Hero $hero)
+    {
+        $armor = $request->get('armor');
+        $hero->armors()->detach($armor['id']);
+
+        return response()->json(['message' => 'Pomyślnie usunięto zbroje']);
+    }
+
+    public function unequipArmor(Request $request, Hero $hero)
+    {
+        $armor = $request->get('armor');
+        $hero->armors()->detach($armor['id']);
+        $newInventoryItem = $hero->inventory()->create([
+            'name' => $armor['name'],
+            'loading' => $armor['loading'],
+            'description' => $armor['category']
+        ]);
+
+        return response()->json(['message' => 'Pomyślnie schowano zbroję do ekwipunku', 'inventory' => $newInventoryItem]);
     }
 
     public function addItem(Request $request, int $id)

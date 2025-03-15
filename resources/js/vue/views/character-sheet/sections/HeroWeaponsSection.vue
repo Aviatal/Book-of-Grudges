@@ -115,8 +115,6 @@
                             </v-col>
                         </v-row>
                     </template>
-
-
                 </v-data-table>
             </div>
         </transition>

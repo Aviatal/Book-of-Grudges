@@ -36,10 +36,16 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/update-hero', [CharactersController::class, 'updateHero'])->name('character-sheet.update-hero');
         Route::post('/{hero}/update-description', [CharactersController::class, 'updateDescription'])->name('character-sheet.update-description');
         Route::post('/{hero}/update-characteristic', [CharactersController::class, 'updateCharacteristic'])->name('character-sheet.update-characteristic');
+
         Route::post('/{hero}/add-weapon', [CharactersController::class, 'addWeapon'])->name('character-sheet.add-weapon');
         Route::post('/{hero}/edit-weapon', [CharactersController::class, 'editWeapon'])->name('character-sheet.edit-weapon');
         Route::post('/{hero}/drop-weapon', [CharactersController::class, 'dropWeapon'])->name('character-sheet.drop-weapon');
         Route::post('/{hero}/unequip-weapon', [CharactersController::class, 'unequipWeapon'])->name('character-sheet.unequip-weapon');
+
+        Route::post('/{hero}/add-armor', [CharactersController::class, 'addArmor'])->name('character-sheet.add-armor');
+        Route::post('/{hero}/drop-armor', [CharactersController::class, 'dropArmor'])->name('character-sheet.drop-armor');
+        Route::post('/{hero}/unequip-armor', [CharactersController::class, 'unequipArmor'])->name('character-sheet.unequip-armor');
+
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
     });
 

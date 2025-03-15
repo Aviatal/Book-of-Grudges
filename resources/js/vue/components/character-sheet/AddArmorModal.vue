@@ -2,33 +2,29 @@
     <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on, attrs }">
             <button class="button-panel-custom button-orange for-vue" @click="dialog = true">
-                Dodaj broń
+                Dodaj zbroję
             </button>
         </template>
         <v-card class="bg-dark-custom border-custom shadow-custom">
             <v-card-title class="text-h5 font-weight-bold gold-text text-center v-card-title">
-                Dodaj Broń
+                Dodaj zbroję
             </v-card-title>
             <template v-if="!isLoading">
                 <v-card-text class="v-card-text">
                     <v-row class="mb-5">
                         <v-col cols="12">
                             <v-select
-                                v-model="newWeapon.weaponId"
-                                :options="weapons"
-                                :reduce="weapon => weapon.id"
+                                v-model="newArmorId"
+                                :options="armors"
+                                :reduce="armor => armor.id"
                                 label="name"
-                                placeholder="Wybierz rodzaj broni"
+                                placeholder="Wybierz rodzaj zbroi"
                                 class="custom-select w-full"
-                            ></v-select>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-text-field
-                                v-model="newWeapon.additionalWeaponName"
-                                label="Dodatkowa nazwa broni (np. kordelas dla broni jednoręcznej)"
-                                class="custom-input"
-                                variant="filled"
-                            ></v-text-field>
+                            >
+                                <template v-slot:option="armor">
+                                    {{ armor.category }} - {{ armor.name }}
+                                </template>
+                            </v-select>
                         </v-col>
                     </v-row>
                 </v-card-text>
@@ -36,12 +32,12 @@
             <template v-else>
                 <div class="text-center py-8">
                     <v-progress-circular indeterminate color="amber"></v-progress-circular>
-                    <p class="mt-4 text-amber-400">Ładowanie broni...</p>
+                    <p class="mt-4 text-amber-400">Pobieranie zbroi...</p>
                 </div>
             </template>
             <v-card-actions class="justify-center">
                 <button @click="dialog = false" class="cancel-button">Anuluj</button>
-                <button @click="addWeapon" class="add-button">Dodaj</button>
+                <button @click="addArmor" class="add-button">Dodaj</button>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -50,7 +46,7 @@
 <script>
 
 export default {
-    name: 'AddWeaponModal',
+    name: 'AddArmorModal',
     props: {
         heroId: {
             type: Number
@@ -59,39 +55,34 @@ export default {
     data() {
         return {
             dialog: false,
-            filteredWeapons: null,
-            weapons: null,
+            armors: null,
             isLoading: false,
 
-            newWeapon: {
-                weaponId: null,
-                additionalWeaponName: '',
-            },
+            newArmorId: null
         }
     },
     methods: {
-        getWeapons() {
+        getArmors() {
             this.isLoading = true;
-            axios.get('bronie/get-weapons?grouped=true')
+            axios.get('opancerzenie/get-armors?grouped=true')
                 .then(response => {
-                    this.weapons = response.data
-                    console.log(this.weapons)
+                    this.armors = response.data
                 })
                 .catch(error => {
                     console.log(error)
-                    this.$toast.error('Wystąpił błąd podczas pobierania broni')
+                    this.$toast.error('Wystąpił błąd podczas pobierania zbroi')
                 })
                 .finally(() => {
                     this.isLoading = false
                 })
         },
-        addWeapon() {
-                axios.post('karta-postaci/' + this.heroId + '/add-weapon', this.newWeapon)
+        addArmor() {
+                axios.post('karta-postaci/' + this.heroId + '/add-armor', {armorId: this.newArmorId})
                     .then((response) => {
                         this.dialog = false;
-                        this.newWeapon = {weaponId: null, additionalWeaponName: ''};
-                        this.$toast.success('Pomyślnie odano broń')
-                        this.$emit('weapon-added', response.data)
+                        this.newArmorId = null;
+                        this.$toast.success('Pomyślnie dodano zbroję')
+                        this.$emit('armor-added', response.data)
                     })
                     .catch(error => {
                         console.error(error);
@@ -102,7 +93,7 @@ export default {
     watch: {
         dialog: function () {
             if (this.dialog) {
-                this.getWeapons();
+                this.getArmors();
             }
         }
     }
