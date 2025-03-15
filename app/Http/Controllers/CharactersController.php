@@ -144,6 +144,19 @@ class CharactersController extends Controller
         return response()->json(['message' => 'Pomyślnie usunięto broń']);
     }
 
+    public function unequipWeapon(Request $request, Hero $hero)
+    {
+        $weapon = $request->get('weapon');
+        $hero->weapons()->detach($weapon['id']);
+        $newInventoryItem = $hero->inventory()->create([
+            'name' => $weapon['name'],
+            'loading' => $weapon['loading'],
+            'description' => $weapon['pivot']['additional_weapon_name']
+        ]);
+
+        return response()->json(['message' => 'Pomyślnie schowano broń do ekwipunku', 'inventory' => $newInventoryItem]);
+    }
+
     public function addItem(Request $request, int $id)
     {
         return response()->json(HeroInventory::query()->create([

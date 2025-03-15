@@ -52,7 +52,18 @@
                     </template>
 
                     <template v-slot:item.delete="{ item, index }">
-                        <button @click="dropWeapon(item, index)" class="delete-button">Usuń</button>
+                        <v-row no-gutters class="n-3">
+                            <v-col cols="12">
+                                <v-btn @click="dropWeapon(item, index)" block class="delete-button">
+                                    Usuń
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-btn @click="unequip(item, index)" block class="unequip-button">
+                                    Schowaj
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </template>
                 </v-data-table>
             </div>
@@ -91,8 +102,21 @@
                     </template>
 
                     <template v-slot:item.delete="{ item, index }">
-                        <button @click="dropWeapon(item, index)" class="delete-button">Usuń</button>
+                        <v-row no-gutters>
+                            <v-col cols="12">
+                                <v-btn @click="dropWeapon(item, index)" block class="delete-button">
+                                    Usuń
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-btn @click="unequip(item, index)" block class="unequip-button">
+                                    Schowaj
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </template>
+
+
                 </v-data-table>
             </div>
         </transition>
@@ -159,7 +183,7 @@ export default {
             if (!confirm('Czy na pewno chcesz usunąć broń?')) {
                 return;
             }
-            axios.post('karta-postaci/' + this.heroId + '/drop-weapon', { weapon: weapon })
+            axios.post('karta-postaci/' + this.heroId + '/drop-weapon', {weapon: weapon})
                 .then(response => {
                     if (!weapon.is_ranged) {
                         this.coldWeapons.splice(index, 1)
@@ -173,8 +197,24 @@ export default {
                     this.$toast.error('Wystąpił błąd podczas usuwania broni')
                 })
         },
+        unequip(weapon, index) {
+            axios.post('karta-postaci/' + this.heroId + '/unequip-weapon', {weapon: weapon})
+                .then(response => {
+                    if (!weapon.is_ranged) {
+                        this.coldWeapons.splice(index, 1)
+                    } else {
+                        this.rangedWeapons.splice(index, 1)
+                    }
+                    this.$toast.success(response.data.message)
+                    this.$emit('unequip-weapon', response.data.inventory)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas chowania broni do ekwipunku')
+                })
+        },
         updateWeapon(weapon) {
-            axios.post('karta-postaci/' + this.heroId + '/edit-weapon', { weapon: weapon })
+            axios.post('karta-postaci/' + this.heroId + '/edit-weapon', {weapon: weapon})
                 .then(response => {
                     this.$toast.success(response.data.message)
                 })
@@ -236,9 +276,9 @@ export default {
     background-color: #ff4d4d;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -250,6 +290,26 @@ export default {
 
 .delete-button:active {
     background-color: #e60000;
+}
+
+.unequip-button {
+    background-color: #d4af37;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.unequip-button:hover {
+    background-color: #b99932;
+}
+
+.unequip-button:active {
+    background-color: #8d7525;
 }
 
 </style>
