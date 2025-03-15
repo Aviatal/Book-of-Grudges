@@ -108,7 +108,7 @@ class CharactersController extends Controller
             return response()->json(['message' => $exception->getMessage()], 502);
         }
         $hero->weapons()->syncWithoutDetaching([
-            $weapon->id => ['hero_weapons.additional_weapon_name' => $request->get('additionalWeaponName')]
+            $weapon->id => ['additional_weapon_name' => $request->get('additionalWeaponName')]
         ]);
 
         return response()->json(collect([
