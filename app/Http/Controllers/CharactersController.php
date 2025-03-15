@@ -43,6 +43,7 @@ class CharactersController extends Controller
                 throw new \Exception('Nie przesłano wymaganych danych');
             }
             $hero->update([$request->get('field') => $request->get('value')]);
+            return response()->json(['message' => 'Pomyślnie zaktualizowano bohatera']);
         } catch (\Throwable $exception) {
             return response()->json(['message' => $exception->getMessage()]);
         }
@@ -55,6 +56,7 @@ class CharactersController extends Controller
                 throw new \Exception('Nie przesłano wymaganych danych');
             }
             $hero->description()->update([$request->get('field') => $request->get('value')]);
+            return response()->json(['message' => 'Pomyślnie zaktualizowano opis bohatera']);
         } catch (\Throwable $exception) {
             return response()->json(['message' => $exception->getMessage()]);
         }

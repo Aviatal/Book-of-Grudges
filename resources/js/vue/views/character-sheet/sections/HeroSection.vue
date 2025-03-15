@@ -166,8 +166,8 @@ export default {
             axios.post('karta-postaci/' + this.hero.id + '/update-hero', {
                 field: field, value: this.hero[field]
             })
-                .then(() => {
-                    this.$toast.success('Udało się zaktualizować bohatera')
+                .then((response) => {
+                    this.$toast.success(response.data.message)
                 })
                 .catch((error) => {
                     this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
