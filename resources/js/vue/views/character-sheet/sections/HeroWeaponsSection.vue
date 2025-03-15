@@ -20,6 +20,12 @@
 
         <transition name="fade">
             <div v-show="isOpen" class="mt-4">
+                <div class="flex justify-end items-center mb-4">
+                    <add-weapon-modal
+                        :hero-id="heroId"
+                        v-on:weapon-added="handleNewWeapon"
+                    ></add-weapon-modal>
+                </div>
                 <div class="weapon-category-header">Broń Biała</div>
                 <v-data-table
                     :headers="coldWeaponHeaders"
@@ -34,6 +40,8 @@
                             class="custom-input w-full"
                             variant="filled"
                             hide-details
+                            @update="updateWeapon(item)"
+                            @blur="updateWeapon(item)"
                         >
                         </v-text-field>
                     </template>
@@ -41,6 +49,10 @@
                         <span v-for="(trait, index) in item.traits" :key="index" class="trait-pill">
                             {{ trait.name }}<span v-if="index < item.traits.length - 1">, </span>
                         </span>
+                    </template>
+
+                    <template v-slot:item.delete="{ item, index }">
+                        <button @click="dropWeapon(item, index)" class="delete-button">Usuń</button>
                     </template>
                 </v-data-table>
             </div>
@@ -52,6 +64,7 @@
                 <v-data-table
                     :headers="rangedWeaponHeaders"
                     :items="rangedWeapons"
+                    key="id"
                     class="custom-table"
                     hide-default-footer
                     no-data-text="Nie posiadasz broni strzeleckiej"
@@ -62,6 +75,8 @@
                             class="custom-input w-full"
                             variant="filled"
                             hide-details
+                            @update="updateWeapon(item)"
+                            @blur="updateWeapon(item)"
                         >
                         </v-text-field>
                     </template>
@@ -74,6 +89,10 @@
                             {{ trait.name }}<span v-if="index < item.traits.length - 1">, </span>
                         </span>
                     </template>
+
+                    <template v-slot:item.delete="{ item, index }">
+                        <button @click="dropWeapon(item, index)" class="delete-button">Usuń</button>
+                    </template>
                 </v-data-table>
             </div>
         </transition>
@@ -81,16 +100,19 @@
 </template>
 
 <script>
+import addWeaponModal from "../../../components/character-sheet/AddWeaponModal.vue";
+import AddInventoryModal from "../../../components/character-sheet/AddInventoryModal.vue";
+
 export default {
     props: {
+        heroId: Number,
         coldWeaponsData: Object,
         rangedWeaponsData: Object
     },
+    components: {AddInventoryModal, addWeaponModal},
     data() {
         return {
             isOpen: false,
-            coldWeapons: this.coldWeaponsData,
-            rangedWeapons: this.rangedWeaponsData,
 
             coldWeaponHeaders: [
                 {title: 'Broń', align: 'start', sortable: true, value: 'name'},
@@ -99,6 +121,7 @@ export default {
                 {title: 'Kategoria', align: 'start', sortable: true, value: 'category'},
                 {title: 'Siła broni', align: 'start', sortable: true, value: 'power'},
                 {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
+                {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
             ],
             rangedWeaponHeaders: [
                 {title: 'Broń', align: 'start', sortable: true, value: 'name'},
@@ -109,16 +132,57 @@ export default {
                 {title: 'Zasięg', align: 'start', sortable: true, value: 'range'},
                 {title: 'Przeład.', align: 'start', sortable: true, value: 'reload_time'},
                 {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
+                {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
             ],
         };
+    },
+    computed: {
+        coldWeapons() {
+            return this.coldWeaponsData;
+        },
+        rangedWeapons() {
+            return this.rangedWeaponsData;
+        }
     },
     methods: {
         toggleOpen() {
             this.isOpen = !this.isOpen;
         },
-        updateHeroDescription() {
-            this.$emit('update-hero-weapons');
+        handleNewWeapon(newWeapon) {
+            if (!newWeapon.is_ranged) {
+                this.coldWeapons.push(newWeapon)
+            } else {
+                this.rangedWeapons.push(newWeapon)
+            }
         },
+        dropWeapon(weapon, index) {
+            if (!confirm('Czy na pewno chcesz usunąć broń?')) {
+                return;
+            }
+            axios.post('karta-postaci/' + this.heroId + '/drop-weapon', { weapon: weapon })
+                .then(response => {
+                    if (!weapon.is_ranged) {
+                        this.coldWeapons.splice(index, 1)
+                    } else {
+                        this.rangedWeapons.splice(index, 1)
+                    }
+                    this.$toast.success(response.data.message)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas usuwania broni')
+                })
+        },
+        updateWeapon(weapon) {
+            axios.post('karta-postaci/' + this.heroId + '/edit-weapon', { weapon: weapon })
+                .then(response => {
+                    this.$toast.success(response.data.message)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas edytowania broni')
+                })
+        }
     }
 };
 </script>
@@ -166,6 +230,26 @@ export default {
     border-radius: 8px;
     margin-bottom: 10px;
     border: 2px solid #8b5a2b;
+}
+
+.delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #ff1a1a;
+}
+
+.delete-button:active {
+    background-color: #e60000;
 }
 
 </style>

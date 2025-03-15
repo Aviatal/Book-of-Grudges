@@ -12,6 +12,7 @@
                 v-on:add-characteristic="handleAddCharacteristic"
             ></hero-characteristic-section>
             <hero-weapons-section
+                :hero-id="hero.id"
                 :cold-weapons-data="hero.cold_weapons"
                 :ranged-weapons-data="hero.ranged_weapons"
             ></hero-weapons-section>

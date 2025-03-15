@@ -6,6 +6,7 @@ use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
 use App\Models\Skill;
+use App\Models\Weapon;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
@@ -94,6 +95,53 @@ class CharactersController extends Controller
         }
 
         return response()->json(['message' => 'Udało się zakutalizować cechę bohatera', 'changeCurrentWounds' => $changeCurrentWounds]);
+    }
+
+    public function addWeapon(Request $request, Hero $hero)
+    {
+        $weapon = Weapon::query()->find($request->get('weaponId'));
+        try {
+            if (DB::table('hero_weapons')->where('hero_id', $hero->id)->where('weapon_id',$weapon->id)->first()) {
+                throw new \Exception('Już posiadasz taką broń! Jeśli chcesz jej używać, aktualną broń tego typu usuń z zakładki "Broń" i zapisz do ekwipunku');
+            }
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()], 502);
+        }
+        $hero->weapons()->syncWithoutDetaching([
+            $weapon->id => ['hero_weapons.additional_weapon_name' => $request->get('additionalWeaponName')]
+        ]);
+
+        return response()->json(collect([
+            'is_ranged' => $weapon->is_ranged,
+            'name' => $weapon->name,
+            'loading' => $weapon->loading,
+            'category' => $weapon->category,
+            'power' => $weapon->power,
+            'short_range' => $weapon->short_range,
+            'long_range' => $weapon->long_range,
+            'reload_time' => $weapon->reload_time,
+            'traits' => $weapon->traits,
+            'pivot' => [
+                'additional_weapon_name' => $request->get('additionalWeaponName')
+            ]
+        ]));
+    }
+
+    public function editWeapon(Request $request, Hero $hero)
+    {
+        $hero->weapons()->syncWithoutDetaching([
+            $request->get('weapon')['id'] => ['additional_weapon_name' => $request->get('additionalWeaponName')]
+        ]);
+
+        return response()->json(['message' => 'Pomyślnie zedytowano broń']);
+    }
+
+    public function dropWeapon(Request $request, Hero $hero)
+    {
+        $weapon = $request->get('weapon');
+        $hero->weapons()->detach($weapon['id']);
+
+        return response()->json(['message' => 'Pomyślnie usunięto broń']);
     }
 
     public function addItem(Request $request, int $id)

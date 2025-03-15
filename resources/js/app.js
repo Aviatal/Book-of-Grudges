@@ -7,14 +7,18 @@ import WeaponsIndex from "./vue/views/weapons/WeaponsIndex.vue";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
 import VueSelect  from "vue-select";
-import { VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular } from 'vuetify/components';
+import {
+    VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular,
+    VAutocomplete
+} from 'vuetify/components';
 import ArmorsIndex from "./vue/views/armors/ArmorsIndex.vue";
 import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 
 const vuetify = createVuetify({
     components: {
-        VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular
+        VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular,
+        VAutocomplete
     }
 });
 
