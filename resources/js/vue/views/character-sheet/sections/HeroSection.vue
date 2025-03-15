@@ -31,14 +31,18 @@
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
-                    <v-select
-                        label="Rasa"
-                        v-model="hero.race"
-                        :options="['Krasnolud', 'Niziołek', 'Człowiek', 'Elf']"
-                        class="custom-select w-full"
-                        variant="filled"
-                        @blur="updateHero('race')"
-                    ></v-select>
+                    <div class="select-wrapper">
+                        <select
+                            v-model="hero.race"
+                            class="custom-select w-full"
+                            @change="updateHero('race')"
+                        >
+                            <option value="Krasnolud">Krasnolud</option>
+                            <option value="Niziołek">Niziołek</option>
+                            <option value="Człowiek">Człowiek</option>
+                            <option value="Elf">Elf</option>
+                        </select>
+                    </div>
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
@@ -185,3 +189,37 @@ export default {
     }
 };
 </script>
+<style scoped>
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #807a69;
+    border-radius: 4px;
+    background-color: #42413b;
+    cursor: pointer;
+}
+
+.select-wrapper::after {
+    content: '\25BC';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+</style>
