@@ -7,12 +7,12 @@ trait BelongsToManyKeyBy
     public function belongsToManyKeyBy(
         string $keyBy,
         string $related,
-        string $table = null,
-        string $foreignPivotKey = null,
-        string $relatedPivotKey = null,
-        string $parentKey = null,
-        string $relatedKey = null,
-        string $relationName = null
+        string $table,
+        string $foreignPivotKey,
+        string $relatedPivotKey,
+        string $parentKey,
+        string $relatedKey,
+        string $relationName
     ): \App\Helpers\Classes\BelongsToManyKeyBy {
         $instance = $this->newRelatedInstance($related);
 
@@ -30,9 +30,9 @@ trait BelongsToManyKeyBy
             $table,
             $foreignPivotKey,
             $relatedPivotKey,
-            $parentKey ?: $this->getKeyName(),
-            $relatedKey ?: $instance->getKeyName(),
-            $relationName ?: $this->guessRelationName()
+            $parentKey,
+            $relatedKey,
+            $relationName
         );
     }
 }
