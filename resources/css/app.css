@@ -41,3 +41,7 @@
     color: #42413b !important;
 }
 /* v-select */
+
+.v-toast {
+    z-index: 2500 !important;
+}
