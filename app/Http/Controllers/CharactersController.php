@@ -101,11 +101,11 @@ class CharactersController extends Controller
     {
         $weapon = Weapon::query()->find($request->get('weaponId'));
         try {
-            if (DB::table('hero_weapons')->where('hero_id', $hero->id)->where('weapon_id',$weapon->id)->first()) {
+            if (DB::table('hero_weapons')->where('hero_id', $hero->id)->where('weapon_id', $weapon->id)->first()) {
                 throw new \Exception('Już posiadasz taką broń! Jeśli chcesz jej używać, aktualną broń tego typu usuń z zakładki "Broń" i zapisz do ekwipunku');
             }
         } catch (\Throwable $exception) {
-            return response()->json(['message' => $exception->getMessage()], 502);
+            return response()->json(['message' => $exception->getMessage()], 500);
         }
         $hero->weapons()->syncWithoutDetaching([
             $weapon->id => ['additional_weapon_name' => $request->get('additionalWeaponName')]
