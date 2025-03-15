@@ -12,7 +12,7 @@ Route::group(['prefix' => 'bronie'], function () {
     Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');
     Route::get('/get-weapons', [WeaponsController::class, 'getWeapons'])->name('weapons.get-weapons');
 });
-Route::group(['prefix' => 'opanczerzenie'], function () {
+Route::group(['prefix' => 'opancerzenie'], function () {
     Route::get('/', [ArmorsController::class, 'index'])->name('armors.index');
     Route::get('/get-armors', [ArmorsController::class, 'getArmors'])->name('armors.get-armors');
 });

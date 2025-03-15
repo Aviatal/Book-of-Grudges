@@ -86,7 +86,7 @@ export default {
         getArmors() {
             this.loading = true;
 
-            axios.get('opanczerzenie/get-armors')
+            axios.get('opancerzenie/get-armors')
                 .then(response => {
                     this.leatherArmors = response.data.leather;
                     this.mailArmors = response.data.mail;
