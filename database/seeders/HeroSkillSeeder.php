@@ -18,7 +18,7 @@ class HeroSkillSeeder extends Seeder
         foreach ($heroes as $hero) {
             foreach ($skills as $skill) {
                 if (!$hero->skills()->where('skills.id', $skill->id)->exists()) {
-                    $hero->skills()->syncWithoutDetaching($skill->id);
+                    $hero->skills()->attach($skill->id);
                 } else {
                     $hero->skills()->updateExistingPivot($skill->id, ['hurdled' => 1]);
                 }
