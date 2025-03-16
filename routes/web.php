@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/drop-armor', [CharactersController::class, 'dropArmor'])->name('character-sheet.drop-armor');
         Route::post('/{hero}/unequip-armor', [CharactersController::class, 'unequipArmor'])->name('character-sheet.unequip-armor');
 
+        Route::post('/{hero}/update-skill', [CharactersController::class, 'updateSkill'])->name('character-sheet.update-skill');
+
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
     });
 

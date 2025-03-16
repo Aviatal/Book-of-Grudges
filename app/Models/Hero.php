@@ -61,8 +61,26 @@ class Hero extends Model
     }
     public function skills(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class)->withPivot(['additional_skill_name', 'first_level', 'second_level']);
+        return $this->belongsToMany(Skill::class)->withPivot(['id', 'additional_skill_name', 'hurdled', 'first_level', 'second_level']);
     }
+
+    public function updateOrCreateSkill($heroSkillId, $data, $action): HeroSkill|bool
+    {
+
+        return match ($action) {
+            'add' => HeroSkill::create([
+                'hero_id' => $data['hero_id'],
+                'skill_id' => $data['skill_id'],
+                'hurdled' => 1,
+                'first_level' => 0,
+                'second_level' => 0,
+                'additional_skill_name' => null
+            ]),
+            'remove' => HeroSkill::where('id', $heroSkillId)->first()->delete(),
+            default => HeroSkill::updateOrCreate(['id' => $heroSkillId], $data),
+        };
+    }
+
     public function talents(): BelongsToMany
     {
         return $this->belongsToMany(Talent::class, 'hero_talent', 'hero_id', 'talent_id')->withPivot(['additional_talent_name']);

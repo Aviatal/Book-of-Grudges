@@ -23,8 +23,9 @@
                 @unequip-armor="addArmorToInventory"
             ></hero-armors-section>
             <hero-skills-section
-                :hurdled-skills-data="hero.skills"
-                v-on:update-hero-skills="updateHeroSkills"
+                :hero-id="hero.id"
+                :skills-data="hero.skills"
+                :characteristic-data="hero.characteristic"
             ></hero-skills-section>
             <hero-talents-section
                 :talents-data="hero.talents"
@@ -110,18 +111,5 @@ export default {
     created() {
         this.getHero();
     },
-    methods: {
-        updateHeroSkills() {
-            axios.post('karta-postaci/' + this.hero.id + '/update-hero-skills', this.hero.skills)
-                .then(response => {
-                    this.hero = response.data;
-                    this.$toast.success('Zaktualizowano umiejętności bohatera!')
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji umiejętności bohatera!')
-                })
-        },
-    }
 };
 </script>

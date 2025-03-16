@@ -196,6 +196,25 @@ class CharactersController extends Controller
         return response()->json(['message' => 'Pomyślnie schowano zbroję do ekwipunku', 'inventory' => $newInventoryItem]);
     }
 
+    public function updateSkill(Request $request, Hero $hero)
+    {
+        $skill = $request->get('skill');
+        try {
+            $newSkill = $hero->updateOrCreateSkill($skill['pivot']['id'], [
+                'hero_id' => $skill['pivot']['hero_id'],
+                'skill_id' => $skill['id'],
+                'additional_skill_name' => $skill['pivot']['additional_skill_name'],
+                'hurdled' => $skill['pivot']['hurdled'],
+                'first_level' => $skill['pivot']['first_level'],
+                'second_level' => $skill['pivot']['second_level']
+            ], $request->get('action'));
+
+            return response()->json(['message' => 'Zaktualizowano umiejętność', 'skill' => $newSkill]);
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()], 500);
+        }
+    }
+
     public function addItem(Request $request, int $id)
     {
         return response()->json(HeroInventory::query()->create([
