@@ -158,7 +158,7 @@ export default {
     },
     computed: {
         hurdledSkills() {
-            return this.skillsData.filter((skill) => Boolean(skill.pivot.hurdled)) .sort((a, b) => a.name.localeCompare(b.name));;
+            return this.skillsData.filter((skill) => Boolean(skill.pivot.hurdled)) .sort((a, b) => a.name.localeCompare(b.name));
         },
         notHurdledSkills() {
             return this.skillsData.filter((skill) => !Boolean(skill.pivot.hurdled) || skill.expandable === 1)
@@ -253,18 +253,6 @@ export default {
 .custom-table .v-data-table th:hover {
     background-color: #704214 !important;
     color: #f5e0b7 !important;
-}
-
-.weapon-category-header {
-    background-color: #5a3e1b;
-    color: #f5e0b7;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 2px solid #8b5a2b;
 }
 
 .hurdle-button {
