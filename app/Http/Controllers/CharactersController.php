@@ -7,6 +7,7 @@ use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
 use App\Models\Skill;
+use App\Models\Talent;
 use App\Models\Weapon;
 use Auth;
 use DB;
@@ -213,6 +214,27 @@ class CharactersController extends Controller
         } catch (\Throwable $exception) {
             return response()->json(['message' => $exception->getMessage()], 500);
         }
+    }
+
+    public function addTalent(Request $request, Hero $hero)
+    {
+        $talent = Talent::query()->find($request->get('talentId'));
+        try {
+            if (DB::table('hero_talent')->where('hero_id', $hero->id)->where('talent_id', $talent->id)->first()) {
+                throw new \Exception('Już posiadasz tą zdolnosć!');
+            }
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => $exception->getMessage()], 500);
+        }
+        $hero->talents()->syncWithoutDetaching($talent->id);
+        return response()->json($talent);
+    }
+
+    public function dropTalent(Request $request, Hero $hero)
+    {
+        $talent = $request->get('talent');
+        $hero->talents()->detach($talent['id']);
+        return response()->json(['message' => 'Pomyślnie usunięto zdolność']);
     }
 
     public function addItem(Request $request, int $id)

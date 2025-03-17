@@ -28,6 +28,7 @@
                 :characteristic-data="hero.characteristic"
             ></hero-skills-section>
             <hero-talents-section
+                :hero-id="hero.id"
                 :talents-data="hero.talents"
             ></hero-talents-section>
             <hero-inventory-section

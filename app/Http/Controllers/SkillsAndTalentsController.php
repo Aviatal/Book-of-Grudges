@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Skill;
 use App\Models\Talent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SkillsAndTalentsController extends Controller
 {
@@ -24,9 +25,18 @@ class SkillsAndTalentsController extends Controller
         return response()->json($skills);
     }
 
-    public function getTalents()
+    public function getTalents(Request $request)
     {
-        $talents = Talent::orderBy('name')->get();
-        return response()->json($talents);
+        $talents = Talent::orderBy('name');
+        if ($request->has('withoutOwned')) {
+            $heroTalents = DB::table('hero_talent')
+                ->select('talent_id')
+                ->where('hero_id', $request->has('withoutOwned'))
+                ->get()
+                ->pluck('talent_id')
+                ->toArray();
+            return response()->json($talents->whereNotIn('id', $heroTalents)->get());
+        }
+        return response()->json($talents->get());
     }
 }
