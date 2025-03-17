@@ -246,4 +246,11 @@ class CharactersController extends Controller
             'description' => $request->get('description')
         ]));
     }
+
+    public function dropInventoryItem(Request $request, Hero $hero)
+    {
+        $item = $request->get('item');
+        HeroInventory::query()->where('hero_id', $hero->id)->where('id', $item['id'])->delete();
+        return response()->json(['message' => 'Pomyślnie usunięto przedmiot']);
+    }
 }

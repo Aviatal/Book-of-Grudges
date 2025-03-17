@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/drop-talent', [CharactersController::class, 'dropTalent'])->name('character-sheet.drop-talent');
 
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
+        Route::post('/{hero}/drop-item-from-inventory', [CharactersController::class, 'dropInventoryItem'])->name('character-sheet.drop-inventory-item');
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');

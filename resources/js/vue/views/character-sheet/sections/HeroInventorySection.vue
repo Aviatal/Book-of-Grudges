@@ -32,7 +32,14 @@
                     class="custom-table"
                     hide-default-footer
                     no-data-text="Nie posiadasz żadnych przedmiotów"
-                ></v-data-table>
+                >
+                    <template v-slot:item.delete="{ item, index }">
+                        <button @click="removeItem(item, index)"
+                                class="mt-4 self-end px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors">
+                            Usuń
+                        </button>
+                    </template>
+                </v-data-table>
             </div>
 
         </transition>
@@ -55,6 +62,7 @@ export default {
                 {title: 'Przedmiot', align: 'start', sortable: true, value: 'name'},
                 {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
                 {title: 'Opis', align: 'start', sortable: true, value: 'description'},
+                {title: 'Usuń', align: 'start', sortable: true, value: 'delete'},
             ],
         };
     },
@@ -69,6 +77,17 @@ export default {
         },
         handleNewItem(newItem) {
             this.inventory.push(newItem);
+        },
+        removeItem(item, index) {
+            axios.post('karta-postaci/' + this.heroData.id + '/drop-item-from-inventory', {item: item})
+                .then(response => {
+                    this.inventory.splice(index, 1)
+                    this.$toast.success(response.data.message)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas usuwania przedmiotu')
+                })
         },
     }
 };
