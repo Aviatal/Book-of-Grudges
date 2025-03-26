@@ -280,6 +280,14 @@ class CharactersController extends Controller
             ]);
         }
 
+        for($i = 1; $i <= 47; $i++) {
+            $hero->skills()->attach($i, [
+                'hurdled' => 0,
+                'first_level' => 0,
+                'second_level' => 0,
+            ]);
+        }
+
         $hero->description()->create([
             'age' => 0,
             'gender' => 'M',
