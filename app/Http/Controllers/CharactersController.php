@@ -253,4 +253,36 @@ class CharactersController extends Controller
         HeroInventory::query()->where('hero_id', $hero->id)->where('id', $item['id'])->delete();
         return response()->json(['message' => 'Pomyślnie usunięto przedmiot']);
     }
+
+    public static function createEmptyCharacter(int $userId)
+    {
+        $hero = Hero::create([
+            'user_id' => $userId,
+            'name' => '',
+            'race' => 'Człowiek',
+            'current_experience' => 0,
+            'all_experience' => 0,
+            'current_wounds' => 0,
+            'gold_crowns' => 0,
+            'silver_shillings' => 0,
+            'brass_pennies' => 0,
+            'fortune_pennies' => 0,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        for($i = 1; $i <= 16; $i++) {
+            $hero->characteristic()->attach($i, [
+                'start_value' => 0,
+                'current_value' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        $hero->description()->create([
+            'age' => 0,
+            'gender' => 'M',
+        ]);
+    }
 }
