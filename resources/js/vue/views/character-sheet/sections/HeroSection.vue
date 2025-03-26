@@ -100,9 +100,11 @@
                         v-model="hero.previous_profession_id"
                         :options="professions"
                         :reduce="profession => profession.id"
+                        placeholder="Obecna profesja"
                         label="text"
                         class="custom-select w-full"
                         @blur="updateHero('previous_profession_id')"
+                        @close="updateHero('current_profession_id')"
                     ></v-select>
                 </v-col>
 
@@ -111,9 +113,11 @@
                         v-model="hero.current_profession_id"
                         :options="professions"
                         :reduce="profession => profession.id"
+                        placeholder="Obecna profesja"
                         label="text"
                         class="custom-select w-full"
                         @blur="updateHero('current_profession_id')"
+                        @close="updateHero('current_profession_id')"
                     ></v-select>
                 </v-col>
 
