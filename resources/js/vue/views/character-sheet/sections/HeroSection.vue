@@ -65,7 +65,10 @@
                     ></v-text-field>
                 </v-col>
 
-                <v-col cols="12" sm="6" lg="6">
+                <v-col cols="12">
+                    <div class="text-center text-[#d4af37] text-lg font-semibold my-1">Majątek</div>
+                </v-col>
+                <v-col cols="12" sm="4" lg="4">
                     <v-text-field
                         v-model="hero.gold_crowns"
                         label="Złote Korony"
@@ -75,7 +78,7 @@
                     ></v-text-field>
                 </v-col>
 
-                <v-col cols="12" sm="6" lg="6">
+                <v-col cols="12" sm="4" lg="4">
                     <v-text-field
                         v-model="hero.silver_shillings"
                         label="Srebrne szylingi"
@@ -85,7 +88,7 @@
                     ></v-text-field>
                 </v-col>
 
-                <v-col cols="12" sm="6" lg="6">
+                <v-col cols="12" sm="4" lg="4">
                     <v-text-field
                         v-model="hero.brass_pennies"
                         label="Miedziane pensy"
@@ -95,12 +98,17 @@
                     ></v-text-field>
                 </v-col>
 
+                <v-col cols="12">
+                    <div class="text-center text-[#d4af37] text-lg font-semibold my-1">Profesje</div>
+                </v-col>
+
                 <v-col cols="12" sm="6" lg="6">
+                    <labe>Poprzednia profesja</labe>
                     <v-select
                         v-model="hero.previous_profession_id"
                         :options="professions"
                         :reduce="profession => profession.id"
-                        placeholder="Obecna profesja"
+                        placeholder="Poprzednia profesja"
                         label="text"
                         class="custom-select w-full"
                         @blur="updateHero('previous_profession_id')"
@@ -109,6 +117,7 @@
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
+                    <label>Obecna profesja</label>
                     <v-select
                         v-model="hero.current_profession_id"
                         :options="professions"
@@ -119,6 +128,10 @@
                         @blur="updateHero('current_profession_id')"
                         @close="updateHero('current_profession_id')"
                     ></v-select>
+                </v-col>
+
+                <v-col cols="12">
+                    <div class="text-center text-[#d4af37] text-lg font-semibold my-1">Punkty doświadczenia</div>
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
