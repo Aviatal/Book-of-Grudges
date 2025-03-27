@@ -51,7 +51,7 @@
                                 no-data-text="Nie posiadasz wykupionych umiejętności"
                             >
                                 <template v-slot:item.hurdled="{ item }">
-                                    <input type="checkbox" checked @change="updateSkill(item ,'hurdled', 0)">
+                                    <input type="checkbox" checked @change="updateSkill(item ,'hurdled', 0, true)">
                                 </template>
                                 <template v-slot:item.test="{ item }">
                                     {{ characteristic[item.characteristic].pivot.current_value }}
@@ -62,17 +62,17 @@
                                         class="custom-input w-full"
                                         variant="filled"
                                         hide-details
-                                        @change="updateSkill(item ,'additional_skill_name', item.pivot.additional_skill_name)"
+                                        @change="updateSkill(item ,'additional_skill_name', item.pivot.additional_skill_name, true)"
                                     >
                                     </v-text-field>
                                 </template>
                                 <template v-slot:item.first_level="{ item }">
                                     <input :checked="isLevelChecked('first_level', item)" type="checkbox"
-                                           @change="updateSkill(item, 'first_level', !isLevelChecked('first_level', item))">
+                                           @change="updateSkill(item, 'first_level', !isLevelChecked('first_level', item), true)">
                                 </template>
                                 <template v-slot:item.second_level="{ item }">
                                     <input :checked="isLevelChecked('second_level', item)" type="checkbox"
-                                           @change="updateSkill(item, 'second_level', !isLevelChecked('second_level', item))">
+                                           @change="updateSkill(item, 'second_level', !isLevelChecked('second_level', item), true)">
                                 </template>
                             </v-data-table>
                         </div>
@@ -113,7 +113,7 @@
                                     {{ Math.floor(characteristic[item.characteristic].pivot.current_value / 2) }}
                                 </template>
                                 <template v-slot:item.add="{ item }">
-                                    <v-btn @click="updateSkill(item ,'hurdled', 1)" block class="hurdle-button">
+                                    <v-btn @click="updateSkill(item ,'hurdled', 1, false)" block class="hurdle-button">
                                         Wykup
                                     </v-btn>
                                 </template>
@@ -129,7 +129,7 @@
 <script>
 export default {
     props: {
-        skillsData: Object,
+        skillsData: Array,
         characteristicData: Object,
         heroId: Number
     },
@@ -161,7 +161,7 @@ export default {
             return this.skillsData.filter((skill) => Boolean(skill.pivot.hurdled)) .sort((a, b) => a.name.localeCompare(b.name));
         },
         notHurdledSkills() {
-            return this.skillsData.filter((skill) => !Boolean(skill.pivot.hurdled) || skill.expandable === 1)
+            return this.skillsData.filter((skill) => !Boolean(skill.pivot.hurdled))
                 .filter((skill, index, self) =>
                         index === self.findIndex((t) => t.id === skill.id)
                 )
@@ -188,10 +188,12 @@ export default {
         isLevelChecked(level, item) {
             return Boolean(item.pivot[level])
         },
-        updateSkill(skill, field, value) {
+        updateSkill(skill, field, value, update) {
             let action = null;
+            if (update) {
+                skill['pivot'][field] = value;
+            }
 
-            skill['pivot'][field] = value;
             if (skill.expandable && field === 'hurdled' && value) {
                 action = 'add'
             } else if (
@@ -203,12 +205,15 @@ export default {
                 action = 'remove'
             }
 
-            axios.post('karta-postaci/' + this.heroId + '/update-skill', {skill:  skill, action: action})
+            console.log(action)
+            axios.post('karta-postaci/' + this.heroId + '/update-skill', {skill: skill, action: action})
                 .then((response) => {
+                    console.log(response)
                     if (action === 'add') {
                         const newSkill = JSON.parse(JSON.stringify(skill))
                         newSkill.pivot = response.data.skill
                         console.log(newSkill)
+                        console.log(skill)
                         this.skillsData.push(newSkill)
                     }
                     this.$toast.success(response.data.message)
