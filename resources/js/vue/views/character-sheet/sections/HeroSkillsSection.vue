@@ -113,7 +113,7 @@
                                     {{ Math.floor(characteristic[item.characteristic].pivot.current_value / 2) }}
                                 </template>
                                 <template v-slot:item.add="{ item }">
-                                    <v-btn @click="updateSkill(item ,'hurdled', 1, false)" block class="hurdle-button">
+                                    <v-btn @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="hurdle-button">
                                         Wykup
                                     </v-btn>
                                 </template>
@@ -205,10 +205,8 @@ export default {
                 action = 'remove'
             }
 
-            console.log(action)
             axios.post('karta-postaci/' + this.heroId + '/update-skill', {skill: skill, action: action})
                 .then((response) => {
-                    console.log(response)
                     if (action === 'add') {
                         const newSkill = JSON.parse(JSON.stringify(skill))
                         newSkill.pivot = response.data.skill
