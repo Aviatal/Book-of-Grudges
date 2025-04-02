@@ -31,6 +31,7 @@
                     :headers="coldWeaponHeaders"
                     :items="coldWeapons"
                     class="custom-table"
+                    items-per-page="-1"
                     hide-default-footer
                     no-data-text="Nie posiadasz broni białej"
                 >
@@ -77,6 +78,7 @@
                     :items="rangedWeapons"
                     key="id"
                     class="custom-table"
+                    items-per-page="-1"
                     hide-default-footer
                     no-data-text="Nie posiadasz broni strzeleckiej"
                 >

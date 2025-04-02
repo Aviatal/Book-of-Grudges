@@ -106,7 +106,7 @@
                                 :items="notHurdledSkills"
                                 class="custom-table"
                                 hide-default-footer
-                                items-per-page="-10"
+                                items-per-page="-1"
                                 no-data-text="Jesteś wcieleniem Sigmara! Posiadasz wszystkie umiejętności!"
                             >
                                 <template v-slot:item.test="{ item }">

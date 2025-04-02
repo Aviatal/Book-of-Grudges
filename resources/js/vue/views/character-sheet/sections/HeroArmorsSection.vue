@@ -31,6 +31,7 @@
                     :items="armors"
                     class="custom-table mb-6"
                     key="id"
+                    items-per-page="-1"
                     hide-default-footer
                     no-data-text="Nie posiadasz pancerza"
                 >
