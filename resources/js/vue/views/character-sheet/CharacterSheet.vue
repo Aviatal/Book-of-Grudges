@@ -13,6 +13,8 @@
             ></hero-characteristic-section>
             <hero-weapons-section
                 :hero-id="hero.id"
+                :characteristic-data="hero.characteristic"
+                :talents-data="hero.talents"
                 :cold-weapons-data="hero.cold_weapons"
                 :ranged-weapons-data="hero.ranged_weapons"
                 @unequip-weapon="addWeaponToInventory"

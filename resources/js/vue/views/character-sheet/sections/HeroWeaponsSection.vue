@@ -51,6 +51,9 @@
                             {{ trait.name }}<span v-if="index < item.traits.length - 1">, </span>
                         </span>
                     </template>
+                    <template v-slot:item.attack_bonus="{ item }">
+                        {{ weaponPower(item) }}
+                    </template>
 
                     <template v-slot:item.delete="{ item, index }">
                         <v-row no-gutters class="n-3">
@@ -82,6 +85,9 @@
                     hide-default-footer
                     no-data-text="Nie posiadasz broni strzeleckiej"
                 >
+                    <template v-slot:item.attack_bonus="{ item }">
+                        {{ weaponPower(item) }}
+                    </template>
                     <template v-slot:item.additional_weapon_name="{ item }">
                         <v-text-field
                             v-model="item.pivot.additional_weapon_name"
@@ -130,6 +136,8 @@ import AddInventoryModal from "../../../components/character-sheet/AddInventoryM
 export default {
     props: {
         heroId: Number,
+        characteristicData: Array,
+        talentsData: Array,
         coldWeaponsData: Object,
         rangedWeaponsData: Object
     },
@@ -139,22 +147,20 @@ export default {
             isOpen: false,
 
             coldWeaponHeaders: [
-                {title: 'Broń', align: 'start', sortable: true, value: 'name'},
-                {title: 'Nazwa', align: 'start', sortable: true, value: 'additional_weapon_name'},
-                {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
-                {title: 'Kategoria', align: 'start', sortable: true, value: 'category'},
-                {title: 'Siła broni', align: 'start', sortable: true, value: 'power'},
+                {title: 'Broń', align: 'start', sortable: false, value: 'name'},
+                {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
+                {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
+                {title: 'Siła', align: 'start', sortable: false, value: 'power'},
                 {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
                 {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
             ],
             rangedWeaponHeaders: [
-                {title: 'Broń', align: 'start', sortable: true, value: 'name'},
-                {title: 'Nazwa', align: 'start', sortable: true, value: 'additional_weapon_name'},
-                {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
-                {title: 'Kategoria', align: 'start', sortable: true, value: 'category'},
-                {title: 'Siła broni', align: 'start', sortable: true, value: 'power'},
-                {title: 'Zasięg', align: 'start', sortable: true, value: 'range'},
-                {title: 'Przeład.', align: 'start', sortable: true, value: 'reload_time'},
+                {title: 'Broń', align: 'start', sortable: false, value: 'name'},
+                {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
+                {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
+                {title: 'Siła', align: 'start', sortable: false, value: 'power'},
+                {title: 'Zasięg', align: 'start', sortable: false, value: 'range'},
+                {title: 'Przeład.', align: 'start', sortable: false, value: 'reload_time'},
                 {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
                 {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
             ],
@@ -166,7 +172,19 @@ export default {
         },
         rangedWeapons() {
             return this.rangedWeaponsData;
-        }
+        },
+        heroPower() {
+            return Math.max(this.characteristicData['S'].pivot.current_value, this.characteristicData['S'].pivot.start_value)
+        },
+        hasBrawlTalent() {
+            return this.talentsData.some(talent => talent.name === "Bijatyka");
+        },
+        hasStrongStrikeTalent() {
+            return this.talentsData.some(talent => talent.name === "Silny cios");
+        },
+        hasSharpshooterTalent() {
+            return this.talentsData.some(talent => talent.name === "Strzał precyzyjny");
+        },
     },
     methods: {
         toggleOpen() {
@@ -222,6 +240,28 @@ export default {
                     console.log(error);
                     this.$toast.error('Wystąpił błąd podczas edytowania broni')
                 })
+        },
+        weaponPower(weapon) {
+            let weaponPower = 0;
+
+            if (weapon.power === 'S') {
+                weaponPower += this.heroPower
+            } else if (weapon.power.startsWith('S') && weapon.power.length > 1) {
+                const calculatedWeaponPower = this.heroPower + parseInt(weapon.power.slice(1))
+                weaponPower += calculatedWeaponPower;
+            } else if (!isNaN(parseInt(weapon.power))) {
+                weaponPower += weapon.power;
+            }
+
+            if (
+                (this.hasBrawlTalent && weapon.name === 'Bez broni') ||
+                (weapon.name !== 'Bez broni' && weapon.is_ranged === 0 && this.hasStrongStrikeTalent) ||
+                (weaponPower > 0 && weapon.is_ranged === 1 && this.hasSharpshooterTalent)
+            ) {
+                weaponPower++;
+            }
+
+            return weaponPower
         }
     }
 };
