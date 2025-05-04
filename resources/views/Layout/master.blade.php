@@ -18,8 +18,8 @@
     <h1 class="text-4xl font-bold text-[#d4af37] tracking-wide">Book of Grudges</h1>
 </header>
 
-<main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-    <section class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b] col-span-2" id="app">
+<main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6"  id="app">
+    <section class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b] col-span-2">
         @yield('content')
     </section>
 
@@ -42,6 +42,8 @@
                 </li>
             @endauth
         </ul>
+
+        <currency-converter></currency-converter>
     </aside>
 </main>
 

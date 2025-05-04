@@ -14,6 +14,7 @@ import {
 import ArmorsIndex from "./vue/views/armors/ArmorsIndex.vue";
 import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
+import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
 
 const vuetify = createVuetify({
     components: {
@@ -53,5 +54,6 @@ app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
 app.component('skills-index', SkillsIndex);
 app.component('talents-index', TalentsIndex);
+app.component('currency-converter', CurrencyConverter);
 
 app.mount('#app');
