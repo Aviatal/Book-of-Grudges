@@ -56,7 +56,7 @@ export default {
             } else if (this.selectedCurrency === 'Srebrne Szylingi') {
                 goldCrowns =this.roundTo2Decimals(parseFloat(this.valueToConvert / 20));
                 silverShillings = this.valueToConvert
-                pennies = this.roundTo2Decimals(parseFloat(this.valueToConvert * 240))
+                pennies = this.roundTo2Decimals(parseFloat(this.valueToConvert * 12))
             } else if (this.selectedCurrency === 'Miedziane pensy') {
                 goldCrowns = this.roundTo2Decimals(parseFloat(this.valueToConvert / 240));
                 silverShillings = this.roundTo2Decimals(parseFloat(this.valueToConvert / 12));
