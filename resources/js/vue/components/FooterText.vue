@@ -17,7 +17,7 @@ export default {
         this.getText();
         setInterval(() => {
             this.getText();
-        },  30 * 1000)
+        },  15 * 1000)
     },
     methods: {
         getText() {
