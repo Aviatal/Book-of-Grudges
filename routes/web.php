@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
+use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SkillsAndTalentsController;
 use App\Http\Controllers\WeaponsController;
@@ -25,6 +26,8 @@ Route::group(['prefix' => 'zdolnosci'], function () {
     Route::get('/', [SkillsAndTalentsController::class, 'talentsIndex'])->name('skills-and-talents.talents-index');
     Route::get('/get-talents', [SkillsAndTalentsController::class, 'getTalents'])->name('skills-and-talents.get-talents');
 });
+
+Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
 
 Route::middleware('auth')->group(function (){
     Route::get('/', function () {

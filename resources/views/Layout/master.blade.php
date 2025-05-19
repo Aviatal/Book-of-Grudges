@@ -14,41 +14,43 @@
     @endif
 </head>
 <body class="bg-[#2b2a27] text-[#e4d8b4] font-serif flex flex-col min-h-screen">
-<header class="bg-[#3b3a36] py-6 shadow-lg border-b-4 border-[#8b5a2b] text-center">
-    <h1 class="text-4xl font-bold text-[#d4af37] tracking-wide">Book of Grudges</h1>
-</header>
+<div id="app">
+    <header class="bg-[#3b3a36] py-6 shadow-lg border-b-4 border-[#8b5a2b] text-center">
+        <h1 class="text-4xl font-bold text-[#d4af37] tracking-wide">Book of Grudges</h1>
+    </header>
 
-<main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6"  id="app">
-    <section class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b] col-span-2">
-        @yield('content')
-    </section>
+    <main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b] col-span-2">
+            @yield('content')
+        </section>
 
-    <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
-        <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
-        <ul class="space-y-2">
-            @auth
-                <li><a href="{{ route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
-            @endauth
-            <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
-            <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
-            <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
-            <li><a href="{{ route('skills-and-talents.talents-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
-            @auth
-                <li>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
-                    </form>
-                </li>
-            @endauth
-        </ul>
+        <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
+            <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
+            <ul class="space-y-2">
+                @auth
+                    <li><a href="{{ route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
+                @endauth
+                <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
+                <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
+                <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
+                <li><a href="{{ route('skills-and-talents.talents-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
+                @auth
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
+                        </form>
+                    </li>
+                @endauth
+            </ul>
 
-        <currency-converter></currency-converter>
-    </aside>
-</main>
+            <currency-converter></currency-converter>
+        </aside>
+    </main>
 
-<footer class="text-center py-4 mt-6 text-[#c4a47c] border-t border-[#8b5a2b]">
-    Wszystko poszłoby zgodnie z planem, gdyby nie te kilka kropel deszczu...
-</footer>
+    <footer class="text-center py-4 mt-6 text-[#c4a47c] border-t border-[#8b5a2b]">
+        <footer-text></footer-text>
+    </footer>
+</div>
 </body>
 </html>
