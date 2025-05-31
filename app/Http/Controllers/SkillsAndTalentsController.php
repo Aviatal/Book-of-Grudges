@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Skill;
 use App\Models\Talent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,15 +20,23 @@ class SkillsAndTalentsController extends Controller
         return view('Pages.talents');
     }
 
-    public function getSkills()
+    public function getSkills(Request $request): \Illuminate\Http\JsonResponse
     {
-        $skills = Skill::all();
+        $skills = Skill::query()
+            ->when($request->query('search'), function (Builder $query) use ($request) {
+                $query->where('name', 'like', '%' . $request->query('search') . '%');
+            })
+            ->get();
         return response()->json($skills);
     }
 
-    public function getTalents(Request $request)
+    public function getTalents(Request $request): \Illuminate\Http\JsonResponse
     {
-        $talents = Talent::orderBy('name');
+        $talents = Talent::query()
+            ->when($request->query('search'), function (Builder $query) use ($request) {
+                $query->where('name', 'like', '%' . $request->query('search') . '%');
+            })
+            ->orderBy('name');
         if ($request->has('withoutOwned')) {
             $heroTalents = DB::table('hero_talent')
                 ->select('talent_id')
