@@ -81,7 +81,7 @@ class CharactersController extends Controller
             ]);
             $changeCurrentWounds = 0;
             if (
-                $characteristic['short_name'] == 'Zyw' &&
+                $characteristic['short_name'] === 'Zyw' &&
                 $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value == $hero->current_wounds
             ) {
                 $hero->update(['current_wounds' => $characteristic['pivot']['current_value']]);
@@ -245,6 +245,16 @@ class CharactersController extends Controller
             'loading' => $request->get('loading'),
             'description' => $request->get('description')
         ]));
+    }
+
+    public function editItem(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
+    {
+        $item = $request->get('item');
+        HeroInventory::query()->where('hero_id', $hero->id)->where('id', $item['id'])->update([
+            'name' => $item['name'],
+            'description' => $item['description'],
+        ]);
+        return response()->json(['message' => 'Pomyślnie edytowano przedmiot']);
     }
 
     public function dropInventoryItem(Request $request, Hero $hero)

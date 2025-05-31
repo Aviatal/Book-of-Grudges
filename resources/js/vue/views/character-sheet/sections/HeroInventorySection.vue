@@ -34,11 +34,26 @@
                     hide-default-footer
                     no-data-text="Nie posiadasz żadnych przedmiotów"
                 >
+                    <template v-slot:item.name="{ item, index }">
+                        <v-text-field
+                            v-model="item.name"
+                            @change="editItem(item)"
+                        ></v-text-field>
+                    </template>
+
+                    <template v-slot:item.description="{ item }">
+                        <v-text-field
+                            v-model="item.description"
+                            @change="editItem(item)"
+                        ></v-text-field>
+                    </template>
                     <template v-slot:item.delete="{ item, index }">
-                        <button @click="removeItem(item, index)"
-                                class="mt-4 self-end px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors">
-                            Usuń
-                        </button>
+                        <div class="flex items-center justify-center h-full w-full">
+                            <button @click="removeItem(item, index)"
+                                    class="px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors">
+                                Usuń
+                            </button>
+                        </div>
                     </template>
                 </v-data-table>
             </div>
@@ -90,6 +105,20 @@ export default {
                     this.$toast.error('Wystąpił błąd podczas usuwania przedmiotu')
                 })
         },
+        editItem(item) {
+            if (item.name === '') {
+                this.$toast.error('Nazwa przedmiotu nie może być pusta')
+                return;
+            }
+            axios.post('karta-postaci/' + this.heroData.id + '/edit-inventory-item', {item: item})
+                .then(response => {
+                    this.$toast.success(response.data.message)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.$toast.error('Wystąpił błąd podczas usuwania przedmiotu')
+                })
+        }
     }
 };
 </script>
