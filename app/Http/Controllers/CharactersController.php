@@ -44,7 +44,7 @@ class CharactersController extends Controller
                 throw new \Exception('Nie przesłano wymaganych danych');
             }
             $hero->update([$request->get('field') => $request->get('value')]);
-            return response()->json(['message' => 'Pomyślnie zaktualizowano bohatera']);
+            return response()->json(['message' => 'Pomyślnie zaktualizowano bohatera', 'characteristic' => $hero->load('characteristic')->getRelation('characteristic')]);
         } catch (\Throwable $exception) {
             return response()->json(['message' => $exception->getMessage()]);
         }

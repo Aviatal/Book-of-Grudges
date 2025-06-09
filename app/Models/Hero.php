@@ -47,7 +47,12 @@ class Hero extends Model
             'id',
             'id',
             'characteristic'
-        )->withPivot('start_value', 'advancement', 'current_value');
+        )
+            ->withPivot('start_value', 'advancement', 'profession_characteristics.available_advancement as available_advancement')
+            ->leftJoin('profession_characteristics', function ($join) {
+                $join->on('hero_characteristics.characteristic_id', '=', 'profession_characteristics.characteristic_id')
+                    ->whereRaw('profession_characteristics.profession_id = (SELECT current_profession_id FROM heroes WHERE heroes.id = hero_characteristics.hero_id)');
+            });
     }
 
     public function inventory(): HasMany

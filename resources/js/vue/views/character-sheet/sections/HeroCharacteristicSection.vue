@@ -36,81 +36,81 @@
                 <tbody>
                 <tr>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['WW'].pivot.start_value }}
+                        {{ characteristic['WW']?.pivot.start_value }}
 
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['US'].pivot.start_value }}
+                        {{ characteristic['US']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['K'].pivot.start_value }}
+                        {{ characteristic['K']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Odp'].pivot.start_value }}
+                        {{ characteristic['Odp']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zr'].pivot.start_value }}
+                        {{ characteristic['Zr']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['SW'].pivot.start_value }}
+                        {{ characteristic['SW']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Int'].pivot.start_value }}
+                        {{ characteristic['Int']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Ogd'].pivot.start_value }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['WW'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['US'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['K'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Odp'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zr'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['SW'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Int'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Ogd'].pivot.advancement }}
+                        {{ characteristic['Ogd']?.pivot.start_value }}
                     </td>
                 </tr>
                 <tr>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['WW'].pivot.current_value }}
+                        {{ characteristic['WW']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['US'].pivot.current_value }}
+                        {{ characteristic['US']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['K'].pivot.current_value }}
+                        {{ characteristic['K']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Odp'].pivot.current_value }}
+                        {{ characteristic['Odp']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zr'].pivot.current_value }}
+                        {{ characteristic['Zr']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Int'].pivot.current_value }}
+                        {{ characteristic['SW']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['SW'].pivot.current_value }}
+                        {{ characteristic['Int']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Ogd'].pivot.current_value }}
+                        {{ characteristic['Ogd']?.available_advancement ?? '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['WW']?.pivot.start_value + characteristic['WW']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['US']?.pivot.start_value + characteristic['US']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['K']?.pivot.start_value + characteristic['K']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Odp']?.pivot.start_value + characteristic['Odp']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Zr']?.pivot.start_value + characteristic['Zr']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Int']?.pivot.start_value + characteristic['Int']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['SW']?.pivot.start_value + characteristic['SW']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Ogd']?.pivot.start_value + characteristic['Ogd']?.pivot.advancement }}
                     </td>
                 </tr>
                 </tbody>
@@ -132,80 +132,80 @@
                 <tbody>
                 <tr>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['A'].pivot.start_value }}
+                        {{ characteristic['A']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zyw'].pivot.start_value }}
+                        {{ characteristic['Zyw']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['S'].pivot.start_value }}
+                        {{ characteristic['S']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Wt'].pivot.start_value }}
+                        {{ characteristic['Wt']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Sz'].pivot.start_value }}
+                        {{ characteristic['Sz']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Mag'].pivot.start_value }}
+                        {{ characteristic['Mag']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PO'].pivot.start_value }}
+                        {{ characteristic['PO']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PP'].pivot.start_value }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['A'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zyw'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['S'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Wt'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Sz'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Mag'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PO'].pivot.advancement }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PP'].pivot.advancement }}
+                        {{ characteristic['PP']?.pivot.start_value }}
                     </td>
                 </tr>
                 <tr>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['A'].pivot.current_value }}
+                        {{ characteristic['A']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zyw'].pivot.current_value }}
+                        {{ characteristic['Zyw']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['S'].pivot.current_value }}
+                        {{ characteristic['S']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Wt'].pivot.current_value }}
+                        {{ characteristic['Wt']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Sz'].pivot.current_value }}
+                        {{ characteristic['Sz']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Mag'].pivot.current_value }}
+                        {{ characteristic['Mag']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PO'].pivot.current_value }}
+                        {{ characteristic['PO']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PP'].pivot.current_value }}
+                        {{ characteristic['PP']?.available_advancement ?? '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['A']?.pivot.start_value + characteristic['A']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Zyw']?.pivot.start_value + characteristic['Zyw']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['S']?.pivot.start_value + characteristic['S']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Wt']?.pivot.start_value + characteristic['Wt']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Sz']?.pivot.start_value + characteristic['Sz']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['Mag']?.pivot.start_value + characteristic['Mag']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['PO']?.pivot.start_value + characteristic['PO']?.pivot.advancement }}
+                    </td>
+                    <td class="border border-[#8b5a2b]">
+                        {{ characteristic['PP']?.pivot.start_value + characteristic['PP']?.pivot.advancement }}
                     </td>
                 </tr>
                 </tbody>

@@ -189,6 +189,9 @@ export default {
             })
                 .then((response) => {
                     this.$toast.success(response.data.message)
+                    if (field === 'current_profession_id') {
+                        this.$emit('update-characteristics', response.data.characteristic)
+                    }
                 })
                 .catch((error) => {
                     this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)

@@ -3,6 +3,7 @@
         <template v-if="!isLoading">
             <hero-section
                 :hero-data="hero"
+                @update-characteristics="refreshCharacteristic"
             ></hero-section>
             <hero-description-section
                 :description-data="hero.description"
@@ -98,6 +99,9 @@ export default {
                 hero.current_wounds = changeCurrentWounds
             }
         }
+        const refreshCharacteristic = (characteristics) => {
+            hero.characteristic = {...characteristics};
+        }
 
         const addWeaponToInventory = (weapon) => {
             hero.inventory.push(weapon)
@@ -108,7 +112,7 @@ export default {
 
         return {
             hero, isLoading,
-            getHero, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory
+            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory
         }
     },
     created() {
