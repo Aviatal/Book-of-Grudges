@@ -93,8 +93,9 @@ export default {
                 })
         }
 
-        const handleAddCharacteristic = (characteristicName, characteristic, changeCurrentWounds) => {
+        const handleAddCharacteristic = (characteristicName, characteristic, changeCurrentWounds, spentExperience) => {
             hero.characteristic[characteristicName].pivot = characteristic
+            hero.current_experience -= spentExperience;
             if (changeCurrentWounds > 0) {
                 hero.current_wounds = changeCurrentWounds
             }

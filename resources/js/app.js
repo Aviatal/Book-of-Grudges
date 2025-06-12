@@ -16,6 +16,7 @@ import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
 import FooterText from "./vue/components/FooterText.vue";
+import Swal from 'sweetalert2'
 
 const vuetify = createVuetify({
     components: {
@@ -27,6 +28,14 @@ const vuetify = createVuetify({
 window.axios.defaults.baseURL = document.head
     .querySelector('meta[name="base-url"]')
     .content;
+
+const customSwal = Swal.mixin({
+    background: "#181818",
+    color: "#d4af37",
+    confirmButtonColor: "#FFA500",
+    denyButtonColor: "#444",
+});
+window.customSwal = customSwal;
 
 const app = createApp({})
     .use(vuetify)

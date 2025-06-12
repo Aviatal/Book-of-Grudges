@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Armor;
+use App\Models\Characteristic;
 use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
@@ -72,17 +73,29 @@ class CharactersController extends Controller
                 throw new \Exception('Nie przesłano wymaganych pól');
             }
             $characteristic = $request->get("characteristic");
+            $developedValue = $characteristic['type'] === 'MAIN' ? 5 : 1;
+            $expNeeded = 0;
+            if (!in_array($characteristic['short_name'], Characteristic::DEVELOPED_WITHOUT_EXPERIENCE, true)) {
+                $availableAdvancement = $characteristic['available_advancement'] ?? 0;
+                $currentValue = $characteristic['pivot']['start_value'] + $characteristic['pivot']['advancement'];
+                $expNeeded = ($currentValue + $developedValue > $characteristic['pivot']['start_value'] + $availableAdvancement) ?
+                    Characteristic::DEVELOP_EXP_NEEDED['OUTSIDE_SCHEMA']
+                    : Characteristic::DEVELOP_EXP_NEEDED['BASIC'];
+                if ($hero->current_experience < $expNeeded) {
+                    throw new \Exception('Nie masz wymaganej liczby punktktów doświadczenia. Brakuje Ci ' . $expNeeded - $hero->current_experience . 'PD');
+                }
+                $hero->update(['current_experience' => $hero->current_experience - $expNeeded]);
+            }
             $hero->characteristic()->syncWithoutDetaching([
                 $characteristic['id'] => [
                     'start_value' => $characteristic['pivot']['start_value'],
-                    'advancement' => $characteristic['pivot']['advancement'],
-                    'current_value' => $characteristic['pivot']['current_value']
+                    'advancement' => $characteristic['pivot']['advancement'] + $developedValue
                 ]
             ]);
             $changeCurrentWounds = 0;
             if (
                 $characteristic['short_name'] === 'Zyw' &&
-                $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value == $hero->current_wounds
+                $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value === $hero->current_wounds
             ) {
                 $hero->update(['current_wounds' => $characteristic['pivot']['current_value']]);
                 $changeCurrentWounds = $characteristic['pivot']['current_value'];
@@ -95,10 +108,10 @@ class CharactersController extends Controller
                 \Log::error('FATAL ERROR DURING ROLLBACK CHANGE ' . $e->getMessage());
                 return response()->json(['message' => $exception->getMessage()]);
             }
-            return response()->json(['message' => $exception->getMessage()]);
+            return response()->json(['message' => $exception->getMessage()], 500);
         }
 
-        return response()->json(['message' => 'Udało się zakutalizować cechę bohatera', 'changeCurrentWounds' => $changeCurrentWounds]);
+        return response()->json(['message' => 'Udało się zakutalizować cechę bohatera', 'changeCurrentWounds' => $changeCurrentWounds, 'spentExperience' => $expNeeded, 'developedValue' => $developedValue]);
     }
 
     public function addWeapon(Request $request, Hero $hero)
