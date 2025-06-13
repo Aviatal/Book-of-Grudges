@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('characteristics', static function (Blueprint $table) {
-            $table->enum('type', ['MAIN', 'SECONDARY']);
+            $table->enum('type', ['MAIN', 'SECONDARY'])->default('MAIN');
         });
-        \App\Models\Characteristic::whereIn('short_name', ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd'])->update(['type' => 'MAIN']);
         \App\Models\Characteristic::whereIn('short_name', ['A', 'Zyw', 'S', 'Wt', 'Sz', 'Mag', 'PO', 'PP'])->update(['type' => 'SECONDARY']);
     }
 
