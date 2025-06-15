@@ -16,6 +16,7 @@ import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
 import FooterText from "./vue/components/FooterText.vue";
+import ExperienceManagement from "./vue/views/panel/experience/ExperienceManagement.vue";
 import Swal from 'sweetalert2'
 
 const vuetify = createVuetify({
@@ -59,6 +60,7 @@ app.config.globalProperties.$calculatePrice = (price) => {
 
 app.component('v-select', VueSelect);
 
+//FRONT
 app.component('character-sheet', CharacterSheet);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
@@ -66,5 +68,8 @@ app.component('skills-index', SkillsIndex);
 app.component('talents-index', TalentsIndex);
 app.component('currency-converter', CurrencyConverter);
 app.component('footer-text', FooterText);
+
+//PANEL
+app.component('experience-management', ExperienceManagement)
 
 app.mount('#app');

@@ -115,3 +115,15 @@
 .v-autocomplete :deep(.v-label.v-label--active) {
     color: #d4b38a;
 }
+
+.simple-button {
+    background-color: #d4af37;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}

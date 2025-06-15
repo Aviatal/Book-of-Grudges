@@ -113,9 +113,9 @@
                                     {{ Math.floor(characteristic[item.characteristic].pivot.current_value / 2) }}
                                 </template>
                                 <template v-slot:item.add="{ item }">
-                                    <v-btn @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="hurdle-button">
+                                    <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="simple-button">
                                         Wykup
-                                    </v-btn>
+                                    </button>
                                 </template>
                             </v-data-table>
                         </div>
@@ -258,23 +258,7 @@ export default {
     color: #f5e0b7 !important;
 }
 
-.hurdle-button {
-    background-color: #d4af37;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
 
-.hurdle-button:hover {
-    background-color: #b99932;
-}
 
-.hurdle-button:active {
-    background-color: #8d7525;
-}
+
 </style>

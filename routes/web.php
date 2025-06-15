@@ -3,9 +3,11 @@
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\HomepageController;
+use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SkillsAndTalentsController;
 use App\Http\Controllers\WeaponsController;
+use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 Auth::routes();
 
@@ -32,7 +34,7 @@ Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->na
 Route::middleware('auth')->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
-    });
+    })->name('home');
     Route::group(['prefix' => 'karta-postaci'], function () {
         Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
         Route::get('/{id}/get-hero', [CharactersController::class, 'getHero'])->name('character-sheet.get-hero');
@@ -66,5 +68,12 @@ Route::middleware('auth')->group(function (){
         ini_set('max_execution_time', 5000);
         \Artisan::call('migrate:fresh', ['--seed' => true]);
         dd("Migracje zostały wykonane");
+    });
+});
+
+Route::middleware(Admin::class)->prefix('/panel')->group(function (){
+    Route::prefix('experience')->group(function () {
+        Route::get('/show-experience-form', [ExperienceController::class, 'showExperiencesForm'])->name('panel.experience.show-experiences-form');
+        Route::post('/save-experience', [ExperienceController::class, 'saveExperience'])->name('panel.experience.save-experience');
     });
 });
