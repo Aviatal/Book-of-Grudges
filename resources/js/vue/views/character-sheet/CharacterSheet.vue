@@ -60,6 +60,7 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
+import ExperienceWatcher from "../../components/ExperienceWatcher.vue";
 import {reactive, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 
@@ -69,7 +70,8 @@ export default {
         HeroInventorySection,
         HeroTalentsSection,
         HeroSkillsSection,
-        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection
+        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection,
+        ExperienceWatcher,
     },
     props: {
         userId: {

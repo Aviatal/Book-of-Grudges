@@ -31,11 +31,12 @@ Route::group(['prefix' => 'zdolnosci'], function () {
 
 Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
 
+Route::get('/api/experience-watch', [ExperienceController::class, 'experienceWatch']);
+
 Route::middleware('auth')->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     })->name('home');
-    Route::get('/api/experience-watch', [ExperienceController::class, 'experienceWatch']);
 
     Route::group(['prefix' => 'karta-postaci'], function () {
         Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
