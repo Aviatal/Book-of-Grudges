@@ -140,6 +140,7 @@
                         label="Obecne PD"
                         class="custom-input w-full"
                         variant="filled"
+                        disabled
                         @change="updateHero('current_experience')"
                     ></v-text-field>
                 </v-col>
@@ -150,6 +151,7 @@
                         label="Wszystkie PD"
                         class="custom-input w-full"
                         variant="filled"
+                        disabled
                         @change="updateHero('all_experience')"
                     ></v-text-field>
                 </v-col>
