@@ -1,3 +1,6 @@
+<template>
+    <audio ref="notificationAlertSound"><source src="/public/sounds/notification_alert.mp3"></audio>
+</template>
 <script>
 export default {
     name: 'ExperienceWatcher',
@@ -13,6 +16,7 @@ export default {
 
             eventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);
+                this.$refs.notificationAlertSound.play();
                 this.$emit('experience-changed', data.amount);
                 customSwal.fire({
                     title: `Otrzymałeś ${data.amount} punktów doświadczenia!`,
