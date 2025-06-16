@@ -27,21 +27,73 @@
         <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
             <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
             <ul class="space-y-2">
-                @auth
-                    <li><a href="{{ route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]) }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Karta postaci</a></li>
-                @endauth
-                <li><a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a></li>
-                <li><a href="{{ route('armors.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Opancerzenie</a></li>
-                <li><a href="{{ route('skills-and-talents.skills-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Umiejętności</a></li>
-                <li><a href="{{ route('skills-and-talents.talents-index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Zdolności</a></li>
-                @auth
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
-                        </form>
+                {{--PANEL MENU--}}
+                @if(Auth::user() && Auth::user()->getAttribute('is_admin') && str_contains(url()->current(), 'panel'))
+                    <li><a href="{{ route('panel.experience.show-experiences-form') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Rozdanie PD
+                        </a>
                     </li>
-                @endauth
+                    <li>
+                        <a href="{{ route('home') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">
+                            Front
+                        </a>
+                    </li>
+
+                {{--FRONT MENU--}}
+                @else
+                    @auth
+                        <li>
+                            <a href="{{ route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]) }}"
+                               class="text-[#e4d8b4] hover:text-[#d4af37]"
+                            >
+                                Karta postaci
+                            </a>
+                        </li>
+                    @endauth
+                    <li>
+                        <a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('armors.index') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Opancerzenie
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('skills-and-talents.skills-index') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Umiejętności
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('skills-and-talents.talents-index') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Zdolności
+                        </a>
+                    </li>
+                    @if(Auth::user() && Auth::user()->getAttribute('is_admin') && !str_contains(url()->current(), 'panel'))
+                        <li>
+                            <a href="{{ route('panel.experience.show-experiences-form') }}"
+                               class="text-[#e4d8b4] hover:text-[#d4af37]"
+                            >
+                                Panel
+                            </a>
+                        </li>
+                    @endif
+                    @auth
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
+                            </form>
+                        </li>
+                    @endauth
+                @endif
             </ul>
 
             <currency-converter></currency-converter>

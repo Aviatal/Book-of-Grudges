@@ -38,6 +38,9 @@
                 :hero-data="hero"
                 v-on:get-hero="getHero"
             ></hero-inventory-section>
+            <experience-watcher
+                @experience-changed="handleAddExperience"
+            ></experience-watcher>
         </template>
         <template v-else>
             <div class="text-center py-8">
@@ -57,6 +60,7 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
+import ExperienceWatcher from "../../components/ExperienceWatcher.vue";
 import {reactive, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 
@@ -66,7 +70,8 @@ export default {
         HeroInventorySection,
         HeroTalentsSection,
         HeroSkillsSection,
-        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection
+        HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection,
+        ExperienceWatcher,
     },
     props: {
         userId: {
@@ -111,9 +116,14 @@ export default {
             hero.inventory.push(armor)
         }
 
+        const handleAddExperience = (experience) => {
+            hero.current_experience += experience;
+            hero.all_experience += experience;
+        }
+
         return {
             hero, isLoading,
-            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory
+            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory, handleAddExperience
         }
     },
     created() {
