@@ -8,6 +8,6 @@ class HomepageController extends Controller
 {
     public function getFooterText(): \Illuminate\Http\JsonResponse
     {
-        return response()->json(FooterText::query()->inRandomOrder()->first()->text);
+        return response()->json(FooterText::query()->inRandomOrder()->get()->pluck('text')->toArray());
     }
 }

@@ -10,24 +10,35 @@ export default {
     name: 'FooterText',
     data() {
         return {
+            currentIndex: 0,
+            footerTexts: [],
             text: ''
         }
     },
     created() {
-        this.getText();
+        this.getTexts();
         setInterval(() => {
-            this.getText();
-        },  15 * 1000)
+            this.changeText();
+        },  5 * 1000)
     },
     methods: {
-        getText() {
+        getTexts() {
             axios.get('get-footer-text')
                 .then((response) => {
-                    this.text = response.data;
+                    this.footerTexts = response.data;
+                    this.text = this.footerTexts[0];
                 })
                 .catch((error) => {
                     console.log(error);
                 })
+        },
+        changeText() {
+            if (this.currentIndex === (this.footerTexts.length - 1)) {
+                this.currentIndex = 0;
+            } else {
+                this.currentIndex++;
+            }
+            this.text = this.footerTexts[this.currentIndex];
         }
     }
 }
