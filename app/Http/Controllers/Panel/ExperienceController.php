@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Models\ExpUpdate;
 use App\Models\Hero;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -21,28 +22,62 @@ class ExperienceController extends Controller
 
     public function saveExperience(Request $request)
     {
-        $activeUsers = Hero::select('id', 'user_id', 'name', 'current_experience', 'all_experience')
-            ->get()
-            ->keyBy('id')
-            ->toArray();
         $commonExp = $request->get('commonExperience', 0);
-        $upsertData = [];
+        $insertData = [];
 
         foreach ($request->get('heroesExperience') as $heroId => $experience) {
-            $upsertData[] = [
-                'id' => $heroId,
-                'user_id' => $activeUsers[$heroId]['user_id'],
-                'name' => $activeUsers[$heroId]['name'],
-                'current_experience' => $activeUsers[$heroId]['current_experience'] + $commonExp + $experience,
-                'all_experience' => $activeUsers[$heroId]['all_experience'] + $commonExp + $experience,
+            $insertData[] = [
+                'hero_id' => $heroId,
+                'read' => 1,
+                'exp_amount' => $commonExp + $experience,
+                'additional_note' => '',
+                'created_at' => now(),
+                'updated_at' => now()
             ];
+        }
+        foreach ($request->get('heroesNotes') as $heroId => $note) {
+            $insertData[$heroId]['additional_note'] = $note;
         }
 
         try {
-            Hero::upsert($upsertData, ['id'], ['current_experience', 'all_experience']);
+            ExpUpdate::create($insertData);
         } catch (\Throwable $exception) {
             \Log::error('Error during updating experience. Transaction rolled back.');
             \Log::error($exception);
         }
+    }
+
+    public function experienceWatch(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        return response()->stream(function () use ($request) {
+            $user = $request->user();
+
+            while (true) {
+                $xpUpdate = ExpUpdate::where('hero_id', $user->hero->id)
+                    ->where('read', false)
+                    ->latest()
+                    ->first();
+
+                if ($xpUpdate) {
+                    echo "data: " . json_encode([
+                            'amount' => $xpUpdate->exp_amount,
+                            'message' => $xpUpdate->additional_note ?? 'Dobra gra!',
+                        ], JSON_THROW_ON_ERROR) . "\n\n";
+                    $user->hero->update(['current_experience' => $user->hero->current_experience + $xpUpdate->exp_amount]);
+                    $xpUpdate->read = true;
+                    $xpUpdate->save();
+
+                    ob_flush();
+                    flush();
+                }
+
+                sleep(1);
+            }
+
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no'
+        ]);
     }
 }

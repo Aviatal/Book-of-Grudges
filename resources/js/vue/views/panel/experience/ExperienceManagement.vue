@@ -29,6 +29,7 @@
                             <th class="p-2">Użytkownik</th>
                             <th class="p-2">Bohater</th>
                             <th class="p-2">Liczba PD</th>
+                            <th class="p-2">Notatka</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,6 +39,11 @@
                             <td class="p-2">
                                 <v-text-field
                                     v-model="heroesExp[user.hero.id]"
+                                ></v-text-field>
+                            </td>
+                            <td class="p-2">
+                                <v-text-field
+                                    v-model="heroesNotes[user.hero.id]"
                                 ></v-text-field>
                             </td>
                         </tr>
@@ -63,6 +69,7 @@ export default {
             newExp: '',
             addedExp: [],
             heroesExp: {},
+            heroesNotes: {},
         }
     },
     computed: {
@@ -84,7 +91,7 @@ export default {
             this.newExp = '';
         },
         saveExperience() {
-            axios.post('panel/experience/save-experience', {commonExperience: this.totalCommonExp, heroesExperience: this.heroesExp})
+            axios.post('panel/experience/save-experience', {commonExperience: this.totalCommonExp, heroesExperience: this.heroesExp, heroesNotes: this.heroesNotes})
                 .then(() => {
                     this.$toast.success('Dodano punkty doświadczenia bohaterom')
                     this.step = 1;

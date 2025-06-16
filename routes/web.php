@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     })->name('home');
+    Route::get('/api/experience-watch', [ExperienceController::class, 'experienceWatch']);
+
     Route::group(['prefix' => 'karta-postaci'], function () {
         Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
         Route::get('/{id}/get-hero', [CharactersController::class, 'getHero'])->name('character-sheet.get-hero');
@@ -71,6 +73,7 @@ Route::middleware('auth')->group(function (){
     });
 });
 
+//PANEL
 Route::middleware(Admin::class)->prefix('/panel')->group(function (){
     Route::prefix('experience')->group(function () {
         Route::get('/show-experience-form', [ExperienceController::class, 'showExperiencesForm'])->name('panel.experience.show-experiences-form');

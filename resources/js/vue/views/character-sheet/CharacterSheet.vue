@@ -38,6 +38,9 @@
                 :hero-data="hero"
                 v-on:get-hero="getHero"
             ></hero-inventory-section>
+            <experience-watcher
+                @experience-changed="handleAddExperience"
+            ></experience-watcher>
         </template>
         <template v-else>
             <div class="text-center py-8">
@@ -111,9 +114,14 @@ export default {
             hero.inventory.push(armor)
         }
 
+        const handleAddExperience = (experience) => {
+            hero.current_experience += experience;
+            hero.all_experience += experience;
+        }
+
         return {
             hero, isLoading,
-            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory
+            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory, handleAddExperience
         }
     },
     created() {
