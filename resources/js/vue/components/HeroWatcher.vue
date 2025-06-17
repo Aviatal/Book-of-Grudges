@@ -1,5 +1,6 @@
 <template>
     <audio ref="experienceNotificationSound"><source src="/public/sounds/notification_alert.mp3"></audio>
+    <audio ref="fortunePointsNotificationSound"><source src="/public/sounds/fp-added-notification.mp3"></audio>
 </template>
 <script>
 export default {
@@ -26,7 +27,7 @@ export default {
                         width: '30%'
                     })
                 } else if (data.type === 'FORTUNE_POINTS') {
-                    this.$refs.experienceNotificationSound.play();
+                    this.$refs.fortunePointsNotificationSound.play();
                     this.$emit('fortune-points-changed');
                     customSwal.fire({
                         title: `Gratulacje!`,
