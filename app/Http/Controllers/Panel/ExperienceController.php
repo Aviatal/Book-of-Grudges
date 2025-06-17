@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
-use App\Models\ExpUpdate;
+use App\Models\HeroUpdate;
 use App\Models\Hero;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,8 +28,9 @@ class ExperienceController extends Controller
         foreach ($request->get('heroesExperience') as $heroId => $experience) {
             $insertData[] = [
                 'hero_id' => $heroId,
-                'read' => 1,
-                'exp_amount' => $commonExp + $experience,
+                'type' => HeroUpdate::TYPES['EXP'],
+                'read' => 0,
+                'added_amount' => $commonExp + $experience,
                 'additional_note' => '',
                 'created_at' => now(),
                 'updated_at' => now()
@@ -40,44 +41,10 @@ class ExperienceController extends Controller
         }
 
         try {
-            ExpUpdate::create($insertData);
+            HeroUpdate::query()->create($insertData);
         } catch (\Throwable $exception) {
             \Log::error('Error during updating experience. Transaction rolled back.');
             \Log::error($exception);
         }
-    }
-
-    public function experienceWatch(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
-    {
-        return response()->stream(function () use ($request) {
-            $user = $request->user();
-
-            while (true) {
-                $xpUpdate = ExpUpdate::where('hero_id', $user->hero->id)
-                    ->where('read', false)
-                    ->latest()
-                    ->first();
-
-                if ($xpUpdate) {
-                    echo "data: " . json_encode([
-                            'amount' => $xpUpdate->exp_amount,
-                            'message' => $xpUpdate->additional_note ?? 'Dobra gra!',
-                        ], JSON_THROW_ON_ERROR) . "\n\n";
-                    $user->hero->update(['current_experience' => $user->hero->current_experience + $xpUpdate->exp_amount]);
-                    $xpUpdate->read = true;
-                    $xpUpdate->save();
-
-                    ob_flush();
-                    flush();
-                }
-
-                sleep(1);
-            }
-
-        }, 200, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
-            'X-Accel-Buffering' => 'no'
-        ]);
     }
 }

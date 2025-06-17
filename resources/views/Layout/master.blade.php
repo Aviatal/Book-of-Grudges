@@ -29,10 +29,18 @@
             <ul class="space-y-2">
                 {{--PANEL MENU--}}
                 @if(Auth::user() && Auth::user()->getAttribute('is_admin') && str_contains(url()->current(), 'panel'))
-                    <li><a href="{{ route('panel.experience.show-experiences-form') }}"
+                    <li>
+                        <a href="{{ route('panel.experience.show-experiences-form') }}"
                            class="text-[#e4d8b4] hover:text-[#d4af37]"
                         >
                             Rozdanie PD
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('panel.fortune-points.show-fp-management-form') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Punkty szczęścia
                         </a>
                     </li>
                     <li>

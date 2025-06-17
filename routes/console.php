@@ -3,6 +3,11 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::call(static function () {
+    Log::info('Updating fortune points');;
+    $heroes = \App\Models\Hero::query()->with('characteristics')->get();
+    foreach ($heroes as $hero)
+    {
+        $hero->update(['fortune_points' => $hero->characteristics['PP']->start_value]);
+    }
+})->dailyAt('22:15');

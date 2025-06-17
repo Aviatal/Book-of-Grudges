@@ -5,9 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ExpUpdate extends Model
+class HeroUpdate extends Model
 {
-    protected $table = 'exp_update';
+    protected $table = 'hero_update';
+    protected $guarded = ['id'];
+    public const array TYPES = [
+        'EXP' => 'EXPERIENCE',
+        'FP' => 'FORTUNE_POINTS'
+    ];
 
     public function hero(): BelongsTo
     {

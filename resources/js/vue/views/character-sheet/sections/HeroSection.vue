@@ -196,7 +196,7 @@ export default {
                     }
                 })
                 .catch((error) => {
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
+                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.response.data.message)
                 })
         },
         getProfessions() {

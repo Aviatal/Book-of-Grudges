@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
+use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\ProfessionsController;
@@ -31,7 +32,7 @@ Route::group(['prefix' => 'zdolnosci'], function () {
 
 Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
 
-Route::get('/api/experience-watch', [ExperienceController::class, 'experienceWatch']);
+Route::get('/sse/hero-watcher', [CharactersController::class, 'heroStateWatch']);
 
 Route::middleware('auth')->group(function (){
     Route::get('/', function () {
@@ -75,9 +76,13 @@ Route::middleware('auth')->group(function (){
 });
 
 //PANEL
-Route::middleware(Admin::class)->prefix('/panel')->group(function (){
+Route::middleware(Admin::class)->prefix('panel')->group(function (){
     Route::prefix('experience')->group(function () {
         Route::get('/show-experience-form', [ExperienceController::class, 'showExperiencesForm'])->name('panel.experience.show-experiences-form');
         Route::post('/save-experience', [ExperienceController::class, 'saveExperience'])->name('panel.experience.save-experience');
+    });
+    Route::prefix('fortune-points')->group(function () {
+        Route::get('/show-fp-form', [FortunePointsController::class, 'getFortunePointsManagement'])->name('panel.fortune-points.show-fp-management-form');
+        Route::post('/assign-fortune-point', [FortunePointsController::class, 'assignFortunePoint'])->name('panel.fortune-points.save-experience');
     });
 });

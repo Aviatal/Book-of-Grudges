@@ -17,6 +17,7 @@ import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
 import FooterText from "./vue/components/FooterText.vue";
 import ExperienceManagement from "./vue/views/panel/experience/ExperienceManagement.vue";
+import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
 import Swal from 'sweetalert2'
 
 const vuetify = createVuetify({
@@ -71,5 +72,6 @@ app.component('footer-text', FooterText);
 
 //PANEL
 app.component('experience-management', ExperienceManagement)
+app.component('fortune-points-management', FortunePointsManagement)
 
 app.mount('#app');

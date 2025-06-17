@@ -7,6 +7,7 @@ use App\Models\Characteristic;
 use App\Models\Hero;
 use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
+use App\Models\HeroUpdate;
 use App\Models\Skill;
 use App\Models\Talent;
 use App\Models\Weapon;
@@ -38,16 +39,64 @@ class CharactersController extends Controller
         return view('Pages.character-sheet', compact('id'));
     }
 
-    public function updateHero(Request $request, Hero $hero)
+    public function heroStateWatch(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        ini_set('max_execution_time', 0);
+        return response()->stream(function () use ($request) {
+            $user = $request->user();
+
+            while (true) {
+                $heroUpdate = HeroUpdate::query()
+                    ->where('hero_id', $user->hero->id)
+                    ->where('read', false)
+                    ->latest()
+                    ->first();
+
+                if ($heroUpdate) {
+                    if ($heroUpdate->type === HeroUpdate::TYPES['EXP']) {
+                        echo "data: " . json_encode([
+                                'amount' => $heroUpdate->added_amount,
+                                'type' => $heroUpdate->type,
+                                'message' => $heroUpdate->additional_note ?? 'Dobra gra!',
+                            ], JSON_THROW_ON_ERROR) . "\n\n";
+                        $user->hero->update(['current_experience' => $user->hero->current_experience + $heroUpdate->added_amount]);
+                    } else if ($heroUpdate->type === HeroUpdate::TYPES['FP']) {
+                        echo "data: " . json_encode([
+                                'amount' => $heroUpdate->added_amount,
+                                'type' => $heroUpdate->type,
+                            ], JSON_THROW_ON_ERROR) . "\n\n";
+                        $user->hero->increment('fortune_points', $heroUpdate->added_amount);
+                    }
+                    $heroUpdate->read = true;
+                    $heroUpdate->save();
+
+                    ob_flush();
+                    flush();
+                }
+
+                sleep(1);
+            }
+
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no'
+        ]);
+    }
+
+    public function updateHero(Request $request, Hero $hero): ?\Illuminate\Http\JsonResponse
     {
         try {
             if (!$request->has(['field', 'value'])) {
                 throw new \Exception('Nie przesłano wymaganych danych');
             }
+            if ($request->get('field') === 'fortune_points' && $hero->fortune_points < $request->get('value')) {
+                throw new \Exception('Nie możesz zwiększać ręcznie punktów szczęścia!');
+            }
             $hero->update([$request->get('field') => $request->get('value')]);
             return response()->json(['message' => 'Pomyślnie zaktualizowano bohatera', 'characteristic' => $hero->load('characteristic')->getRelation('characteristic')]);
         } catch (\Throwable $exception) {
-            return response()->json(['message' => $exception->getMessage()]);
+            return response()->json(['message' => $exception->getMessage()], 500);
         }
     }
 

@@ -38,9 +38,10 @@
                 :hero-data="hero"
                 v-on:get-hero="getHero"
             ></hero-inventory-section>
-            <experience-watcher
+            <hero-watcher
                 @experience-changed="handleAddExperience"
-            ></experience-watcher>
+                @fortune-points-changed="handleAddFortunePoints"
+            ></hero-watcher>
         </template>
         <template v-else>
             <div class="text-center py-8">
@@ -60,7 +61,7 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
-import ExperienceWatcher from "../../components/ExperienceWatcher.vue";
+import HeroWatcher from "../../components/HeroWatcher.vue";
 import {reactive, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 
@@ -71,7 +72,7 @@ export default {
         HeroTalentsSection,
         HeroSkillsSection,
         HeroArmorsSection, HeroDescriptionSection, HeroSection, HeroCharacteristicSection, HeroWeaponsSection,
-        ExperienceWatcher,
+        HeroWatcher,
     },
     props: {
         userId: {
@@ -115,15 +116,18 @@ export default {
         const addArmorToInventory = (armor) => {
             hero.inventory.push(armor)
         }
-
         const handleAddExperience = (experience) => {
             hero.current_experience += experience;
             hero.all_experience += experience;
         }
+        const handleAddFortunePoints = () => {
+            hero.current_experience ++;
+        }
 
         return {
             hero, isLoading,
-            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory, handleAddExperience
+            getHero, refreshCharacteristic, handleAddCharacteristic, addWeaponToInventory, addArmorToInventory,
+            handleAddExperience, handleAddFortunePoints
         }
     },
     created() {
