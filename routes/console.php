@@ -10,4 +10,4 @@ Schedule::call(static function () {
     {
         $hero->update(['fortune_points' => $hero->characteristics['PP']->start_value]);
     }
-})->dailyAt('22:15');
+})->dailyAt('22:45');
