@@ -13,7 +13,7 @@ class ExperienceController extends Controller
     public function showExperiencesForm()
     {
         $activeUsers = User::select('id', 'name')
-            ->with('hero:id,user_id,name,current_experience')
+            ->withWhereHas('hero:id,user_id,name,current_experience')
             ->where('is_active', 1)
             ->get();
 
