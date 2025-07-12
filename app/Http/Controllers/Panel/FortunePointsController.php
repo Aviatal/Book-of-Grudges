@@ -13,7 +13,7 @@ class FortunePointsController extends Controller
     public function getFortunePointsManagement()
     {
         $activeUsers = User::select('id', 'name')
-            ->with('hero:id,user_id,name')
+            ->withWhereHas('hero:id,user_id,name')
             ->where('is_active', 1)
             ->get();
 
