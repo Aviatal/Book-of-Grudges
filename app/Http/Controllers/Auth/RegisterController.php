@@ -70,7 +70,15 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        CharactersController::createEmptyCharacter($user->id);
+        \DB::beginTransaction();
+        try {
+            CharactersController::createEmptyCharacter($user->id);
+            \DB::commit();
+        } catch (\Throwable $exception) {
+            \DB::rollBack();
+            \Log::error('Error during creating empty character. Transaction rolled back.');
+            \Log::error($exception);
+        }
 
         return $user;
     }

@@ -346,7 +346,6 @@ class CharactersController extends Controller
         for($i = 1; $i <= 16; $i++) {
             $hero->characteristic()->attach($i, [
                 'start_value' => 0,
-                'current_value' => 0,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
