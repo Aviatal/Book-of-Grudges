@@ -1,21 +1,30 @@
 <template>
-    <audio ref="experienceNotificationSound"><source src="/public/sounds/notification_alert.mp3"></audio>
-    <audio ref="fortunePointsNotificationSound"><source src="/public/sounds/fp-added-notification.mp3"></audio>
+<!--    <audio ref="experienceNotificationSound" muted="muted"><source src="/public/sounds/notification_alert.mp3"></audio>-->
+<!--    <audio ref="fortunePointsNotificationSound" muted="muted"><source src="/public/sounds/fp-added-notification.mp3"></audio>-->
 </template>
 <script>
 export default {
     name: 'HeroWatcher',
+    emits: ['experience-changed', 'fortune-points-changed'],
+    data() {
+        return {
+            eventSource: null
+        };
+    },
     mounted() {
         this.establishConnection();
     },
+    beforeUnmount() {
+        if (this.eventSource) {
+            this.eventSource.close();
+        }
+    },
     methods: {
         establishConnection() {
-            let eventSource = null;
-            eventSource = new EventSource(`/sse/hero-watcher`, {
-                withCredentials: true
-            });
+            this.eventSource = new EventSource(`/sse/hero-watcher`);
 
-            eventSource.onmessage = (event) => {
+            this.eventSource.onmessage = (event) => {
+                console.log('xx')
                 const data = JSON.parse(event.data);
                 if (data.type === 'EXPERIENCE') {
                     this.$refs.experienceNotificationSound.play();
@@ -39,9 +48,9 @@ export default {
 
             };
 
-            eventSource.onerror = (error) => {
+            this.eventSource.onerror = (error) => {
                 console.error('SSE error:', error);
-                eventSource.close();
+                this.eventSource.close();
             };
         }
     }
