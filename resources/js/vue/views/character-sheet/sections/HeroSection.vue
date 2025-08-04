@@ -103,7 +103,7 @@
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
-                    <labe>Poprzednia profesja</labe>
+                    <label>Poprzednia profesja</label>
                     <v-select
                         v-model="hero.previous_profession_id"
                         :options="professions"
@@ -160,56 +160,59 @@
     </div>
 </template>
 
+<script setup lang="ts">
+import {defineEmits, defineProps} from "vue";
+import {onMounted, ref} from "vue";
+import axios from "axios";
+import {CharacteristicPivot, Hero} from "../../../../types/Hero";
+import {useToast} from "vue-toast-notification";
 
-<script>
-export default {
-    props: {
-        heroData: Object
-    },
-    data() {
-        return {
-            professions: [],
 
-            isOpen: false
-        };
-    },
-    created() {
-        this.getProfessions();
-    },
-    computed: {
-        hero() {
-            return this.heroData
-        }
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        updateHero(field) {
-            axios.post('karta-postaci/' + this.hero.id + '/update-hero', {
-                field: field, value: this.hero[field]
-            })
-                .then((response) => {
-                    this.$toast.success(response.data.message)
-                    if (field === 'current_profession_id') {
-                        this.$emit('update-characteristics', response.data.characteristic)
-                    }
-                })
-                .catch((error) => {
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.response.data.message)
-                })
-        },
-        getProfessions() {
-            axios.get('professions/get-professions')
-                .then(response => {
-                    this.professions = response.data;
-                })
-                .catch(() => {
-                    this.$toast.error('Wystąpił błąd podczas pobierania profesji');
-                });
-        }
-    }
+const props = defineProps<{
+    hero: Hero
+}>();
+
+const emits = defineEmits<{
+    updateCharacteristics: [characteristic: CharacteristicPivot]
+}>();
+
+const professions = ref<any[]>([]);
+const isOpen = ref<boolean>(false);
+const toast = useToast();
+
+onMounted(() => {
+    getProfessions();
+})
+
+const toggleOpen = (): void => {
+    isOpen.value = !isOpen.value;
 };
+
+const updateHero = async(field: string): Promise<void> => {
+    axios.post('karta-postaci/' + props.hero.id + '/update-hero', {
+        field: field,
+        value: props.hero[field]
+    })
+        .then((response) => {
+            toast.success(response.data.message)
+            if (field === 'current_profession_id') {
+                emits('updateCharacteristics', response.data.characteristic)
+            }
+        })
+        .catch((error) => {
+            toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.response.data.message)
+        })
+}
+const getProfessions = async(): Promise<void> => {
+    axios.get('professions/get-professions')
+        .then(response => {
+            professions.value = response.data;
+        })
+        .catch(() => {
+            toast.error('Wystąpił błąd podczas pobierania profesji');
+        });
+}
+
 </script>
 <style scoped>
 .select-wrapper {

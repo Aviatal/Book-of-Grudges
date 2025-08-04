@@ -2,7 +2,7 @@
     <div>
         <template v-if="!isLoading && hero">
             <hero-section
-                :hero-data="hero"
+                :hero="hero"
                 @update-characteristics="refreshCharacteristic"
             ></hero-section>
             <hero-description-section
@@ -69,9 +69,7 @@ import axios from "axios";
 
 
 const props = defineProps({
-    userId: {
-        type: Number
-    }
+    userId: Number
 });
 
 const isLoading = ref<boolean>(true);
