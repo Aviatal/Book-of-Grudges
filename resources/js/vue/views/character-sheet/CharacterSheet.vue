@@ -6,7 +6,7 @@
                 @update-characteristics="refreshCharacteristic"
             ></hero-section>
             <hero-description-section
-                :description-data="hero.description"
+                :hero-descriptions="hero.description"
             ></hero-description-section>
             <hero-characteristic-section
                 :characteristic-data="hero.characteristic"

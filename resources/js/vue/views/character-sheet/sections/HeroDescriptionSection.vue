@@ -126,39 +126,33 @@
         </div>
     </div>
 </template>
+<script setup lang="ts">
+import {ref, defineProps} from "vue";
+import {useToast} from "vue-toast-notification";
+import axios from "axios";
 
-<script>
-export default {
-    props: {
-        descriptionData: Object
-    },
-    data() {
-        return {
-            isOpen: false
-        };
-    },
-    computed: {
-        heroDescriptions() {
-            return this.descriptionData;
-        }
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        updateDescription(field) {
-            axios.post('karta-postaci/' + this.heroDescriptions.hero_id + '/update-description', {
-                field: field, value: this.heroDescriptions[field]
-            })
-                .then((response) => {
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    this.$toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
-                })
-        },
-    },
-};
+const props = defineProps<{
+    heroDescriptions: Object
+}>();
+const toast = useToast();
+
+const isOpen = ref<boolean>(false);
+
+const toggleOpen = (): void => {
+    isOpen.value = !isOpen.value;
+}
+const updateDescription = async (field: string): Promise<void> => {
+    axios.post('karta-postaci/' + props.heroDescriptions.hero_id + '/update-description', {
+        field: field,
+        value: props.heroDescriptions[field]
+    })
+        .then((response) => {
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            toast.error('Wystąpił błąd podczas aktualizacji bohatera: ' + error.data.message)
+        })
+}
 </script>
 <style scoped>
 .select-wrapper {
