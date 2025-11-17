@@ -46,69 +46,68 @@
         </v-card>
     </v-dialog>
 </template>
+<script setup lang="ts">
+import {defineProps, ref, watch} from 'vue'
+import {useToast} from "vue-toast-notification";
+import {Weapon} from "../../../types/Weapon";
 
-<script>
-
-export default {
-    name: 'AddWeaponModal',
-    props: {
-        heroId: {
-            type: Number
-        }
-    },
-    data() {
-        return {
-            dialog: false,
-            filteredWeapons: null,
-            weapons: null,
-            isLoading: false,
-
-            newWeapon: {
-                weaponId: null,
-                additionalWeaponName: '',
-            },
-        }
-    },
-    methods: {
-        getWeapons() {
-            this.isLoading = true;
-            axios.get('bronie/get-weapons?grouped=true')
-                .then(response => {
-                    this.weapons = response.data
-                    console.log(this.weapons)
-                })
-                .catch(error => {
-                    console.log(error)
-                    this.$toast.error('Wystąpił błąd podczas pobierania broni')
-                })
-                .finally(() => {
-                    this.isLoading = false
-                })
-        },
-        addWeapon() {
-                axios.post('karta-postaci/' + this.heroId + '/add-weapon', this.newWeapon)
-                    .then((response) => {
-                        this.dialog = false;
-                        this.newWeapon = {weaponId: null, additionalWeaponName: ''};
-                        this.$toast.success('Pomyślnie odano broń')
-                        this.$emit('weapon-added', response.data)
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        this.$toast.error(error.response.data.message, {duration: 10000})
-                    });
-        }
-    },
-    watch: {
-        dialog: function () {
-            if (this.dialog) {
-                this.getWeapons();
-            }
-        }
-    }
+const toast = useToast();
+const props = defineProps<{
+    heroId: number;
+}>();
+const emits = defineEmits<{
+    weaponAdded: [weapon: Weapon];
+}>();
+interface NewWeapon {
+    weaponId: number | null;
+    additionalWeaponName: string;
 }
-</script>
 
+
+const dialog = ref<boolean>(false);
+const weapons = ref<any[]>([]);
+const isLoading = ref<boolean>(false);
+const newWeapon = ref<NewWeapon>({
+    weaponId: null,
+    additionalWeaponName: ''
+});
+
+const getWeapons = (): void => {
+    isLoading.value = true;
+    axios
+        .get('bronie/get-weapons?grouped=true')
+        .then(response => {
+            weapons.value = response.data
+        })
+        .catch(error => {
+            console.log(error)
+            toast.error('Wystąpił błąd podczas pobierania broni')
+        })
+        .finally(() => {
+            isLoading.value = false
+        })
+};
+const addWeapon = (): void => {
+    axios
+        .post('karta-postaci/' + heroId + '/add-weapon', newWeapon)
+        .then((response) => {
+            this.dialog = false;
+            newWeapon.value = {weaponId: null, additionalWeaponName: ''};
+            toast.success('Pomyślnie odano broń')
+            emits('weaponAdded', response.data)
+        })
+        .catch(error => {
+            console.error(error);
+            this.$toast.error(error.response.data.message, {duration: 10000})
+        });
+};
+
+watch(dialog, (newValue) => {
+    if (newValue) {
+        getWeapons();
+    }
+});
+</script>
 <style scoped>
 .bg-dark-custom {
     background-color: #2a2926;

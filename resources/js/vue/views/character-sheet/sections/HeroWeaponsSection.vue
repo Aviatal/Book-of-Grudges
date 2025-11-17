@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -128,145 +128,131 @@
         </transition>
     </div>
 </template>
+<script setup lang="ts">
+import {computed, defineProps, ref} from "vue";
+import AddWeaponModal from "../../../components/character-sheet/AddWeaponModal.vue";
+import {useToast} from "vue-toast-notification";
+import {Weapon} from "../../../../types/Weapon";
 
-<script>
-import addWeaponModal from "../../../components/character-sheet/AddWeaponModal.vue";
-import AddInventoryModal from "../../../components/character-sheet/AddInventoryModal.vue";
+const props = defineProps<{
+    heroId: number,
+    characteristicData: Object,
+    talentsData: Object,
+    coldWeaponsData: Object<string, Weapon>,
+    rangedWeaponsData: Object<string, Weapon>
+}>();
+const emits = defineEmits<{
+    unequipWeapon: [weapon: any[]];
+}>();
+const toast = useToast();
 
-export default {
-    props: {
-        heroId: Number,
-        characteristicData: Array,
-        talentsData: Array,
-        coldWeaponsData: Object,
-        rangedWeaponsData: Object
-    },
-    components: {AddInventoryModal, addWeaponModal},
-    data() {
-        return {
-            isOpen: false,
+const isOpen = ref<boolean>(false);
+const coldWeaponHeaders = ref<array<Object<string, string|boolean>>>([
+    {title: 'Broń', align: 'start', sortable: false, value: 'name'},
+    {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
+    {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
+    {title: 'Siła', align: 'start', sortable: false, value: 'power'},
+    {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
+    {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
+])
+const rangedWeaponHeaders = ref<array<Object<string, string|boolean>>>([
+    {title: 'Broń', align: 'start', sortable: false, value: 'name'},
+    {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
+    {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
+    {title: 'Siła', align: 'start', sortable: false, value: 'power'},
+    {title: 'Zasięg', align: 'start', sortable: false, value: 'range'},
+    {title: 'Przeład.', align: 'start', sortable: false, value: 'reload_time'},
+    {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
+    {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
+])
+const coldWeapons = computed(() => props.coldWeaponsData ?? {});
+const rangedWeapons = computed(() => props.rangedWeaponsData ?? {});
+const heroPower = computed(() => Math.max(props.characteristicData['S'].pivot.current_value, props.characteristicData['S'].pivot.start_value) ?? 0);
+const hasBrawlTalent = computed(() => props.talentsData.some(talent => talent.name === "Bijatyka") ?? false);
+const hasStrongStrikeTalent = computed(() => props.talentsData.some(talent => talent.name === "Silny cios") ?? false);
+const hasSharpshooterTalent = computed(() => props.talentsData.some(talent => talent.name === "Strzał precyzyjny") ?? false);
 
-            coldWeaponHeaders: [
-                {title: 'Broń', align: 'start', sortable: false, value: 'name'},
-                {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
-                {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
-                {title: 'Siła', align: 'start', sortable: false, value: 'power'},
-                {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
-                {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
-            ],
-            rangedWeaponHeaders: [
-                {title: 'Broń', align: 'start', sortable: false, value: 'name'},
-                {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
-                {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
-                {title: 'Siła', align: 'start', sortable: false, value: 'power'},
-                {title: 'Zasięg', align: 'start', sortable: false, value: 'range'},
-                {title: 'Przeład.', align: 'start', sortable: false, value: 'reload_time'},
-                {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
-                {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
-            ],
-        };
-    },
-    computed: {
-        coldWeapons() {
-            return this.coldWeaponsData;
-        },
-        rangedWeapons() {
-            return this.rangedWeaponsData;
-        },
-        heroPower() {
-            return Math.max(this.characteristicData['S'].pivot.current_value, this.characteristicData['S'].pivot.start_value)
-        },
-        hasBrawlTalent() {
-            return this.talentsData.some(talent => talent.name === "Bijatyka");
-        },
-        hasStrongStrikeTalent() {
-            return this.talentsData.some(talent => talent.name === "Silny cios");
-        },
-        hasSharpshooterTalent() {
-            return this.talentsData.some(talent => talent.name === "Strzał precyzyjny");
-        },
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        handleNewWeapon(newWeapon) {
-            if (!newWeapon.is_ranged) {
-                this.coldWeapons.push(newWeapon)
-            } else {
-                this.rangedWeapons.push(newWeapon)
-            }
-        },
-        dropWeapon(weapon, index) {
-            if (!confirm('Czy na pewno chcesz usunąć broń?')) {
-                return;
-            }
-            axios.post('karta-postaci/' + this.heroId + '/drop-weapon', {weapon: weapon})
-                .then(response => {
-                    if (!weapon.is_ranged) {
-                        this.coldWeapons.splice(index, 1)
-                    } else {
-                        this.rangedWeapons.splice(index, 1)
-                    }
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas usuwania broni')
-                })
-        },
-        unequip(weapon, index) {
-            axios.post('karta-postaci/' + this.heroId + '/unequip-weapon', {weapon: weapon})
-                .then(response => {
-                    if (!weapon.is_ranged) {
-                        this.coldWeapons.splice(index, 1)
-                    } else {
-                        this.rangedWeapons.splice(index, 1)
-                    }
-                    this.$toast.success(response.data.message)
-                    this.$emit('unequip-weapon', response.data.inventory)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas chowania broni do ekwipunku')
-                })
-        },
-        updateWeapon(weapon) {
-            axios.post('karta-postaci/' + this.heroId + '/edit-weapon', {weapon: weapon})
-                .then(response => {
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas edytowania broni')
-                })
-        },
-        weaponPower(weapon) {
-            let weaponPower = 0;
-
-            if (weapon.power === 'S') {
-                weaponPower += this.heroPower
-            } else if (weapon.power.startsWith('S') && weapon.power.length > 1) {
-                const calculatedWeaponPower = this.heroPower + parseInt(weapon.power.slice(1))
-                weaponPower += calculatedWeaponPower;
-            } else if (!isNaN(parseInt(weapon.power))) {
-                weaponPower += weapon.power;
-            }
-
-            if (
-                (this.hasBrawlTalent && weapon.name === 'Bez broni') ||
-                (weapon.name !== 'Bez broni' && weapon.is_ranged === 0 && this.hasStrongStrikeTalent) ||
-                (weaponPower > 0 && weapon.is_ranged === 1 && this.hasSharpshooterTalent)
-            ) {
-                weaponPower++;
-            }
-
-            return weaponPower
-        }
+const toggleOpen = ():void => isOpen.value = !isOpen.value;
+const handleNewWeapon = (newWeapon: Weapon): void => {
+    if (!newWeapon.is_ranged) {
+        coldWeapons.push(newWeapon)
+    } else {
+        rangedWeapons.push(newWeapon)
     }
 };
-</script>
 
+const dropWeapon = (weapon :Weapon, index :number) => {
+    if (!confirm('Czy na pewno chcesz usunąć broń?')) {
+        return;
+    }
+    axios
+        .post('karta-postaci/' + heroId + '/drop-weapon', {weapon: weapon})
+        .then(response => {
+            if (!weapon.is_ranged) {
+                coldWeapons.splice(index, 1)
+            } else {
+                rangedWeapons.splice(index, 1)
+            }
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas usuwania broni')
+        })
+};
+const unequip = (weapon: Weapon, index: number) => {
+    axios
+        .post('karta-postaci/' + heroId + '/unequip-weapon', {weapon: weapon})
+        .then(response => {
+            if (!weapon.is_ranged) {
+                coldWeapons.splice(index, 1)
+            } else {
+                rangedWeapons.splice(index, 1)
+            }
+            toast.success(response.data.message)
+            emits('unequipWeapon', response.data.inventory)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas chowania broni do ekwipunku')
+        })
+};
+
+const updateWeapon = (weapon: Weapon) => {
+    axios
+        .post('karta-postaci/' + heroId + '/edit-weapon', {weapon: weapon})
+        .then(response => {
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas edytowania broni')
+        })
+};
+const weaponPower = (weapon: Weapon) => {
+    let weaponPower = 0;
+    console.log(weapon)
+
+    if (weapon.power === 'S') {
+        weaponPower += heroPower
+    } else if (weapon.power?.startsWith('S') && weapon.power.length > 1) {
+        const calculatedWeaponPower = heroPower + parseInt(weapon.power.slice(1))
+        weaponPower += calculatedWeaponPower;
+    } else if (!isNaN(parseInt(weapon.power))) {
+        weaponPower += weapon.power;
+    }
+
+    if (
+        (hasBrawlTalent && weapon.name === 'Bez broni') ||
+        (weapon.name !== 'Bez broni' && weapon.is_ranged === 0 && hasStrongStrikeTalent) ||
+        (weaponPower > 0 && weapon.is_ranged === 1 && hasSharpshooterTalent)
+    ) {
+        weaponPower++;
+    }
+
+    return weaponPower
+}
+</script>
 <style scoped>
 .custom-table {
     background-color: #2b2a27 !important;
