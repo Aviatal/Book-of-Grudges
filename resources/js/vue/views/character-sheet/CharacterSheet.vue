@@ -10,6 +10,7 @@
             ></hero-description-section>
             <hero-characteristic-section
                 :characteristic-data="hero.characteristic"
+                :hero-id="hero.id"
                 @add-characteristic="handleAddCharacteristic"
             ></hero-characteristic-section>
             <hero-weapons-section

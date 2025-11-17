@@ -1,6 +1,8 @@
 export interface CharacteristicPivot {
+    advancement: number;
+    characteristic_id: number;
+    hero_id: number;
     value: number;
-    [key: string]: any;
 }
 
 export interface Hero {
@@ -9,7 +11,13 @@ export interface Hero {
     current_experience: number;
     all_experience: number;
     current_wounds: number;
-    characteristic: Record<string, { pivot: CharacteristicPivot }>;
+    characteristic: Record<string, {
+        name: string,
+        shortName: string,
+        type: string,
+        available_advancement: number,
+        pivot: CharacteristicPivot
+    }>;
     talents: object[];
     skills: object[];
     armors: object[];

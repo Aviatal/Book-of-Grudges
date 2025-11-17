@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                 stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -311,75 +311,77 @@
         </div>
     </div>
 </template>
+<script setup lang="ts">
+import {ref, defineProps, defineEmits, computed} from "vue";
+import axios from "axios";
+import {useToast} from "vue-toast-notification";
+import {CharacteristicPivot} from "../../../../types/Hero";
+
+const props = defineProps<{
+    characteristicData: Object
+    heroId: number
+}>();
+
+const emits = defineEmits<{
+    addCharacteristics: [characteristicName: string, characteristic: CharacteristicPivot, changeCurrentWounds: number, spentExperience: number];
+}>();
 
 
-<script>
-export default {
-    props: {
-        characteristicData: Object
-    },
-    data() {
-        return {
-            isOpen: false,
-            heroId: Object.values(this.characteristicData)[0].pivot.hero_id
-        };
-    },
-    computed: {
-        characteristic() {
-            return this.characteristicData;
-        }
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        developCharacteristic(characteristicName) {
-            let titleText = 'Czy na pewno chcesz rozwinąć umiejętność?';
-            let subtitleText = 'Będzie Cię to kosztowało punkty doświadczenia!';
-            if (characteristicName === 'PP') {
-                titleText = 'Czy na pewno zasłużyłeś na uzyskanie Punktu Przeznaczenia, miernoto?'
-                subtitleText = 'Czytaj: "Czy Mistrz gry przyznał Ci Punkt Przeznaczenia?"'
-            } else if (characteristicName === 'PO') {
-                titleText = 'Ktoś tu powoli szaleje! Co zrobiłeś nie tak, że chcesz dodać sobie Punkt Obłędu'
-                subtitleText = 'Uważaj! Ludzie zwykle dziwnie patrzą na kogoś z trzecim okiem na środku czoła'
-            }
-            customSwal.fire({
-                title: titleText,
-                text: subtitleText,
-                showDenyButton: true,
-                showCancelButton: false,
-                confirmButtonText: "Tak!",
-                cancelButtonText: 'Nie.',
-                width: '30%'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    axios.post('karta-postaci/' + this.heroId + '/update-characteristic', {
-                        characteristic: this.characteristic[characteristicName]
-                    })
-                        .then((response) => {
-                            this.$toast.success(response.data.message)
-                            this.characteristic[characteristicName].pivot.advancement += response.data.developedValue;
-                            this.$emit(
-                                'add-characteristic',
-                                characteristicName,
-                                this.characteristic[characteristicName].pivot,
-                                response.data.changeCurrentWounds,
-                                response.data.spentExperience,
-                            )
-                            customSwal.fire({title: "Rozwinięto!", icon: "success", theme: 'dark'});
-                        })
-                        .catch((error) => {
-                            console.log(error)
-                            customSwal.fire({title: error.response.data.message, icon: "error", theme: 'dark'});
-                        })
-                }
-            });
-        },
-        getRelatedCharacteristicValue(basedOn) {
-            return Math.floor((this.characteristic[basedOn]?.pivot.start_value + (this.characteristic[basedOn]?.pivot.advancement ?? 0)) / 10)
-        }
+const isOpen = ref<boolean>(false);
+const characteristic = computed(() => props.characteristicData ?? {});
+const toast = useToast();
+
+const toggleOpen = (): void => {
+    isOpen.value = !isOpen.value;
+}
+const developCharacteristic = (characteristicName: string): void => {
+    let titleText = 'Czy na pewno chcesz rozwinąć umiejętność?';
+    let subtitleText = 'Będzie Cię to kosztowało punkty doświadczenia!';
+    if (characteristicName === 'PP') {
+        titleText = 'Czy na pewno zasłużyłeś na uzyskanie Punktu Przeznaczenia, miernoto?'
+        subtitleText = 'Czytaj: "Czy Mistrz gry przyznał Ci Punkt Przeznaczenia?"'
+    } else if (characteristicName === 'PO') {
+        titleText = 'Ktoś tu powoli szaleje! Co zrobiłeś nie tak, że chcesz dodać sobie Punkt Obłędu'
+        subtitleText = 'Uważaj! Ludzie zwykle dziwnie patrzą na kogoś z trzecim okiem na środku czoła'
     }
+    customSwal
+        .fire({
+            title: titleText,
+            text: subtitleText,
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Tak!",
+            cancelButtonText: 'Nie.',
+            width: '30%'
+        })
+        .then((result) => {
+            if (result.isConfirmed) {
+                axios.post('karta-postaci/' + props.heroId + '/update-characteristic', {
+                    characteristic: characteristic.value[characteristicName]
+                })
+                    .then((response) => {
+                        toast.success(response.data.message)
+                        characteristic.value[characteristicName].pivot.advancement += response.data.developedValue;
+                        emits(
+                            'addCharacteristics',
+                            characteristicName,
+                            characteristic.value[characteristicName].pivot,
+                            response.data.changeCurrentWounds,
+                            response.data.spentExperience,
+                        )
+                        customSwal.fire({title: "Rozwinięto!", icon: "success", theme: 'dark'});
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                        customSwal.fire({title: error.response.data.message, icon: "error", theme: 'dark'});
+                    })
+            }
+        });
 };
+
+const getRelatedCharacteristicValue = (basedOn: string) => {
+    return Math.floor((characteristic.value[basedOn]?.pivot.start_value + (characteristic.value[basedOn]?.pivot.advancement ?? 0)) / 10)
+}
 </script>
 <style scoped>
 td {
