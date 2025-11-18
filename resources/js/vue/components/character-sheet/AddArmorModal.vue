@@ -42,62 +42,58 @@
         </v-card>
     </v-dialog>
 </template>
+<script setup lang="ts">
+import {defineProps, ref, watch} from 'vue'
+import {Armor} from "../../../types/Armor";
+import {useToast} from "vue-toast-notification";
+const props = defineProps<{
+    heroId: number;
+}>();
+const emits = defineEmits<{
+    armorAdded: [armor: Armor];
+}>();
+const toast = useToast();
 
-<script>
+const dialog = ref<boolean>(false);
+const armors = ref<Armor[]>([]);
+const isLoading = ref<boolean>(false);
+const newArmorId = ref<number | null>(null);
 
-export default {
-    name: 'AddArmorModal',
-    props: {
-        heroId: {
-            type: Number
-        }
-    },
-    data() {
-        return {
-            dialog: false,
-            armors: null,
-            isLoading: false,
+const getArmors = (): void => {
+    isLoading.value = true;
+    axios
+        .get('opancerzenie/get-armors?grouped=true')
+        .then(response => {
+            armors.value = response.data
+        })
+        .catch(error => {
+            console.log(error)
+            toast.error('Wystąpił błąd podczas pobierania zbroi')
+        })
+        .finally(() => {
+            isLoading.value = false
+        })
+};
 
-            newArmorId: null
-        }
-    },
-    methods: {
-        getArmors() {
-            this.isLoading = true;
-            axios.get('opancerzenie/get-armors?grouped=true')
-                .then(response => {
-                    this.armors = response.data
-                })
-                .catch(error => {
-                    console.log(error)
-                    this.$toast.error('Wystąpił błąd podczas pobierania zbroi')
-                })
-                .finally(() => {
-                    this.isLoading = false
-                })
-        },
-        addArmor() {
-                axios.post('karta-postaci/' + this.heroId + '/add-armor', {armorId: this.newArmorId})
-                    .then((response) => {
-                        this.dialog = false;
-                        this.newArmorId = null;
-                        this.$toast.success('Pomyślnie dodano zbroję')
-                        this.$emit('armor-added', response.data)
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        this.$toast.error(error.response.data.message, {duration: 10000})
-                    });
-        }
-    },
-    watch: {
-        dialog: function () {
-            if (this.dialog) {
-                this.getArmors();
-            }
-        }
-    }
+const addArmor = (): void => {
+    axios
+        .post('karta-postaci/' + heroId + '/add-armor', {armorId: newArmorId.value})
+        .then((response) => {
+            dialog.value = false;
+            newArmorId.value = null;
+            toast.success('Pomyślnie dodano zbroję')
+            emits('armorAdded', response.data)
+        })
+        .catch(error => {
+            console.error(error);
+            this.$toast.error(error.response.data.message, {duration: 10000})
+        });
 }
+watch(dialog, (newValue) => {
+    if (newValue) {
+        getArmors();
+    }
+});
 </script>
 
 <style scoped>

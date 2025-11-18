@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -104,111 +104,100 @@
         </transition>
     </div>
 </template>
-
-<script>
-import heroSvg from '@/assets/images/hero.svg?raw';
+<script setup lang="ts">
 import AddArmorModal from "../../../components/character-sheet/AddArmorModal.vue";
-export default {
-    components: {AddArmorModal},
-    props: {
-        armorsData: Object,
-        heroId: Number
-    },
-    data() {
-        return {
-            isOpen: false,
-            heroSvgContent: heroSvg,
-            armorPoints: {
-                head: 0,
-                arms: 0,
-                torso: 0,
-                legs: 0
-            },
+import {Armor} from "../../../../types/Armor";
+import {TableHeader} from "../../../../types/general/TableHeader";
+import {computed, ref} from "vue";
+import heroSvg from '@/assets/images/hero.svg?raw';
+import {useToast} from "vue-toast-notification";
 
-            locationsMap: {
-                head: 'Głowa',
-                arms: 'Ręce',
-                torso: 'Korpus',
-                legs: 'Nogi',
-            },
+const props = defineProps<{
+    armorsData: Armor[],
+    heroId: Number,
+}>();
+const emits = defineEmits<{
+    unequipArmor: [armor: Armor[]]
+}>();
+const toast = useToast();
 
-            armorHeaders: [
-                {title: 'Nazwa', align: 'start', sortable: true, value: 'name'},
-                {title: 'Typ pancerza', align: 'start', sortable: true, value: 'category'},
-                {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
-                {title: 'Lokacja ciała', align: 'start', sortable: true, value: 'locations'},
-                {title: 'Punkty zbroi', align: 'start', sortable: true, value: 'armor_points'},
-                {title: 'Opcje', align: 'start', sortable: true, value: 'options'},
-            ],
-        };
-    },
-    computed: {
-        armors() {
-            return this.armorsData;
-        },
-        headArmorPoints() {
-            return this.calculateArmorPoints('head')
-        },
-        torsoArmorPoints() {
-            return this.calculateArmorPoints('torso')
-        },
-        armsArmorPoints() {
-            return this.calculateArmorPoints('arms')
-        },
-        legsArmorPoints() {
-            return this.calculateArmorPoints('legs')
-        },
-    },
-    // created() {
-    //     ['head', 'arms', 'torso', 'legs'].forEach((location) => {
-    //         this.calculateArmorPoints(location)
-    //     })
-    // },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        calculateArmorPoints(location) {
-            return this.armorsData.reduce((currentValue, armor) => {
-                for (let item of armor.locations) {
-                    if (item.name === this.locationsMap[location]) {
-                        return currentValue + parseInt(armor.armor_points);
-                    }
-                }
-                return currentValue;
-            }, 0)
-        },
-        dropArmor(armor, index) {
-            if (!confirm('Czy na pewno chcesz usunąć zbroję?')) {
-                return;
-            }
-            axios.post('karta-postaci/' + this.heroId + '/drop-armor', {armor: armor})
-                .then(response => {
-                    this.armors.splice(index, 1)
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas usuwania zbroi')
-                })
-        },
-        unequip(armor, index) {
-            axios.post('karta-postaci/' + this.heroId + '/unequip-armor', {armor: armor})
-                .then(response => {
-                    this.armors.splice(index, 1)
-                    this.$toast.success(response.data.message)
-                    this.$emit('unequip-armor', response.data.inventory)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas chowania zbroi do ekwipunku')
-                })
-        },
-        handleNewArmor(newArmor) {
-            this.armors.push(newArmor)
-        },
-    },
+const isOpen = ref<boolean>(false);
+const heroSvgContent = heroSvg;
+const armorPoints = ref<{ [key: string]: number }>({
+    head: 0,
+    arms: 0,
+    torso: 0,
+    legs: 0,
+});
+const locationsMap = ref<{ [key: string]: string }>({
+    head: 'Głowa',
+    arms: 'Ręce',
+    torso: 'Korpus',
+    legs: 'Nogi',
+});
+const armorHeaders = ref<TableHeader[]>([
+    {title: 'Nazwa', align: 'start', sortable: true, value: 'name'},
+    {title: 'Typ pancerza', align: 'start', sortable: true, value: 'category'},
+    {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
+    {title: 'Lokacja ciała', align: 'start', sortable: true, value: 'locations'},
+    {title: 'Punkty zbroi', align: 'start', sortable: true, value: 'armor_points'},
+    {title: 'Opcje', align: 'start', sortable: true, value: 'options'},
+]);
+
+const armors = computed(() => props.armorsData ?? []);
+const headArmorPoints = computed(() => calculateArmorPoints('head'));
+const torsoArmorPoints = computed(() => calculateArmorPoints('torso'));
+const armsArmorPoints = computed(() => calculateArmorPoints('arms'));
+const legsArmorPoints = computed(() => calculateArmorPoints('legs'));
+
+const toggleOpen = () : void => {
+    isOpen.value = !isOpen.value;
 };
+const calculateArmorPoints = (location: string) :number => {
+    return armors.value.reduce((currentValue, armor) => {
+        for (let item of armor.locations) {
+            if (item.name === locationsMap.value[location]) {
+                return currentValue + parseInt(armor.armor_points);
+            }
+        }
+        return currentValue;
+    }, 0)
+};
+
+const dropArmor = (armor: Armor, index: number) => {
+    if (!confirm('Czy na pewno chcesz usunąć zbroję?')) {
+        return;
+    }
+    axios
+        .post('karta-postaci/' + heroId + '/drop-armor', {armor: armor})
+        .then(response => {
+            armors.value.splice(index, 1)
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas usuwania zbroi')
+        })
+};
+
+const unequip = (armor: Armor, index: number) => {
+    axios
+        .post('karta-postaci/' + heroId + '/unequip-armor', {armor: armor})
+        .then(response => {
+            armors.value.splice(index, 1)
+            toast.success(response.data.message)
+            emits('unequipArmor', response.data.inventory)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas chowania zbroi do ekwipunku')
+        })
+};
+
+const handleNewArmor = (newArmor: Armor) => {
+    armors.value.push(newArmor);
+};
+
 </script>
 
 <style scoped>
