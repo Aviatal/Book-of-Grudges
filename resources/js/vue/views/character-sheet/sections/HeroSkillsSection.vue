@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -33,7 +33,7 @@
                             xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24"
                             viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor"
+                            stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
                         >
@@ -92,7 +92,7 @@
                             xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24"
                             viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor"
+                            stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
                         >
@@ -125,104 +125,102 @@
         </transition>
     </div>
 </template>
+<script setup lang="ts">
+import {ref, defineProps, computed} from "vue";
+import {Skill} from "../../../../types/Skill";
+import {Characteristic} from "../../../../types/Characteristic";
+import {TableHeader} from "../../../../types/general/TableHeader";
+import {useToast} from "vue-toast-notification";
+const props = defineProps<{
+    skillsData: Skill[],
+    characteristicData: {[key: string]: Characteristic},
+    heroId: number,
+}>();
+const toast = useToast();
 
-<script>
-export default {
-    props: {
-        skillsData: Array,
-        characteristicData: Object,
-        heroId: Number
-    },
-    data() {
-        return {
-            isOpen: false,
-            isHurdledOpen: true,
-            isNotHurdledOpen: false,
+const isOpen = ref<boolean>(false);
+const isHurdledOpen = ref<boolean>(true);
+const isNotHurdledOpen = ref<boolean>(false);
+const hurdledSkillsHeaders = ref<TableHeader[]>([
+    {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},
+    {title: 'Cecha', align: 'start', sortable: true, value: 'characteristic'},
+    {title: 'Rzut', align: 'start', sortable: true, value: 'test'},
+    {title: 'Dodatkowe informacje', align: 'start', sortable: true, value: 'additional_skill_name'},
+    {title: 'Wykupione', align: 'start', sortable: true, value: 'hurdled'},
+    {title: '+10', align: 'start', sortable: true, value: 'first_level'},
+    {title: '+20', align: 'start', sortable: true, value: 'second_level'},
+]);
 
-            hurdledSkillsHeaders: [
-                {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},
-                {title: 'Cecha', align: 'start', sortable: true, value: 'characteristic'},
-                {title: 'Rzut', align: 'start', sortable: true, value: 'test'},
-                {title: 'Dodatkowe informacje', align: 'start', sortable: true, value: 'additional_skill_name'},
-                {title: 'Wykupione', align: 'start', sortable: true, value: 'hurdled'},
-                {title: '+10', align: 'start', sortable: true, value: 'first_level'},
-                {title: '+20', align: 'start', sortable: true, value: 'second_level'},
-            ],
-            notHurdledSkillsHeaders: [
-                {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},
-                {title: 'Cecha', align: 'start', sortable: true, value: 'characteristic'},
-                {title: 'Rzut', align: 'start', sortable: true, value: 'test'},
-                {title: 'Dodaj', align: 'start', sortable: true, value: 'add'},
-            ],
-        };
-    },
-    computed: {
-        hurdledSkills() {
-            return this.skillsData.filter((skill) => Boolean(skill.pivot.hurdled)) .sort((a, b) => a.name.localeCompare(b.name));
-        },
-        notHurdledSkills() {
-            return this.skillsData.filter((skill) => !Boolean(skill.pivot.hurdled))
-                .filter((skill, index, self) =>
-                        index === self.findIndex((t) => t.id === skill.id)
-                )
-                .sort((a, b) => a.name.localeCompare(b.name));
-        },
-        characteristic() {
-            return this.characteristicData;
-        }
-    },
-    methods: {
-        toggleOpen(panel = 'main') {
-            switch (panel) {
-                case 'main':
-                    this.isOpen = !this.isOpen;
-                    break;
-                case 'hurdled':
-                    this.isHurdledOpen = !this.isHurdledOpen;
-                    break;
-                case 'notHurdled':
-                    this.isNotHurdledOpen = !this.isNotHurdledOpen;
-                    break;
-            }
-        },
-        isLevelChecked(level, item) {
-            return Boolean(item.pivot[level])
-        },
-        updateSkill(skill, field, value, update) {
-            let action = null;
-            if (update) {
-                skill['pivot'][field] = value;
-            }
+const notHurdledSkillsHeaders = ref<TableHeader[]>([
+    {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},
+    {title: 'Cecha', align: 'start', sortable: true, value: 'characteristic'},
+    {title: 'Rzut', align: 'start', sortable: true, value: 'test'},
+    {title: 'Dodaj', align: 'start', sortable: true, value: 'add'},
+]);
 
-            if (skill.expandable && field === 'hurdled' && value) {
-                action = 'add'
-            } else if (
-                skill.expandable === 1 &&
-                field === 'hurdled' &&
-                !value &&
-                this.hurdledSkills.filter((currentSkill) => currentSkill.name === skill.name).length > 0
-            ) {
-                action = 'remove'
-            }
+const hurdledSkills = computed(() => {
+    return props.skillsData.filter((skill) => Boolean(skill.pivot.hurdled))
+        .sort((a, b) => a.name.localeCompare(b.name))
+});
+const notHurdledSkills = computed(() => {
+    return props.skillsData.filter((skill) => !Boolean(skill.pivot.hurdled))
+        .filter((skill, index, self) =>
+            index === self.findIndex((t) => t.id === skill.id)
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
+});
+const characteristic = computed(() => props.characteristicData ?? []);
 
-            axios.post('karta-postaci/' + this.heroId + '/update-skill', {skill: skill, action: action})
-                .then((response) => {
-                    if (action === 'add') {
-                        const newSkill = JSON.parse(JSON.stringify(skill))
-                        newSkill.pivot = response.data.skill
-                        console.log(newSkill)
-                        console.log(skill)
-                        this.skillsData.push(newSkill)
-                    }
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd poczas aktualizacji cechy: ' + error.data?.message)
-                })
-        },
+const toggleOpen = (panel: 'main' | 'hurdled' | 'notHurdled' = 'main') => {
+    switch (panel) {
+        case 'main':
+            isOpen.value = !isOpen.value;
+            break;
+        case 'hurdled':
+            isHurdledOpen.value = !isHurdledOpen.value;
+            break;
+        case 'notHurdled':
+            isNotHurdledOpen.value = !isNotHurdledOpen.value;
+            break;
     }
 };
+
+const isLevelChecked = (level: string, item: Skill) => {
+    return Boolean(item.pivot[level])
+};
+
+const updateSkill = (skill: Skill, field: string, value: any, update: boolean) => {
+    let action = null;
+    if (update) {
+        skill['pivot'][field] = value;
+    }
+
+    if (skill.expandable && field === 'hurdled' && value) {
+        action = 'add'
+    } else if (
+        skill.expandable === 1 &&
+        field === 'hurdled' &&
+        !value &&
+        this.hurdledSkills.filter((currentSkill) => currentSkill.name === skill.name).length > 0
+    ) {
+        action = 'remove'
+    }
+
+    axios
+        .post('karta-postaci/' + props.heroId + '/update-skill', {skill: skill, action: action})
+        .then((response) => {
+            if (action === 'add') {
+                const newSkill = JSON.parse(JSON.stringify(skill))
+                newSkill.pivot = response.data.skill
+                props.skillsData.value.push(newSkill)
+            }
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd poczas aktualizacji cechy: ' + error.data?.message)
+        })
+}
 </script>
 
 <style scoped>
