@@ -175,9 +175,9 @@ const hasSharpshooterTalent = computed(() => props.talentsData.some(talent => ta
 const toggleOpen = ():void => isOpen.value = !isOpen.value;
 const handleNewWeapon = (newWeapon: Weapon): void => {
     if (!newWeapon.is_ranged) {
-        coldWeapons.push(newWeapon)
+        coldWeapons.value.push(newWeapon)
     } else {
-        rangedWeapons.push(newWeapon)
+        rangedWeapons.value.push(newWeapon)
     }
 };
 
@@ -186,12 +186,12 @@ const dropWeapon = (weapon :Weapon, index :number) => {
         return;
     }
     axios
-        .post('karta-postaci/' + heroId + '/drop-weapon', {weapon: weapon})
+        .post('karta-postaci/' + props.heroId + '/drop-weapon', {weapon: weapon})
         .then(response => {
             if (!weapon.is_ranged) {
-                coldWeapons.splice(index, 1)
+                coldWeapons.value.splice(index, 1)
             } else {
-                rangedWeapons.splice(index, 1)
+                rangedWeapons.value.splice(index, 1)
             }
             toast.success(response.data.message)
         })
@@ -202,12 +202,12 @@ const dropWeapon = (weapon :Weapon, index :number) => {
 };
 const unequip = (weapon: Weapon, index: number) => {
     axios
-        .post('karta-postaci/' + heroId + '/unequip-weapon', {weapon: weapon})
+        .post('karta-postaci/' + props.heroId + '/unequip-weapon', {weapon: weapon})
         .then(response => {
             if (!weapon.is_ranged) {
-                coldWeapons.splice(index, 1)
+                coldWeapons.value.splice(index, 1)
             } else {
-                rangedWeapons.splice(index, 1)
+                rangedWeapons.value.splice(index, 1)
             }
             toast.success(response.data.message)
             emits('unequipWeapon', response.data.inventory)
@@ -220,7 +220,7 @@ const unequip = (weapon: Weapon, index: number) => {
 
 const updateWeapon = (weapon: Weapon) => {
     axios
-        .post('karta-postaci/' + heroId + '/edit-weapon', {weapon: weapon})
+        .post('karta-postaci/' + props.heroId + '/edit-weapon', {weapon: weapon})
         .then(response => {
             toast.success(response.data.message)
         })

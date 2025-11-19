@@ -89,16 +89,16 @@ const getWeapons = (): void => {
 };
 const addWeapon = (): void => {
     axios
-        .post('karta-postaci/' + heroId + '/add-weapon', newWeapon)
+        .post('karta-postaci/' + props.heroId + '/add-weapon', newWeapon.value)
         .then((response) => {
-            this.dialog = false;
+            dialog.value = false;
             newWeapon.value = {weaponId: null, additionalWeaponName: ''};
-            toast.success('Pomyślnie odano broń')
+            toast.success('Pomyślnie dodano broń')
             emits('weaponAdded', response.data)
         })
         .catch(error => {
             console.error(error);
-            this.$toast.error(error.response.data.message, {duration: 10000})
+            toast.error(error.response.data.message, {duration: 10000})
         });
 };
 

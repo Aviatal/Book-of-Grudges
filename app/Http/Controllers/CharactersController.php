@@ -194,6 +194,7 @@ class CharactersController extends Controller
         ]);
 
         return response()->json(collect([
+            'id' => $weapon->id,
             'is_ranged' => $weapon->is_ranged,
             'name' => $weapon->name,
             'loading' => $weapon->loading,
