@@ -77,7 +77,7 @@ const getArmors = (): void => {
 
 const addArmor = (): void => {
     axios
-        .post('karta-postaci/' + heroId + '/add-armor', {armorId: newArmorId.value})
+        .post('karta-postaci/' + props.heroId + '/add-armor', {armorId: newArmorId.value})
         .then((response) => {
             dialog.value = false;
             newArmorId.value = null;

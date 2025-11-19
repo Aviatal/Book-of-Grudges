@@ -169,7 +169,7 @@ const dropArmor = (armor: Armor, index: number) => {
         return;
     }
     axios
-        .post('karta-postaci/' + heroId + '/drop-armor', {armor: armor})
+        .post('karta-postaci/' + props.heroId + '/drop-armor', {armor: armor})
         .then(response => {
             armors.value.splice(index, 1)
             toast.success(response.data.message)
@@ -182,7 +182,7 @@ const dropArmor = (armor: Armor, index: number) => {
 
 const unequip = (armor: Armor, index: number) => {
     axios
-        .post('karta-postaci/' + heroId + '/unequip-armor', {armor: armor})
+        .post('karta-postaci/' + props.heroId + '/unequip-armor', {armor: armor})
         .then(response => {
             armors.value.splice(index, 1)
             toast.success(response.data.message)
