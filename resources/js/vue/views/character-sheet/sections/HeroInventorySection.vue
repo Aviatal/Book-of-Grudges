@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -22,7 +22,7 @@
             <div v-show="isOpen" class="mt-4">
                 <div class="flex justify-end items-center mb-4">
                     <add-inventory-modal
-                        :hero-id="heroData.id"
+                        :hero-id="props.heroId"
                         v-on:item-added="handleNewItem"
                     ></add-inventory-modal>
                 </div>
@@ -61,66 +61,63 @@
         </transition>
     </div>
 </template>
-
-<script>
+<script setup lang="ts">
 import AddInventoryModal from "../../../components/character-sheet/AddInventoryModal.vue";
+import {ref, defineProps, computed} from "vue";
+import {Inventory} from "../../../../types/Inventory";
+import {TableHeader} from "../../../../types/general/TableHeader";
+import axios from "axios";
+import {useToast} from "vue-toast-notification";
 
-export default {
-    components: {AddInventoryModal},
-    props: {
-        heroData: Object
-    },
-    data() {
-        return {
-            isOpen: false,
+const props = defineProps<{
+    heroId: number,
+    inventoryData: Inventory[]
+}>();
+const toast = useToast();
 
-            headers: [
-                {title: 'Przedmiot', align: 'start', sortable: true, value: 'name'},
-                {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
-                {title: 'Opis', align: 'start', sortable: true, value: 'description'},
-                {title: 'Usuń', align: 'start', sortable: true, value: 'delete'},
-            ],
-        };
-    },
-    computed: {
-        inventory() {
-            return this.heroData.inventory || [];
-        }
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        handleNewItem(newItem) {
-            this.inventory.push(newItem);
-        },
-        removeItem(item, index) {
-            axios.post('karta-postaci/' + this.heroData.id + '/drop-item-from-inventory', {item: item})
-                .then(response => {
-                    this.inventory.splice(index, 1)
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas usuwania przedmiotu')
-                })
-        },
-        editItem(item) {
-            if (item.name === '') {
-                this.$toast.error('Nazwa przedmiotu nie może być pusta')
-                return;
-            }
-            axios.post('karta-postaci/' + this.heroData.id + '/edit-inventory-item', {item: item})
-                .then(response => {
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas usuwania przedmiotu')
-                })
-        }
-    }
+const isOpen = ref<boolean>(false);
+const headers = ref<TableHeader[]>([
+    {title: 'Przedmiot', align: 'start', sortable: true, value: 'name'},
+    {title: 'Obc.', align: 'start', sortable: true, value: 'loading'},
+    {title: 'Opis', align: 'start', sortable: true, value: 'description'},
+    {title: 'Usuń', align: 'start', sortable: true, value: 'delete'},
+]);
+
+const inventory = computed(() => props.inventoryData ?? []);
+
+const toggleOpen = () : void => {
+    isOpen.value = !isOpen.value;
 };
+const handleNewItem = (newItem: Inventory) => {
+    inventory.value.push(newItem);
+};
+const removeItem = (item: Inventory, index: number) => {
+    axios
+        .post('karta-postaci/' + props.heroId + '/drop-item-from-inventory', {item: item})
+        .then(response => {
+            inventory.value.splice(index, 1)
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas usuwania przedmiotu')
+        })
+};
+const editItem = (item: Inventory) => {
+    if (item.name === '') {
+        toast.error('Nazwa przedmiotu nie może być pusta')
+        return;
+    }
+    axios
+        .post('karta-postaci/' + props.heroId + '/edit-inventory-item', {item: item})
+        .then(response => {
+            $toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            $toast.error('Wystąpił błąd podczas usuwania przedmiotu')
+        })
+}
 </script>
 
 <style scoped>

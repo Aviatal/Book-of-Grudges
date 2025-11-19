@@ -36,7 +36,8 @@
                 :talents-data="hero.talents"
             ></hero-talents-section>
             <hero-inventory-section
-                :hero-data="hero"
+                :hero-id="hero.id"
+                :inventory-data="hero.inventory"
                 @get-hero="getHero"
             ></hero-inventory-section>
             <hero-watcher

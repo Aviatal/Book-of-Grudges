@@ -46,49 +46,51 @@
         </v-card>
     </v-dialog>
 </template>
+<script setup lang="ts">
+import {ref, defineProps, computed} from 'vue';
 
-<script>
-export default {
-    name: 'AddInventoryModal',
-    props: {
-        heroId: {
-            type: Number
-        }
-    },
-    data() {
-        return {
-            dialog: false,
-            newItem: {
-                name: '',
-                loading: '',
-                description: ''
-            },
-            nameRules: [
-                v => !!v || 'Nazwa przedmiotu jest wymagana',
-                v => (v && v.length >= 3) || 'Nazwa musi mieć co najmniej 3 znaki',
-            ],
-        }
-    },
-    computed: {
-        isFormValid() {
-            return this.nameRules.every(rule => rule(this.newItem.name) === true);
-        }
-    },
-    methods: {
-        addItem() {
-            if (this.isFormValid) {
-                axios.post('karta-postaci/' + this.heroId + '/add-inventory-item', this.newItem)
-                    .then((response) => {
-                        this.dialog = false;
-                        this.newItem = { name: '', loading: '', description: '' };
-                        this.$emit('item-added', response.data)
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        this.$toast.error('Nie udało się dodać przedmiotu')
-                    });
-            }
-        }
+interface newInventoryItem {
+    name: string,
+    loading: number,
+    description: string
+}
+
+const props = defineProps<{
+    heroId: number;
+}>();
+const emits = defineEmits<{
+    itemAdded: [item: newInventoryItem];
+}>();
+
+
+const dialog = ref<boolean>(false);
+const newItem = ref<newInventoryItem>({
+    name: '',
+    loading: 0,
+    description: ''
+});
+const nameRules = ref<any[]>([
+    v => !!v || 'Nazwa przedmiotu jest wymagana',
+    v => (v && v.length >= 3) || 'Nazwa musi mieć co najmniej 3 znaki',
+]);
+
+const isFormValid = computed(() => {
+    nameRules.value.every(rule => rule(newItem.value.name) === true)
+});
+
+const addItem = () => {
+    if (isFormValid.value) {
+        axios
+            .post('karta-postaci/' + this.heroId + '/add-inventory-item', newItem.value)
+            .then((response) => {
+                dialog.value = false;
+                newItem.value = { name: '', loading: 0, description: '' };
+                emits('itemAdded', response.data)
+            })
+            .catch(error => {
+                console.error(error);
+                toast.error('Nie udało się dodać przedmiotu')
+            });
     }
 }
 </script>
