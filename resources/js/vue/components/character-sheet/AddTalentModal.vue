@@ -38,62 +38,59 @@
         </v-card>
     </v-dialog>
 </template>
+<script setup lang="ts">
+import {ref, defineProps, defineEmits, watch} from 'vue'
+import {useToast} from "vue-toast-notification";
+import {Talent} from "../../../types/Talent";
 
-<script>
+const props = defineProps<{
+    heroId: number;
+}>();
+const emits = defineEmits<{
+    talentAdded: [talent: Talent];
+}>();
+const toast = useToast();
 
-export default {
-    name: 'AddTalentModal',
-    props: {
-        heroId: {
-            type: Number
-        }
-    },
-    data() {
-        return {
-            dialog: false,
-            talents: null,
-            isLoading: false,
+const isLoading = ref<boolean>(false);
+const dialog = ref<boolean>(false);
+const talents = ref<Talent[]>([]);
+const newTalentId = ref<number | null>(null);
 
-            newTalentId: null
-        }
-    },
-    methods: {
-        getTalents() {
-            this.isLoading = true;
-            axios.get('zdolnosci/get-talents?withoutOwned=' + this.heroId)
-                .then(response => {
-                    this.talents = response.data
-                })
-                .catch(error => {
-                    console.log(error)
-                    this.$toast.error('Wystąpił błąd podczas pobierania zdolności')
-                })
-                .finally(() => {
-                    this.isLoading = false
-                })
-        },
-        addTalent() {
-            axios.post('karta-postaci/' + this.heroId + '/add-talent', {talentId: this.newTalentId})
-                .then((response) => {
-                    this.dialog = false;
-                    this.newTalentId = null;
-                    this.$toast.success('Pomyślnie dodano zdolność')
-                    this.$emit('talent-added', response.data)
-                })
-                .catch(error => {
-                    console.error(error);
-                    this.$toast.error(error.response.data.message, {duration: 10000})
-                });
-        },
-    },
-    watch: {
-        dialog: function () {
-            if (this.dialog) {
-                this.getTalents();
-            }
-        }
-    }
+const getTalents = (): void => {
+    isLoading.value = true;
+    axios
+        .get('zdolnosci/get-talents?withoutOwned=' + props.heroId)
+        .then(response => {
+            talents.value = response.data
+        })
+        .catch(error => {
+            console.log(error)
+            toast.error('Wystąpił błąd podczas pobierania zdolności')
+        })
+        .finally(() => {
+            isLoading.value = false
+        })
+};
+const addTalent = (): void => {
+    axios
+        .post('karta-postaci/' + props.heroId + '/add-talent', {talentId: newTalentId.value})
+        .then((response) => {
+            dialog.value = false;
+            newTalentId.value = null;
+            toast.success('Pomyślnie dodano zdolność')
+            emits('talentAdded', response.data)
+        })
+        .catch(error => {
+            console.error(error);
+            toast.error(error.response.data.message, {duration: 10000})
+        });
 }
+
+watch(dialog, (newValue) => {
+    if (newValue) {
+        getTalents();
+    }
+})
 </script>
 
 <style scoped>
