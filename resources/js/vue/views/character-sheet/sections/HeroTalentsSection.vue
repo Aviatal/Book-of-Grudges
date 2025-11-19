@@ -10,7 +10,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24"
                 viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
+                stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
             >
@@ -42,44 +42,40 @@
         </transition>
     </div>
 </template>
-
-<script>
+<script setup lang="ts">
 import AddTalentModal from "../../../components/character-sheet/AddTalentModal.vue";
+import {ref, defineProps, computed} from "vue";
+import {Talent} from "../../../../types/Talent";
+import {useToast} from "vue-toast-notification";
+import axios from "axios";
 
-export default {
-    components: {AddTalentModal},
-    props: {
-        talentsData: Object,
-        heroId: Number
-    },
-    data() {
-        return {
-            isOpen: false,
-        };
-    },
-    computed: {
-        talents() {
-            return this.talentsData.sort((a, b) => a.name.localeCompare(b.name));
-        }
-    },
-    methods: {
-        toggleOpen() {
-            this.isOpen = !this.isOpen;
-        },
-        handleNewTalent(newTalent) {
-            this.talentsData.push(newTalent);
-        },
-        removeTalent(talent, index) {
-            axios.post('karta-postaci/' + this.heroId + '/drop-talent', {talent: talent})
-                .then(response => {
-                    this.talents.splice(index, 1)
-                    this.$toast.success(response.data.message)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.$toast.error('Wystąpił błąd podczas usuwania talentu')
-                })
-        },
-    }
+const props = defineProps<{
+    talentsData: Talent[],
+    heroId: number
+}>();
+const toast = useToast();
+
+const isOpen = ref<boolean>(false);
+const talents = computed(() => props.talentsData.sort((a, b) => a.name.localeCompare(b.name)));
+
+const toggleOpen = (): void => {
+    isOpen.value = !isOpen.value;
 };
+
+const handleNewTalent = (newTalent: Talent): void => {
+    props.talentsData.push(newTalent);
+};
+
+const removeTalent = (talent: Talent, index: number): void => {
+    axios
+        .post('karta-postaci/' + props.heroId + '/drop-talent', {talent: talent})
+        .then(response => {
+            talents.value.splice(index, 1)
+            toast.success(response.data.message)
+        })
+        .catch((error) => {
+            console.log(error);
+            toast.error('Wystąpił błąd podczas usuwania talentu')
+        })
+}
 </script>
