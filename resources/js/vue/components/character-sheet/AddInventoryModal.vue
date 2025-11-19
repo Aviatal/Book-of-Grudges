@@ -75,13 +75,13 @@ const nameRules = ref<any[]>([
 ]);
 
 const isFormValid = computed(() => {
-    nameRules.value.every(rule => rule(newItem.value.name) === true)
+    return nameRules.value.every(rule => rule(newItem.value.name) === true)
 });
 
 const addItem = () => {
     if (isFormValid.value) {
         axios
-            .post('karta-postaci/' + this.heroId + '/add-inventory-item', newItem.value)
+            .post('karta-postaci/' + props.heroId + '/add-inventory-item', newItem.value)
             .then((response) => {
                 dialog.value = false;
                 newItem.value = { name: '', loading: 0, description: '' };
