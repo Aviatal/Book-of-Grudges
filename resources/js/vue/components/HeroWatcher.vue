@@ -1,20 +1,32 @@
 <template>
-    <audio ref="experienceNotificationSound" muted="muted"><source src="/public/sounds/notification_alert.mp3"></audio>
-    <audio ref="fortunePointsNotificationSound" muted="muted"><source src="/public/sounds/fp-added-notification.mp3"></audio>
+    <audio ref="experienceSound" muted="muted">
+        <source src="/public/sounds/notification_alert.mp3">
+    </audio>
+
+    <audio ref="fortuneSound" muted="muted">
+        <source src="/public/sounds/fp-added-notification.mp3">
+    </audio>
 </template>
 <script setup lang="ts">
-import { useEcho } from "@laravel/echo-vue";
-import { defineProps } from "vue";
-import Echo from "laravel-echo";
+import { defineProps, ref } from "vue";
 
 const props = defineProps<{
     heroId: number
 }>();
+
+const experienceSound = ref<HTMLAudioElement | null>(null);
+const fortuneSound = ref<HTMLAudioElement | null>(null);
 console.log("Hero ID:", props.heroId)
 window.Echo.private(`hero.${props.heroId}`)
     .listen('.hero.experience-points-added', (e) => {
-        console.log("EVENT PRZYSZEDŁ!", e);
-        alert("test");
+        experienceSound.value.muted = false;
+        experienceSound.value.play().catch(err => console.error(err));
+        customSwal.fire({
+            title: `Otrzymałeś ${e.experiencePoints} punktów doświadczenia!`,
+            text: e.message,
+            confirmButtonText: "Dlaczego tak mało?!",
+            width: '30%'
+        })
     });
 
 </script>
@@ -57,12 +69,7 @@ window.Echo.private(`hero.${props.heroId}`)
 <!--                if (data.type === 'EXPERIENCE') {-->
 <!--                    this.$refs.experienceNotificationSound.play();-->
 <!--                    this.$emit('experience-changed', data.amount);-->
-<!--                    customSwal.fire({-->
-<!--                        title: `Otrzymałeś ${data.amount} punktów doświadczenia!`,-->
-<!--                        text: data.message,-->
-<!--                        confirmButtonText: "Dlaczego tak mało?!",-->
-<!--                        width: '30%'-->
-<!--                    })-->
+
 <!--                } else if (data.type === 'FORTUNE_POINTS') {-->
 <!--                    this.$refs.fortunePointsNotificationSound.play();-->
 <!--                    this.$emit('fortune-points-changed');-->

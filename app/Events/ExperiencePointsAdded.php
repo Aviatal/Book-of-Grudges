@@ -17,7 +17,7 @@ class ExperiencePointsAdded implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $heroId, public int $experiencePoints){}
+    public function __construct(public int $heroId, public int $experiencePoints, public string $additionalMessage = ''){}
 
     public function broadcastOn(): Channel
     {

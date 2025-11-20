@@ -24,24 +24,20 @@ class ExperienceController extends Controller
     public function saveExperience(Request $request)
     {
         $commonExp = $request->get('commonExperience', 0);
-        $insertData = [];
+        $notifications = [];
 
         foreach ($request->get('heroesExperience') as $heroId => $experience) {
-            ExperiencePointsAdded::dispatch($heroId, $commonExp + $experience);
-//            event(new ExperiencePointsAdded($heroId, $commonExp + $experience));
-
-            $insertData[] = [
+            $notifications[] = [
                 'hero_id' => $heroId,
-                'type' => HeroUpdate::TYPES['EXP'],
-                'read' => 0,
                 'added_amount' => $commonExp + $experience,
                 'additional_note' => '',
-                'created_at' => now(),
-                'updated_at' => now()
             ];
         }
         foreach ($request->get('heroesNotes') as $heroId => $note) {
             $insertData[$heroId]['additional_note'] = $note;
+        }
+        foreach ($notifications as $notification) {
+            event(new \App\Events\ExperiencePointsAdded($notification['hero_id'], $notification['added_amount'], $notification['additional_note']));
         }
 
         try {
