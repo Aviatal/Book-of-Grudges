@@ -16,6 +16,7 @@ useEcho(
     (e) => {
         console.log("Odebrano event:");
         console.log(e);
+        alert('test')
     },
 );
 </script>
