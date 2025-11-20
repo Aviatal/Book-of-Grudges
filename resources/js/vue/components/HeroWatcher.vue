@@ -9,6 +9,7 @@ import { defineProps } from "vue";
 const props = defineProps<{
     heroId: number
 }>();
+console.log("Hero ID:", props.heroId)
 
 useEcho(
     `hero.${props.heroId}`,
