@@ -27,7 +27,7 @@ class ExperienceController extends Controller
         $notifications = [];
 
         foreach ($request->get('heroesExperience') as $heroId => $experience) {
-            $notifications[] = [
+            $notifications[$heroId] = [
                 'hero_id' => $heroId,
                 'added_amount' => $commonExp + $experience,
                 'additional_note' => '',
