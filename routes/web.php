@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ExperiencePointsAdded;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\Panel\FortunePointsController;
@@ -11,6 +12,9 @@ use App\Http\Controllers\WeaponsController;
 use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 Auth::routes();
+Route::get('/testevent', function (){
+    event(new ExperiencePointsAdded(4, 421));
+});
 
 Route::group(['prefix' => 'bronie'], function () {
     Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');

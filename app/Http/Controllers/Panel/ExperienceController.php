@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
+use App\Events\ExperiencePointsAdded;
 use App\Http\Controllers\Controller;
 use App\Models\HeroUpdate;
 use App\Models\Hero;
@@ -26,6 +27,9 @@ class ExperienceController extends Controller
         $insertData = [];
 
         foreach ($request->get('heroesExperience') as $heroId => $experience) {
+            ExperiencePointsAdded::dispatch($heroId, $commonExp + $experience);
+//            event(new ExperiencePointsAdded($heroId, $commonExp + $experience));
+
             $insertData[] = [
                 'hero_id' => $heroId,
                 'type' => HeroUpdate::TYPES['EXP'],
@@ -41,7 +45,6 @@ class ExperienceController extends Controller
         }
 
         try {
-            HeroUpdate::query()->create($insertData);
         } catch (\Throwable $exception) {
             \Log::error('Error during updating experience. Transaction rolled back.');
             \Log::error($exception);

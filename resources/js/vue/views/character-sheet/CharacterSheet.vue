@@ -41,8 +41,7 @@
                 @get-hero="getHero"
             ></hero-inventory-section>
             <hero-watcher
-                @experience-changed="handleAddExperience"
-                @fortune-points-changed="handleAddFortunePoints"
+                :hero-id="hero.id"
             ></hero-watcher>
         </template>
         <template v-else>
