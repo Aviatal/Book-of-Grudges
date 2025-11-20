@@ -11,19 +11,12 @@ const props = defineProps<{
     heroId: number
 }>();
 console.log("Hero ID:", props.heroId)
-Echo.channel(`hero.${props.heroId}`)
-    .listen('ero.experience-points-added', (e) => {
-        console.log("Odebrano event:");
-        console.log(e);
-        alert('test')
+window.Echo.private(`hero.${props.heroId}`)
+    .listen('.hero.experience-points-added', (e) => {
+        console.log("EVENT PRZYSZEDŁ!", e);
+        alert("test");
     });
-// useEcho(
-//     `hero.${props.heroId}`,
-//     "hero.experience-points-added",
-//     (e) => {
-//
-//     },
-// );
+
 </script>
 <!--<script>-->
 <!--import {echo} from "../../echo.ts";-->
