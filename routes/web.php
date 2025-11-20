@@ -13,7 +13,7 @@ use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 Auth::routes();
 Route::get('/testevent', function (){
-    ExperiencePointsAdded::dispatch(4, 20);
+    event(new \App\Events\ExperiencePointsAdded(4, 20));
 });
 
 Route::group(['prefix' => 'bronie'], function () {
