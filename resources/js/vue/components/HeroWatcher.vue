@@ -11,7 +11,7 @@ const props = defineProps<{
 }>();
 
 useEcho(
-    `private-hero.${props.heroId}`,
+    `hero.${props.heroId}`,
     "hero.experience-points-added",
     (e) => {
         console.log("Odebrano event:");
