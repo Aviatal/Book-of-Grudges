@@ -34,7 +34,7 @@ class ExperienceController extends Controller
             ];
         }
         foreach ($request->get('heroesNotes') as $heroId => $note) {
-            $insertData[$heroId]['additional_note'] = $note;
+            $notifications[$heroId]['additional_note'] = $note;
         }
         foreach ($notifications as $notification) {
             event(new \App\Events\ExperiencePointsAdded($notification['hero_id'], $notification['added_amount'], $notification['additional_note']));

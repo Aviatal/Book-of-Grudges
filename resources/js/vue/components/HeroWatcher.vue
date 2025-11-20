@@ -8,7 +8,7 @@
     </audio>
 </template>
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
+import {defineProps, onMounted, ref} from "vue";
 
 const props = defineProps<{
     heroId: number
@@ -23,7 +23,7 @@ window.Echo.private(`hero.${props.heroId}`)
         experienceSound.value.play().catch(err => console.error(err));
         customSwal.fire({
             title: `Otrzymałeś ${e.experiencePoints} punktów doświadczenia!`,
-            text: e.message,
+            text: e.additionalMessage,
             confirmButtonText: "Dlaczego tak mało?!",
             width: '30%'
         })
