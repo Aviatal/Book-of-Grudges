@@ -5,21 +5,25 @@
 <script setup lang="ts">
 import { useEcho } from "@laravel/echo-vue";
 import { defineProps } from "vue";
+import Echo from "laravel-echo";
 
 const props = defineProps<{
     heroId: number
 }>();
 console.log("Hero ID:", props.heroId)
-
-useEcho(
-    `hero.${props.heroId}`,
-    "hero.experience-points-added",
-    (e) => {
+Echo.channel(`hero.${props.heroId}`)
+    .listen('ero.experience-points-added', (e) => {
         console.log("Odebrano event:");
         console.log(e);
         alert('test')
-    },
-);
+    });
+// useEcho(
+//     `hero.${props.heroId}`,
+//     "hero.experience-points-added",
+//     (e) => {
+//
+//     },
+// );
 </script>
 <!--<script>-->
 <!--import {echo} from "../../echo.ts";-->
