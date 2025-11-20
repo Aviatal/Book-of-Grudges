@@ -12,7 +12,7 @@ const props = defineProps<{
 
 useEcho(
     `hero.${props.heroId}`,
-    "ExperiencePointsAdded",
+    "hero.experience-points-added",
     (e) => {
         console.log("Odebrano event:");
         console.log(e);
