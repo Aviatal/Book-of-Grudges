@@ -8,10 +8,14 @@
     </audio>
 </template>
 <script setup lang="ts">
-import {defineProps, onMounted, ref} from "vue";
+import {defineProps, defineEmits, ref} from "vue";
 
 const props = defineProps<{
     heroId: number
+}>();
+const emits = defineEmits<{
+    experienceChanged: [amount: number],
+    fortunePointsChanged: []
 }>();
 
 const experienceSound = ref<HTMLAudioElement | null>(null);
@@ -26,7 +30,8 @@ window.Echo.private(`hero.${props.heroId}`)
             text: e.additionalMessage,
             confirmButtonText: "Dlaczego tak mało?!",
             width: '30%'
-        })
+        });
+        emits('experienceChanged', e.experiencePoints);
     });
 
 </script>
