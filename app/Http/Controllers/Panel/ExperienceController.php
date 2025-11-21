@@ -38,7 +38,9 @@ class ExperienceController extends Controller
         }
 
         try {
-            foreach ($notifications as $notification) {
+            foreach ($notifications as $heroId => $notification) {
+                //TODO:: Zmniejszyć ilość zapytań
+                Hero::query()->where('id', $heroId)->increment('current_experience', $notification[$heroId]['added_amount']);
                 event(new \App\Events\ExperiencePointsAdded($notification['hero_id'], $notification['added_amount'], $notification['additional_note']));
             }
         } catch (\Throwable $exception) {
