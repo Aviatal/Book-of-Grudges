@@ -8,6 +8,6 @@ Schedule::call(static function () {
     $heroes = \App\Models\Hero::query()->with('characteristics')->get();
     foreach ($heroes as $hero)
     {
-        $hero->update(['fortune_points' => $hero->characteristics['PP']->start_value]);
+        $hero->update(['fortune_points' => $hero->characteristics['PP']->current_value]);
     }
-})->dailyAt('03:10');
+})->dailyAt('20:40');
