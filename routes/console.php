@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\Artisan;
 
 Schedule::call(static function () {
     Log::info('Updating fortune points');;
-    $heroes = \App\Models\Hero::query()->with('characteristics')->get();
+    $heroes = \App\Models\Hero::query()->with('characteristic')->get();
     foreach ($heroes as $hero)
     {
-        $hero->update(['fortune_points' => $hero->characteristics['PP']->current_value]);
+        $hero->update(['fortune_points' => $hero->getRelation('characteristic')['PP']->current_value]);
     }
-})->dailyAt('20:40');
+})->dailyAt('21:35');
