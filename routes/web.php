@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
         Route::post('/{hero}/edit-inventory-item', [CharactersController::class, 'editItem'])->name('character-sheet.edit-item');
         Route::post('/{hero}/drop-item-from-inventory', [CharactersController::class, 'dropInventoryItem'])->name('character-sheet.drop-inventory-item');
+
+        Route::patch('/{hero}/spend-fortune-point', [CharactersController::class, 'spendFortunePoint'])->name('character-sheet.spend-fortune-point');
+        Route::post('/{hero}/log-fortune-point-satisfaction', [CharactersController::class, 'logFortunePointsSatisfaction'])->name('character-sheet.log-fortune-point-satisfaction');
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');

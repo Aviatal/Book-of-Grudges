@@ -2,18 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NotEnoughFortunePointsException;
 use App\Models\Armor;
 use App\Models\Characteristic;
 use App\Models\Hero;
 use App\Models\HeroInventory;
 use App\Models\Talent;
 use App\Models\Weapon;
+use App\Services\FortunePointSatisfactionService;
+use App\Services\HeroService;
 use Auth;
 use DB;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CharactersController extends Controller
 {
+    private HeroService $heroService;
+    private FortunePointSatisfactionService $fortunePointSatisfactionService;
+    public function __construct()
+    {
+        $this->heroService = new HeroService();
+        $this->fortunePointSatisfactionService = new FortunePointSatisfactionService();
+    }
+
     public function getHero(int $userId)
     {
         if ($userId !== Auth::user()->getAuthIdentifier()) {
@@ -36,7 +49,7 @@ class CharactersController extends Controller
         return view('Pages.character-sheet', compact('id'));
     }
 
-    public function updateHero(Request $request, Hero $hero): ?\Illuminate\Http\JsonResponse
+    public function updateHero(Request $request, Hero $hero): ?JsonResponse
     {
         try {
             if (!$request->has(['field', 'value'])) {
@@ -262,7 +275,7 @@ class CharactersController extends Controller
         ]));
     }
 
-    public function editItem(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
+    public function editItem(Request $request, Hero $hero): JsonResponse
     {
         $item = $request->get('item');
         HeroInventory::query()->where('hero_id', $hero->id)->where('id', $item['id'])->update([
@@ -316,5 +329,30 @@ class CharactersController extends Controller
             'age' => 0,
             'gender' => 'M',
         ]);
+    }
+
+    public function spendFortunePoint(Hero $hero): ?JsonResponse
+    {
+        try {
+            $this->heroService->spendFortunePoint($hero);
+            return response()->json('ok', Response::HTTP_OK);
+        } catch (NotEnoughFortunePointsException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR SPENDING FORTUNE POINTS: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się wydać punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function logFortunePointsSatisfaction(Request $request, Hero $hero): ?JsonResponse
+    {
+
+        try {
+            $this->fortunePointSatisfactionService->logSatisfaction($request, $hero);
+            return response()->json('ok', Response::HTTP_OK);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR LOGGING FORTUNE POINTS SATISFACTION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się zapisać oceny punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

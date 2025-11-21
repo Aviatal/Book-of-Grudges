@@ -69,6 +69,7 @@ import {CharacteristicPivot, Hero} from "../../../types/Hero";
 import {onMounted, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 import axios from "axios";
+import { emitter } from '../../../emitter'
 
 
 const props = defineProps({
@@ -137,8 +138,10 @@ const handleAddFortunePoints = () => {
     }
     hero.value.fortune_points++;
 }
-
 onMounted(() => {
     getHero();
+    emitter.on('luck-spent', () => {
+        hero.value.fortune_points--
+    })
 })
 </script>

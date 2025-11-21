@@ -56,13 +56,20 @@
                 </v-col>
 
                 <v-col cols="12" sm="6" lg="6">
-                    <v-text-field
+                    <div class="text-center text-[#d4af37] text-sm font-semibold my-1">
+                        Punkty Szczęścia
+                    </div>
+
+                    <v-rating
                         v-model="hero.fortune_points"
-                        label="Punkty Szczęścia"
-                        class="custom-input w-full"
-                        variant="filled"
-                        @change="updateHero('fortune_points')"
-                    ></v-text-field>
+                        :length="hero.fortune_points"
+                        color="grey-darken-3"
+                        active-color="red-darken-4"
+                        empty-icon="mdi-skull"
+                        full-icon="mdi-skull"
+                        hover
+                        disabled
+                    ></v-rating>
                 </v-col>
 
                 <v-col cols="12">
