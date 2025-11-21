@@ -24,13 +24,6 @@ class FortunePointsController extends Controller
     {
         $heroId = $request->get('heroId');
         Hero::query()->where('id', $heroId)->increment('fortune_points');
-        HeroUpdate::query()->create([
-            'hero_id' => $heroId,
-            'type' => HeroUpdate::TYPES['FP'],
-            'read' => 0,
-            'added_amount' => 1,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        event(new \App\Events\FortunePointsAdded($heroId));
     }
 }

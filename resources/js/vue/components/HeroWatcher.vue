@@ -32,6 +32,17 @@ window.Echo.private(`hero.${props.heroId}`)
             width: '30%'
         });
         emits('experienceChanged', e.experiencePoints);
+    })
+    .listen('.hero.fortune-points-added', () => {
+        fortuneSound.value.muted = false;
+        fortuneSound.value.play().catch(err => console.error(err));
+        customSwal.fire({
+            title: `Gratulacje!`,
+            text: "Otrzymałeś punkt szczęścia!",
+            confirmButtonText: "Dziękuję, wspaniały Mistrzu Gry!",
+            width: '30%'
+        })
+        emits('fortunePointsChanged');
     });
 
 </script>
