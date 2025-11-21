@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
-use App\Events\ExperiencePointsAdded;
 use App\Http\Controllers\Controller;
-use App\Models\HeroUpdate;
 use App\Models\Hero;
 use App\Models\User;
 use Illuminate\Http\Request;

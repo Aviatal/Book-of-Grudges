@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Armor;
 use App\Models\Characteristic;
 use App\Models\Hero;
-use App\Models\HeroCharacteristic;
 use App\Models\HeroInventory;
-use App\Models\HeroUpdate;
-use App\Models\Skill;
 use App\Models\Talent;
 use App\Models\Weapon;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class CharactersController extends Controller
 {
@@ -38,66 +34,6 @@ class CharactersController extends Controller
     public function index(Request $request, int $id)
     {
         return view('Pages.character-sheet', compact('id'));
-    }
-
-    public function heroStateWatch(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
-    {
-        ini_set('max_execution_time', 0);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('X-Accel-Buffering: no');
-        header('Connection: keep-alive');
-        return response()->stream(function () use ($request) {
-            while (true) {
-                $user = $request->user();
-                Log::debug('SSE loop tick for user: ' . $user->id);
-
-                $heroUpdate = HeroUpdate::query()
-                    ->where('hero_id', $user->hero->id)
-                    ->where('read', 0)
-                    ->latest()
-                    ->first();
-                if (!$heroUpdate) {
-                    \Log::info('NO HERO UPDATE FOUND');
-                }
-
-
-                if ($heroUpdate) {
-                    if ($heroUpdate->type === HeroUpdate::TYPES['EXP']) {
-                        Log::info('UPDATEEEE');
-                        echo "retry: 3000\n";
-                        echo "data: " . json_encode([
-                                'amount' => $heroUpdate->added_amount,
-                                'type' => $heroUpdate->type,
-                                'message' => $heroUpdate->additional_note ?? 'Dobra gra!',
-                            ], JSON_THROW_ON_ERROR) . "\n\n";
-                        ob_flush();
-                        flush();
-                        $user->hero->update(['current_experience' => $user->hero->current_experience + $heroUpdate->added_amount]);
-                    } else if ($heroUpdate->type === HeroUpdate::TYPES['FP']) {
-                        Log::info('UPDATEEEE');
-                        echo "retry: 3000\n";
-                        echo "data: " . json_encode([
-                                'amount' => $heroUpdate->added_amount,
-                                'type' => $heroUpdate->type,
-                            ], JSON_THROW_ON_ERROR) . "\n\n";
-                        ob_flush();
-                        flush();
-                        $user->hero->increment('fortune_points', $heroUpdate->added_amount);
-                    }
-                    $heroUpdate->read = 1;
-                    $heroUpdate->save();
-                }
-
-                sleep(5);
-            }
-
-        }, 200, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
-            'X-Accel-Buffering' => 'no',
-            'Connection' => 'keep-alive',
-        ]);
     }
 
     public function updateHero(Request $request, Hero $hero): ?\Illuminate\Http\JsonResponse
