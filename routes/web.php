@@ -12,9 +12,6 @@ use App\Http\Controllers\WeaponsController;
 use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 Auth::routes();
-Route::get('/testevent', function (){
-    event(new \App\Events\ExperiencePointsAdded(4, 20));
-});
 
 Route::group(['prefix' => 'bronie'], function () {
     Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');
@@ -35,8 +32,6 @@ Route::group(['prefix' => 'zdolnosci'], function () {
 });
 
 Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
-
-Route::get('/sse/hero-watcher', [CharactersController::class, 'heroStateWatch']);
 
 Route::middleware('auth')->group(function (){
     Route::get('/', function () {
