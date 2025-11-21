@@ -135,7 +135,7 @@ const handleAddFortunePoints = () => {
     if (!hero.value) {
         return;
     }
-    hero.value.current_experience++;
+    hero.value.fortune_points++;
 }
 
 onMounted(() => {
