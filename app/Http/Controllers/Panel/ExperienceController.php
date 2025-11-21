@@ -21,7 +21,7 @@ class ExperienceController extends Controller
         return view('Panel.experience.experience_forms', compact('activeUsers'));
     }
 
-    public function saveExperience(Request $request)
+    public function saveExperience(Request $request): void
     {
         $commonExp = $request->get('commonExperience', 0);
         $notifications = [];
@@ -36,11 +36,11 @@ class ExperienceController extends Controller
         foreach ($request->get('heroesNotes') as $heroId => $note) {
             $notifications[$heroId]['additional_note'] = $note;
         }
-        foreach ($notifications as $notification) {
-            event(new \App\Events\ExperiencePointsAdded($notification['hero_id'], $notification['added_amount'], $notification['additional_note']));
-        }
 
         try {
+            foreach ($notifications as $notification) {
+                event(new \App\Events\ExperiencePointsAdded($notification['hero_id'], $notification['added_amount'], $notification['additional_note']));
+            }
         } catch (\Throwable $exception) {
             \Log::error('Error during updating experience. Transaction rolled back.');
             \Log::error($exception);
