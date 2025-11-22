@@ -16,8 +16,8 @@
 </head>
 <body class="bg-[#2b2a27] text-[#e4d8b4] font-serif flex flex-col min-h-screen">
 <div id="app">
-    <header class="bg-[#3b3a36] py-6 shadow-lg border-b-4 border-[#8b5a2b] text-center">
-        <h1 class="text-4xl font-bold text-[#d4af37] tracking-wide">Book of Grudges</h1>
+    <header class="bg-[#3b3a36] py-6 shadow-lg border-b-4 border-[#8b5a2b] text-center font-(family-name:--Cinzel)">
+        <h1 class="text-4xl font-bold text-[#d4af37] tracking-widest">BOOK OF GRUDGES</h1>
     </header>
 
     <main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
