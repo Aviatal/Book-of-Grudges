@@ -11,6 +11,7 @@ export interface Weapon {
     id: number,
     is_ranged: boolean,
     name: string,
+    price: number,
     loading: number,
     category: string,
     power: number,

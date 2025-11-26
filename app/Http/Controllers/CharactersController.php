@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\NotEnoughFortunePointsException;
+use App\Exceptions\NotEnoughMoneyException;
 use App\Models\Armor;
 use App\Models\Characteristic;
 use App\Models\Hero;
@@ -11,6 +12,7 @@ use App\Models\Talent;
 use App\Models\Weapon;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
+use App\Services\TransactionsService;
 use Auth;
 use DB;
 use Illuminate\Http\JsonResponse;
@@ -273,6 +275,21 @@ class CharactersController extends Controller
             'loading' => $request->get('loading'),
             'description' => $request->get('description')
         ]));
+    }
+
+    public function equipMarketplaceItem(Request $request, int $id): ?JsonResponse
+    {
+        try {
+            $service = new TransactionsService();
+            $service->equipMarketplaceItem($request, $id);
+        } catch (NotEnoughMoneyException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR EQUIPPING MARKETPLACE ITEM', [
+                'exception' => $exception,
+            ]);
+            return response()->json(['message' => 'Wystąpił błąd podczas zakładania ekwipunku. Majątek nie został pomniejszony'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function editItem(Request $request, Hero $hero): JsonResponse

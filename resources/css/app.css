@@ -134,3 +134,19 @@ body {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+
+.v-overlay__content .v-list {
+    background-color: #3a3935 !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #d4af37;
+}
+
+.v-overlay__content .v-list-item--active,
+.v-overlay__content .v-list-item:hover {
+    background-color: rgba(212, 175, 55, 0.15) !important;
+    color: #d4af37 !important;
+}
+
+.v-overlay__content .v-list-item-title {
+    font-family: 'Merriweather', serif;
+}

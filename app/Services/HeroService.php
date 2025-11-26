@@ -4,14 +4,14 @@ namespace App\Services;
 
 use App\Exceptions\NotEnoughFortunePointsException;
 use App\Models\Hero;
-use App\Repositories\HeroRepository;
+use App\Repositories\HeroesRepository;
 
 class HeroService
 {
-    private HeroRepository $heroRepository;
+    private HeroesRepository $heroesRepository;
     public function __construct()
     {
-        $this->heroRepository = new HeroRepository();
+        $this->heroesRepository = new HeroesRepository();
     }
     /**
      * @throws NotEnoughFortunePointsException
@@ -21,6 +21,6 @@ class HeroService
         if ($hero->fortune_points === 0) {
             throw new NotEnoughFortunePointsException('Nie masz już punktów szczęścia, powodzenia!');
         }
-        $this->heroRepository->spendFortunePoint($hero);
+        $this->heroesRepository->spendFortunePoint($hero);
     }
 }

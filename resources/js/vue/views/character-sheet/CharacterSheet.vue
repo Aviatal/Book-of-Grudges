@@ -42,6 +42,7 @@
             ></hero-inventory-section>
             <hero-watcher
                 :hero-id="hero.id"
+                @add-new-item="handleNewItem"
                 @experience-changed="handleAddExperience"
                 @fortune-points-changed="handleAddFortunePoints"
             ></hero-watcher>
@@ -70,6 +71,9 @@ import {onMounted, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 import axios from "axios";
 import { emitter } from '../../../emitter'
+import {MarketplaceItem} from "../../../types/MarketplaceItem";
+import {Weapon} from "../../../types/Weapon";
+import {Armor} from "../../../types/Armor";
 
 
 const props = defineProps({
@@ -104,6 +108,19 @@ const handleAddCharacteristic = (characteristicName: string, characteristic: Cha
     hero.value.current_experience -= spentExperience;
     if (changeCurrentWounds > 0) {
         hero.value.current_wounds = changeCurrentWounds
+    }
+}
+const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string) => {
+    switch (type) {
+        case 'armor':
+            hero.value.armor.push(newItem)
+            break;
+        case 'weapon':
+            hero.value.weapons.push(newItem);
+            break;
+        case 'marketplace':
+            hero.value.inventory.push(newItem);
+            break;
     }
 }
 const refreshCharacteristic = (characteristics: Record<string, { pivot: CharacteristicPivot }>) => {

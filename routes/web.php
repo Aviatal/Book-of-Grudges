@@ -1,11 +1,11 @@
 <?php
 
-use App\Events\ExperiencePointsAdded;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
+use App\Http\Controllers\Panel\PurchaseController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SkillsAndTalentsController;
 use App\Http\Controllers\WeaponsController;
@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/drop-talent', [CharactersController::class, 'dropTalent'])->name('character-sheet.drop-talent');
 
         Route::post('/{hero}/add-inventory-item', [CharactersController::class, 'addItem'])->name('character-sheet.add-item');
+        Route::post('/{hero}/equip-marketplace-item', [CharactersController::class, 'equipMarketplaceItem'])->name('character-sheet.add-marketplace-item');
         Route::post('/{hero}/edit-inventory-item', [CharactersController::class, 'editItem'])->name('character-sheet.edit-item');
         Route::post('/{hero}/drop-item-from-inventory', [CharactersController::class, 'dropInventoryItem'])->name('character-sheet.drop-inventory-item');
 
@@ -68,13 +69,6 @@ Route::middleware('auth')->group(function (){
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
-
-    Route::get('/migrate-fresh', function(){
-        ini_set('memory_limit', '4069M');
-        ini_set('max_execution_time', 5000);
-        \Artisan::call('migrate:fresh', ['--seed' => true]);
-        dd("Migracje zostały wykonane");
-    });
 });
 
 //PANEL
@@ -86,5 +80,10 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
     Route::prefix('fortune-points')->group(function () {
         Route::get('/show-fp-form', [FortunePointsController::class, 'getFortunePointsManagement'])->name('panel.fortune-points.show-fp-management-form');
         Route::post('/assign-fortune-point', [FortunePointsController::class, 'assignFortunePoint'])->name('panel.fortune-points.save-experience');
+    });
+
+    Route::prefix('purchases')->group(function () {
+        Route::get('/', [PurchaseController::class, 'index'])->name('panel.purchases.make-purchase-form');
+        Route::post('/', [PurchaseController::class, 'sendPurchase'])->name('panel.purchases.sen-purchase');
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\NotEnoughMoneyException;
 use App\Helpers\Traits\BelongsToManyKeyBy;
 use App\Helpers\Traits\HasManyKeyBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,40 @@ class Hero extends Model
 {
     use HasFactory, HasManyKeyBy, BelongsToManyKeyBy;
     protected $guarded = ['id'];
+    const int GOLD_CROWS_TO_BRASS_ENCOUNTER = 240;
+    const int SILVER_SHILLINGS_TO_BRASS_ENCOUNTER = 12;
+
+    /**
+     * @throws NotEnoughMoneyException
+     */
+    public function pay(int $price): void
+    {
+        $totalHeroWealth = $this->getWealthInBrass();
+        if ($totalHeroWealth < $price) {
+            throw new NotEnoughMoneyException();
+        }
+        $wealthLeft = $totalHeroWealth - $price;
+        $goldCrowns = floor($wealthLeft / self::GOLD_CROWS_TO_BRASS_ENCOUNTER);
+        $wealthLeft %= self::GOLD_CROWS_TO_BRASS_ENCOUNTER;
+
+        $silverShillings = floor($wealthLeft / self::SILVER_SHILLINGS_TO_BRASS_ENCOUNTER);
+        $wealthLeft %= self::SILVER_SHILLINGS_TO_BRASS_ENCOUNTER;
+
+        $brassPennies = $wealthLeft;
+
+        $this->update([
+            'gold_crowns' => $goldCrowns,
+            'silver_shillings' => $silverShillings,
+            'brass_pennies' => $brassPennies,
+        ]);
+    }
+
+    private function getWealthInBrass(): int
+    {
+        return ($this->gold_crowns * self::GOLD_CROWS_TO_BRASS_ENCOUNTER) +
+            ($this->silver_shillings * self::SILVER_SHILLINGS_TO_BRASS_ENCOUNTER) +
+            $this->brass_pennies;
+    }
 
     public function user(): BelongsTo
     {
@@ -62,7 +97,7 @@ class Hero extends Model
 
     public function weapons(): BelongsToMany
     {
-        return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id')->withPivot(['additional_weapon_name']);;
+        return $this->belongsToMany(Weapon::class, 'hero_weapons', 'hero_id', 'weapon_id')->withPivot(['additional_weapon_name']);
     }
     public function skills(): BelongsToMany
     {
@@ -81,7 +116,7 @@ class Hero extends Model
                 'second_level' => 0,
                 'additional_skill_name' => null
             ]),
-            'remove' => HeroSkill::where('id', $heroSkillId)->first()->delete(),
+            'remove' => HeroSkill::where('id', $heroSkillId)->firstOrFail()->delete(),
             default => HeroSkill::updateOrCreate(['id' => $heroSkillId], $data),
         };
     }
@@ -104,5 +139,10 @@ class Hero extends Model
     public function rangedWeapons(): BelongsToMany
     {
         return $this->weapons()->where('is_ranged', 1);
+    }
+
+    public function scopeOnlyActiveUsers($query)
+    {
+        return $query->whereRelation('user', 'is_active', true);
     }
 }

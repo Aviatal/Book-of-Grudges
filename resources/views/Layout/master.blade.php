@@ -45,6 +45,13 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('panel.purchases.make-purchase-form') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Zakupy
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('home') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">
                             Front
                         </a>
