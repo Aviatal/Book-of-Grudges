@@ -24,6 +24,11 @@ interface PurchaseEvent {
     customName: string,
     price: number
 }
+interface wealthUpdateObject {
+    goldCrowns: number,
+    silverShillings: number,
+    brassPennies: number
+}
 
 const props = defineProps<{
     heroId: number
@@ -33,7 +38,9 @@ const emits = defineEmits<{
     fortunePointsChanged: [],
     addNewItem: [
         newItem: MarketplaceItem|Weapon|Armor,
-        type: string
+        type: string,
+        wealth: wealthUpdateObject,
+        equip: boolean
     ]
 }>();
 const toast = useToast();
@@ -93,7 +100,7 @@ window.Echo.private(`hero.${props.heroId}`)
                         if(response.data.message) {
                             toast.warning(response.data.message)
                         }
-                        emits('addNewItem', response.data.item.item, response.data.item.type, response.data.wealth)
+                        emits('addNewItem', response.data.item.item, response.data.item.type, response.data.wealth, result.isConfirmed)
                     })
                     .catch(error => {
                         toast.error(error.response.data.message)

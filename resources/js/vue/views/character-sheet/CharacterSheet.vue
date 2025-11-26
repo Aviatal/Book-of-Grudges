@@ -116,17 +116,19 @@ const handleAddCharacteristic = (characteristicName: string, characteristic: Cha
         hero.value.current_wounds = changeCurrentWounds
     }
 }
-const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string, wealth: wealthUpdateObject) => {
-    switch (type) {
-        case 'armor':
-            hero.value.armor.push(newItem)
-            break;
-        case 'weapon':
-            hero.value.weapons.push(newItem);
-            break;
-        case 'marketplace':
-            hero.value.inventory.push(newItem);
-            break;
+const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string, wealth: wealthUpdateObject, equip: boolean) => {
+    if (equip) {
+        switch (type) {
+            case 'armor':
+                hero.value.armor.push(newItem)
+                break;
+            case 'weapon':
+                hero.value.weapons.push(newItem);
+                break;
+            case 'marketplace':
+                hero.value.inventory.push(newItem);
+                break;
+        }
     }
     hero.value.gold_crowns = wealth.goldCrowns;
     hero.value.silver_shillings = wealth.silverShillings;
