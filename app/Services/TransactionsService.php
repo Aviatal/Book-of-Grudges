@@ -33,6 +33,7 @@ class TransactionsService
             switch ($marketplaceItem->tradeable_type) {
                 case 'App\Models\Armor':
                     $armor = $marketplaceItem->tradeable;
+                    $armor->loadMissing('locations');
                     try {
                         if (DB::table('hero_armors')->where('hero_id', $hero->id)->where('armor_id', $armor->id)->first()) {
                             throw new AlreadyEquippedException('Już nosisz taką zbroję! Dodano ją do ekwipunku.');
@@ -72,6 +73,7 @@ class TransactionsService
                     }
                 case 'App\Models\Weapon':
                     $weapon = $marketplaceItem->tradeable;
+                    $weapon->loadMissing('traits');
                     try {
                         if (DB::table('hero_weapons')->where('hero_id', $hero->id)->where('weapon_id', $weapon->id)->first()) {
                             throw new AlreadyEquippedException('Już posiadasz taką broń! Broń została schowana do ekwipunku');
