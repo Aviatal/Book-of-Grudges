@@ -18,7 +18,7 @@
                 :characteristic-data="hero.characteristic"
                 :talents-data="hero.talents"
                 :cold-weapons-data="hero.cold_weapons"
-                :ranged-weapons-data="hero.ranged_weapons"
+                :ranged-weapons-data="hero.cold_weapons"
                 @unequip-weapon="addWeaponToInventory"
             ></hero-weapons-section>
             <hero-armors-section
@@ -120,10 +120,14 @@ const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string, weal
     if (equip) {
         switch (type) {
             case 'armor':
-                hero.value.armor.push(newItem)
+                hero.value.armors.push(newItem)
                 break;
             case 'weapon':
-                hero.value.weapons.push(newItem);
+                if (newItem.is_ranged) {
+                    hero.value.ranged_weapons.push(newItem);
+                } else {
+                    hero.value.cold_weapons.push(newItem);
+                }
                 break;
             case 'marketplace':
                 hero.value.inventory.push(newItem);
