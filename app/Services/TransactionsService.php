@@ -25,7 +25,7 @@ class TransactionsService
     public function equipMarketplaceItem(Request $request, int $id): ?JsonResponse
     {
         try {
-            $marketplaceItem = MarketplaceItem::query()->findOrFail($request->input('marketplaceItemId'));
+            $marketplaceItem = MarketplaceItem::query()->findOrFail($request->input('item'));
             $hero = Hero::query()->findOrFail(Auth::user()->hero->id);
 
             DB::beginTransaction();
