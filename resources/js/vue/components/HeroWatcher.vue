@@ -98,7 +98,7 @@ window.Echo.private(`hero.${props.heroId}`)
                     })
                     .then((response) => {
                         if(response.data.item.message) {
-                            toast.warning(response.data.message)
+                            toast.warning(rresponse.data.item.message)
                         }
                         emits('addNewItem', response.data.item.item, response.data.item.type, response.data.wealth, result.isConfirmed)
                     })
