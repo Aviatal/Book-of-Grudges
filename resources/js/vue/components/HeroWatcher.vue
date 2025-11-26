@@ -97,7 +97,7 @@ window.Echo.private(`hero.${props.heroId}`)
                         equip: result.isConfirmed
                     })
                     .then((response) => {
-                        if(response.data.message) {
+                        if(response.data.item.message) {
                             toast.warning(response.data.message)
                         }
                         emits('addNewItem', response.data.item.item, response.data.item.type, response.data.wealth, result.isConfirmed)
