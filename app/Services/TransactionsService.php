@@ -51,7 +51,6 @@ class TransactionsService
                             ]
                         ]);
                     } catch (AlreadyEquippedException $exception) {
-                        \Log::error('ERROR EQUIPPING ARMOR CATCG');
                         $inventoryItem = HeroInventory::query()->create([
                             'hero_id' => $id,
                             'name' => $armor->name,

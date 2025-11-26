@@ -284,9 +284,8 @@ class CharactersController extends Controller
         } catch (NotEnoughMoneyException $exception) {
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
         } catch (\Throwable $exception) {
-            \Log::error('ERROR EQUIPPING MARKETPLACE ITEM', [
-                'exception' => $exception,
-            ]);
+            \Log::error('ERROR EQUIPPING MARKETPLACE ITEM');
+            \Log::error($exception);
             return response()->json(['message' => 'Wystąpił błąd podczas zakładania ekwipunku. Majątek nie został pomniejszony'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
