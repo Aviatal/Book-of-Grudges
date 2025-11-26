@@ -25,7 +25,7 @@ class PurchaseController extends Controller
     {
         $heroes = $this->heroesRepository->getHeroes(['id', 'name']);
         $marketplaceItems = $this->marketplaceItemsRepository->getItemsForSale();
-        return view('panel.purchases.index', compact('heroes', 'marketplaceItems'));
+        return view('Panel.purchases.index', compact('heroes', 'marketplaceItems'));
     }
     public function sendPurchase(Request $request): ?\Illuminate\Http\JsonResponse
     {
