@@ -280,8 +280,7 @@ class CharactersController extends Controller
     public function equipMarketplaceItem(Request $request, int $id): ?JsonResponse
     {
         try {
-            $service = new TransactionsService();
-            $service->equipMarketplaceItem($request, $id);
+            return new TransactionsService()->equipMarketplaceItem($request, $id);
         } catch (NotEnoughMoneyException $exception) {
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
         } catch (\Throwable $exception) {
