@@ -83,7 +83,7 @@ window.Echo.private(`hero.${props.heroId}`)
             .fire({
                 title: `Kupujesz ${e.customName}!`,
                 text: "Musisz na to wydać " + message,
-                showDenyButton: true,
+                showDenyButton: e.item.tradeable_type === 'App\\Models\\CommonItems',
                 confirmButtonText: "Schowaj do ekwipunku",
                 denyButtonText: "Zużyj natychmiast",
                 width: '30%'

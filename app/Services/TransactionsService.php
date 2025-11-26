@@ -32,7 +32,7 @@ class TransactionsService
             $hero->pay($request->input('price'));
             switch ($marketplaceItem->tradeable_type) {
                 case 'App\Models\Armor':
-                    $armor = Armor::query()->with('locations')->find($request->get('tradeable_id'));
+                    $armor = $marketplaceItem->tradeable;
                     try {
                         if (DB::table('hero_armors')->where('hero_id', $hero->id)->where('armor_id', $armor->id)->first()) {
                             throw new AlreadyEquippedException('Już nosisz taką zbroję! Dodano ją do ekwipunku.');
@@ -71,7 +71,7 @@ class TransactionsService
                         ], Response::HTTP_OK);
                     }
                 case 'App\Models\Weapon':
-                    $weapon = Weapon::query()->find($request->get('weaponId'));
+                    $weapon = $marketplaceItem->tradeable;
                     try {
                         if (DB::table('hero_weapons')->where('hero_id', $hero->id)->where('weapon_id', $weapon->id)->first()) {
                             throw new AlreadyEquippedException('Już posiadasz taką broń! Broń została schowana do ekwipunku');
@@ -97,7 +97,8 @@ class TransactionsService
                                     'pivot' => [
                                         'additional_weapon_name' => $request->input('customName', '')
                                     ]
-                                ])
+                                ]),
+                                'type' => 'weapon'
                             ],
                             'wealth' => [
                                 'goldCrowns' => $hero->gold_crowns,
