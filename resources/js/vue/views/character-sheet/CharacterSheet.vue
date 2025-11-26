@@ -80,6 +80,12 @@ const props = defineProps({
     userId: Number
 });
 
+interface wealthUpdateObject {
+    goldCrowns: number,
+    silverShillings: number,
+    brassPennies: number
+}
+
 const isLoading = ref<boolean>(true);
 const hero = ref<Hero | null>(null);
 const toast = useToast();
@@ -110,7 +116,7 @@ const handleAddCharacteristic = (characteristicName: string, characteristic: Cha
         hero.value.current_wounds = changeCurrentWounds
     }
 }
-const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string) => {
+const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string, wealth: wealthUpdateObject) => {
     switch (type) {
         case 'armor':
             hero.value.armor.push(newItem)
@@ -122,6 +128,9 @@ const handleNewItem = (newItem: MarketplaceItem|Weapon|Armor, type: string) => {
             hero.value.inventory.push(newItem);
             break;
     }
+    hero.value.gold_crowns = wealth.goldCrowns;
+    hero.value.silver_shillings = wealth.silverShillings;
+    hero.value.brass_pennies = wealth.brassPennies;
 }
 const refreshCharacteristic = (characteristics: Record<string, { pivot: CharacteristicPivot }>) => {
     if (!hero.value) {

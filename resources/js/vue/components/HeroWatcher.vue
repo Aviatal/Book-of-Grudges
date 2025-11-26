@@ -76,6 +76,7 @@ window.Echo.private(`hero.${props.heroId}`)
             .fire({
                 title: `Kupujesz ${e.customName}!`,
                 text: "Musisz na to wydać " + message,
+                showDenyButton: true,
                 confirmButtonText: "Schowaj do ekwipunku",
                 denyButtonText: "Zużyj natychmiast",
                 width: '30%'
@@ -92,7 +93,7 @@ window.Echo.private(`hero.${props.heroId}`)
                         if(response.data.message) {
                             toast.warning(response.data.message)
                         }
-                        emits('addNewItem', response.data.item, response.data.type)
+                        emits('addNewItem', response.data.item.item, response.data.item.type, response.data.wealth)
                     })
                     .catch(error => {
                         toast.error(error.response.data.message)

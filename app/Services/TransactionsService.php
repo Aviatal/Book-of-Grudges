@@ -40,8 +40,15 @@ class TransactionsService
                         $hero->armors()->syncWithoutDetaching($armor->id);
                         DB::commit();
                         return response()->json([
-                            'item' => $armor,
-                            'type' => 'armor'
+                            'item' => [
+                                'item' => $armor,
+                                'type' => 'armor'
+                            ],
+                            'wealth' => [
+                                'goldCrowns' => $hero->gold_crowns,
+                                'silverShillings' => $hero->silver_shillings,
+                                'brassPennies' => $hero->brass_pennies,
+                            ]
                         ]);
                     } catch (AlreadyEquippedException $exception) {
                         $inventoryItem = HeroInventory::query()->create([
@@ -51,9 +58,16 @@ class TransactionsService
                         ]);
                         DB::commit();
                         return response()->json([
-                            'message' => $exception->getMessage(),
-                            'item' => $inventoryItem,
-                            'type' => 'marketplace'
+                            'item' => [
+                                'message' => $exception->getMessage(),
+                                'item' => $inventoryItem,
+                                'type' => 'marketplace'
+                            ],
+                            'wealth' => [
+                                'goldCrowns' => $hero->gold_crowns,
+                                'silverShillings' => $hero->silver_shillings,
+                                'brassPennies' => $hero->brass_pennies,
+                            ]
                         ], Response::HTTP_OK);
                     }
                 case 'App\Models\Weapon':
@@ -68,21 +82,28 @@ class TransactionsService
                         DB::commit();
 
                         return response()->json([
-                            'item' => collect([
-                                'id' => $weapon->id,
-                                'is_ranged' => $weapon->is_ranged,
-                                'name' => $weapon->name,
-                                'loading' => $weapon->loading,
-                                'category' => $weapon->category,
-                                'power' => $weapon->power,
-                                'short_range' => $weapon->short_range,
-                                'long_range' => $weapon->long_range,
-                                'reload_time' => $weapon->reload_time,
-                                'traits' => $weapon->traits,
-                                'pivot' => [
-                                    'additional_weapon_name' => $request->input('customName', '')
-                                ]
-                            ])
+                            'item' => [
+                                'item' => collect([
+                                    'id' => $weapon->id,
+                                    'is_ranged' => $weapon->is_ranged,
+                                    'name' => $weapon->name,
+                                    'loading' => $weapon->loading,
+                                    'category' => $weapon->category,
+                                    'power' => $weapon->power,
+                                    'short_range' => $weapon->short_range,
+                                    'long_range' => $weapon->long_range,
+                                    'reload_time' => $weapon->reload_time,
+                                    'traits' => $weapon->traits,
+                                    'pivot' => [
+                                        'additional_weapon_name' => $request->input('customName', '')
+                                    ]
+                                ])
+                            ],
+                            'wealth' => [
+                                'goldCrowns' => $hero->gold_crowns,
+                                'silverShillings' => $hero->silver_shillings,
+                                'brassPennies' => $hero->brass_pennies,
+                            ]
                         ]);
                     } catch (AlreadyEquippedException $exception) {
                         $inventoryItem = HeroInventory::query()->create([
@@ -92,9 +113,16 @@ class TransactionsService
                         ]);
                         DB::commit();
                         return response()->json([
-                            'message' => $exception->getMessage(),
-                            'item' => $inventoryItem,
-                            'type' => 'marketplace'
+                            'item' => [
+                                'message' => $exception->getMessage(),
+                                'item' => $inventoryItem,
+                                'type' => 'marketplace'
+                            ],
+                            'wealth' => [
+                                'goldCrowns' => $hero->gold_crowns,
+                                'silverShillings' => $hero->silver_shillings,
+                                'brassPennies' => $hero->brass_pennies,
+                            ]
                         ], Response::HTTP_OK);
                     }
                 case 'App\Models\CommonItems':
@@ -105,8 +133,15 @@ class TransactionsService
                     ]);
                     DB::commit();
                     return response()->json([
-                        'item' => $inventoryItem,
-                        'type' => 'marketplace'
+                        'item' => [
+                            'item' => $inventoryItem,
+                            'type' => 'marketplace'
+                        ],
+                        'wealth' => [
+                            'goldCrowns' => $hero->gold_crowns,
+                            'silverShillings' => $hero->silver_shillings,
+                            'brassPennies' => $hero->brass_pennies,
+                        ]
                     ]);
                 default:
                     throw new BadRequestHttpException('Unknown item type: ' . $marketplaceItem->tradeable_type);
