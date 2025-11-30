@@ -46,6 +46,15 @@
                         >
                         </v-text-field>
                     </template>
+                    <template v-slot:item.power="{ item }">
+                        <template v-if="item.power === 0">S</template>
+                        <template v-else-if="item.add_hero_power">
+                            S
+                            <template v-if="item.power > 0">+</template><template v-else>-</template>
+                            {{ item.power }}
+                        </template>
+                        <template v-else>{{ item.power }}</template>
+                    </template>
                     <template v-slot:item.traits="{ item }">
                         <span v-for="(trait, index) in item.traits" :key="index" class="trait-pill">
                             {{ trait.name }}<span v-if="index < item.traits.length - 1">, </span>
@@ -87,6 +96,15 @@
                 >
                     <template v-slot:item.attack_bonus="{ item }">
                         {{ weaponPower(item) }}
+                    </template>
+                    <template v-slot:item.power="{ item }">
+                        <template v-if="item.power === 0">S</template>
+                        <template v-else-if="item.add_hero_power">
+                            S
+                            <template v-if="item.power > 0">+</template><template v-else>-</template>
+                            {{ item.power }}
+                        </template>
+                        <template v-else>{{ item.power }}</template>
                     </template>
                     <template v-slot:item.additional_weapon_name="{ item }">
                         <v-text-field
@@ -133,13 +151,18 @@ import {computed, defineProps, ref} from "vue";
 import AddWeaponModal from "../../../components/character-sheet/AddWeaponModal.vue";
 import {useToast} from "vue-toast-notification";
 import {Weapon} from "../../../../types/Weapon";
+import {Characteristic} from "../../../../types/Characteristic";
+import {Talent} from "../../../../types/Talent";
+import {TableHeader} from "../../../../types/general/TableHeader";
+import {Response} from "../../../../types/general/Response";
+import axios from "axios";
 
 const props = defineProps<{
     heroId: number,
-    characteristicData: Object,
-    talentsData: Object,
-    coldWeaponsData: Object<string, Weapon>,
-    rangedWeaponsData: Object<string, Weapon>
+    characteristicData: Characteristic,
+    talentsData: Talent[],
+    coldWeaponsData: Weapon[],
+    rangedWeaponsData: Weapon[]
 }>();
 const emits = defineEmits<{
     unequipWeapon: [weapon: any[]];
@@ -147,7 +170,7 @@ const emits = defineEmits<{
 const toast = useToast();
 
 const isOpen = ref<boolean>(false);
-const coldWeaponHeaders = ref<array<Object<string, string|boolean>>>([
+const coldWeaponHeaders = ref<TableHeader[]>([
     {title: 'Broń', align: 'start', sortable: false, value: 'name'},
     {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
     {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
@@ -155,7 +178,7 @@ const coldWeaponHeaders = ref<array<Object<string, string|boolean>>>([
     {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
     {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
 ])
-const rangedWeaponHeaders = ref<array<Object<string, string|boolean>>>([
+const rangedWeaponHeaders = ref<TableHeader[]>([
     {title: 'Broń', align: 'start', sortable: false, value: 'name'},
     {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
     {title: 'Atak', align: 'start', sortable: false, value: 'attack_bonus'},
@@ -165,14 +188,14 @@ const rangedWeaponHeaders = ref<array<Object<string, string|boolean>>>([
     {title: 'Cechy', align: 'start', sortable: false, value: 'traits'},
     {title: 'Opcje', align: 'start', sortable: false, value: 'delete'},
 ])
-const coldWeapons = computed(() => props.coldWeaponsData ?? {});
-const rangedWeapons = computed(() => props.rangedWeaponsData ?? {});
-const heroPower = computed(() => Math.max(props.characteristicData['S'].pivot.current_value, props.characteristicData['S'].pivot.start_value) ?? 0);
+const coldWeapons = computed(() => props.coldWeaponsData ?? []);
+const rangedWeapons = computed(() => props.rangedWeaponsData ?? []);
+const heroPower = computed(() => Math.floor((props.characteristicData['K'].pivot.start_value + props.characteristicData['K'].pivot.advancement) / 10) ?? 0);
 const hasBrawlTalent = computed(() => props.talentsData.some(talent => talent.name === "Bijatyka") ?? false);
 const hasStrongStrikeTalent = computed(() => props.talentsData.some(talent => talent.name === "Silny cios") ?? false);
 const hasSharpshooterTalent = computed(() => props.talentsData.some(talent => talent.name === "Strzał precyzyjny") ?? false);
 
-const toggleOpen = ():void => isOpen.value = !isOpen.value;
+const toggleOpen = ():boolean => isOpen.value = !isOpen.value;
 const handleNewWeapon = (newWeapon: Weapon): void => {
     if (!newWeapon.is_ranged) {
         coldWeapons.value.push(newWeapon)
@@ -187,7 +210,7 @@ const dropWeapon = (weapon :Weapon, index :number) => {
     }
     axios
         .post('karta-postaci/' + props.heroId + '/drop-weapon', {weapon: weapon})
-        .then(response => {
+        .then((response: Response) => {
             if (!weapon.is_ranged) {
                 coldWeapons.value.splice(index, 1)
             } else {
@@ -231,21 +254,17 @@ const updateWeapon = (weapon: Weapon) => {
 };
 const weaponPower = (weapon: Weapon) => {
     let weaponPower = 0;
-    console.log(weapon)
-
-    if (weapon.power === 'S') {
-        weaponPower += heroPower
-    } else if (weapon.power?.startsWith('S') && weapon.power.length > 1) {
-        const calculatedWeaponPower = heroPower + parseInt(weapon.power.slice(1))
+    if (weapon.power === 0) {
+        weaponPower += heroPower.value
+    } else {
+        const calculatedWeaponPower = heroPower.value + weapon.power
         weaponPower += calculatedWeaponPower;
-    } else if (!isNaN(parseInt(weapon.power))) {
-        weaponPower += weapon.power;
     }
 
     if (
         (hasBrawlTalent && weapon.name === 'Bez broni') ||
-        (weapon.name !== 'Bez broni' && weapon.is_ranged === 0 && hasStrongStrikeTalent) ||
-        (weaponPower > 0 && weapon.is_ranged === 1 && hasSharpshooterTalent)
+        (weapon.name !== 'Bez broni' && !weapon.is_ranged && hasStrongStrikeTalent.value) ||
+        (weaponPower > 0 && weapon.is_ranged && hasSharpshooterTalent.value)
     ) {
         weaponPower++;
     }
