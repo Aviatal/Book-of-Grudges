@@ -47,10 +47,15 @@
                 @fortune-points-changed="handleAddFortunePoints"
             ></hero-watcher>
         </template>
-        <template v-else>
+        <template v-else-if="isLoading">
             <div class="text-center py-8">
                 <v-progress-circular indeterminate color="amber"></v-progress-circular>
                 <p class="mt-4 text-amber-400">Ładowanie danych bohatera...</p>
+            </div>
+        </template>
+        <template v-else>
+            <div class="text-center py-8">
+                <button class="mt-4 text-amber-400">Stwórz bohatera</button>
             </div>
         </template>
     </div>
@@ -95,6 +100,9 @@ const getHero = async(): Promise<void> => {
     axios.get('karta-postaci/' + props.userId + '/get-hero')
         .then(response => {
             hero.value = response.data;
+            if (Object.keys(hero.value).length === 0) {
+                hero.value = null;
+            }
         })
         .catch(error => {
             console.log(error);
