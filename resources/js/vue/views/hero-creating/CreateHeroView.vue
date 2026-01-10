@@ -232,34 +232,34 @@ const availableRaces = ref([
     {
         id: 1,
         name: 'Człowiek',
-        description: 'Wszechstronni i ambitni mieszkańcy Imperium',
+        description: 'Wszechstronni i ambitni',
         icon: '/images/races/human.png',
-        bonuses: ['Wszechstronność', '+5 do jednej cechy'],
-        suggestedNames: ['Magnus', 'Sigmar', 'Wilhelm', 'Brunhilde', 'Katarina']
+        bonuses: ['Wszechstronność', 'Ambicja', ],
+        suggestedNames: ['Alexa', 'Felix', 'Klara', 'Otto', 'Mathilde', 'Wolfgang']
     },
     {
         id: 2,
         name: 'Krasnolud',
-        description: 'Krzepcy i odważni górnicy i rzemieślnicy',
+        description: 'Krzepcy i odważni',
         icon: '/images/races/dwarf.png',
-        bonuses: ['Odporność', '+10 Wytrzymałość', 'Noktowizja'],
-        suggestedNames: ['Gotrek', 'Thorgrim', 'Bardin', 'Valka', 'Mira']
+        bonuses: ['Pamiętliwość', 'Tradycjonalizm', 'Solisdność'],
+        suggestedNames: ['Gotrek', 'Astrid', 'Bardin', 'Greta', 'Anika', 'Thylda']
     },
     {
         id: 3,
         name: 'Elf',
-        description: 'Graccy i długowieczni strażnicy lasu',
+        description: 'Dostojni i długowieczni',
         icon: '/images/races/elf.png',
-        bonuses: ['Zręczność', '+10 Zręczność', 'Wyczulone zmysły'],
-        suggestedNames: ['Tyrion', 'Teclis', 'Alarielle', 'Araloth', 'Naestra']
+        bonuses: ['Perfekcjonizm', 'Długowieczność', 'Wyczulone zmysły'],
+        suggestedNames: ['Halion', 'Teclis', 'Ulliana', 'Aluthol', 'Dolwen']
     },
     {
         id: 4,
         name: 'Niziołek',
-        description: 'Spokojni mieszkańcy wiejskich hrabstw',
+        description: 'Spokojni i łakomi',
         icon: '/images/races/halfling.png',
-        bonuses: ['Szczęście', '+10 Szczęście', 'Odporność na strach'],
-        suggestedNames: ['Ludo', 'Hisme', 'Peregrin', 'Rosie', 'Mungo']
+        bonuses: ['Zaradność', 'Pogodność', 'Odporność na strach'],
+        suggestedNames: ['Ludo', 'Paul', 'Leni', 'Max', 'Theo', 'Sophia']
     }
 ])
 
@@ -476,8 +476,8 @@ onMounted(() => {
 
 .creation-container {
     position: relative;
-    width: 90vw;
-    max-width: 1200px;
+    width: 95vw;
+    max-width: 1600px; /* Zwiększone z 1200px */
     min-height: 80vh;
     background: linear-gradient(145deg, #2a2926 0%, #3d3a35 100%);
     border: 3px solid #d4af37;
@@ -558,10 +558,11 @@ onMounted(() => {
 
 /* Race Selection Styles */
 .race-selection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
     margin-top: 2rem;
+    flex-wrap: nowrap;
 }
 
 .race-card {
@@ -573,6 +574,9 @@ onMounted(() => {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    flex: 1;
+    max-width: 320px;
+    min-width: 280px;
 }
 
 .race-card:hover {
@@ -587,23 +591,25 @@ onMounted(() => {
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
 }
 
+/* Zmienione wartości */
 .race-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1rem;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
     border-radius: 50%;
     background: rgba(212, 175, 55, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    border: 2px solid rgba(212, 175, 55, 0.5);
 }
 
 .race-icon img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
-
 .race-name {
     color: #d4af37;
     font-size: 1.3rem;
@@ -955,7 +961,32 @@ onMounted(() => {
     font-size: 1.1rem;
 }
 
-/* Responsive */
+@media (max-width: 1400px) {
+    .creation-container {
+        max-width: 1400px;
+    }
+
+    .race-selection-grid {
+        gap: 1.5rem;
+    }
+
+    .race-card {
+        max-width: 300px;
+        min-width: 260px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .creation-container {
+        max-width: 1200px;
+    }
+
+    .race-card {
+        max-width: 280px;
+        min-width: 240px;
+    }
+}
+
 @media (max-width: 768px) {
     .creation-container {
         width: 95vw;
@@ -967,7 +998,14 @@ onMounted(() => {
     }
 
     .race-selection-grid {
-        grid-template-columns: 1fr;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .race-card {
+        flex: none;
+        min-width: 250px;
+        max-width: 300px;
     }
 
     .characteristics-grid {
@@ -979,4 +1017,5 @@ onMounted(() => {
         gap: 1rem;
     }
 }
+
 </style>
