@@ -21,6 +21,7 @@ import Purchases from "./vue/views/panel/purchases/Purchases.vue";
 import SpendFortunePoint from "./vue/components/SpendFortunePoint.vue";
 import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
 import Swal from 'sweetalert2'
+import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 
 const vuetify = createVuetify({
     components: {
@@ -78,6 +79,7 @@ app.config.globalProperties.$calculatePrice = (price) => {
 app.component('v-select', VueSelect);
 
 //FRONT
+app.component('create-hero-view', CreateHeroView)
 app.component('character-sheet', CharacterSheet);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
