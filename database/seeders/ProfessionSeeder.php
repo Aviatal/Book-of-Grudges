@@ -63,7 +63,7 @@ class ProfessionSeeder extends Seeder
             ['name' => 'Tarczownik', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Uczeń czarodzieja', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Węglarz', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Włoczykij', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Włóczykij', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Wojownik klanowy', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Woźnica', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Zabójca trolli', 'created_at' => now(), 'updated_at' => now()],
