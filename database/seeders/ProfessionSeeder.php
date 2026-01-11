@@ -45,7 +45,7 @@ class ProfessionSeeder extends Seeder
             ['name' => 'Posłaniec', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Przemytnik', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Przepatrywacz', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Przewoźnk', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Przewoźnik', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Rybak', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Rzecznik rodu', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Rzemieślnik', 'created_at' => now(), 'updated_at' => now()],
