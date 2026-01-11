@@ -29,7 +29,7 @@ class ProfessionSeeder extends Seeder
             ['name' => 'Guślarz', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Hiena cmentarna', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Kanciarz', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Kozak kiselvski', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Kozak kislevski', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Leśnik', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Łowca', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Łowca nagród', 'created_at' => now(), 'updated_at' => now()],
