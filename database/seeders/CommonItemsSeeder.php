@@ -803,7 +803,7 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 0
             ],
             [
-                'name' => 'Koń pociągowy lub muł',
+                'name' => 'Koń pociągowy',
                 'price' => 6000,
                 'loading' => 0
             ],
