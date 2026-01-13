@@ -9,6 +9,10 @@ class Weapon extends Model
 {
     protected $guarded = ['id'];
 
+    public function marketplaceItem(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(MarketplaceItem::class, 'tradeable');
+    }
     public function traits(): BelongsToMany
     {
         return $this->belongsToMany(WeaponTrait::class, 'weapon_traits_weapons', 'weapon_id', 'trait_id');
