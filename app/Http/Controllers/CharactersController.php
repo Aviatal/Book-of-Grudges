@@ -250,14 +250,20 @@ class CharactersController extends Controller
     {
         $talent = Talent::query()->find($request->get('talentId'));
         try {
-            if (DB::table('hero_talent')->where('hero_id', $hero->id)->where('talent_id', $talent->id)->first()) {
+            if (
+                DB::table('hero_talent')
+                    ->where('hero_id', $hero->id)
+                    ->where('additional_talent_name', $request->get('specialisation'))
+                    ->where('talent_id', $talent->id)
+                    ->first()
+            ) {
                 throw new \Exception('Już posiadasz tą zdolnosć!');
             }
         } catch (\Throwable $exception) {
             return response()->json(['message' => $exception->getMessage()], 500);
         }
-        $hero->talents()->syncWithoutDetaching($talent->id);
-        return response()->json($talent);
+        $hero->talents()->attach($talent->id, ['additional_talent_name' => $request->get('specialisation')]);
+        return response()->json($hero->talents()->find($talent->id));
     }
 
     public function dropTalent(Request $request, Hero $hero)

@@ -28,7 +28,7 @@
                     <div v-for="(talent, index) in talents" :key="talent.id"
                          class="bg-gray-800 border border-gray-600 p-4 rounded-lg shadow-lg flex flex-col justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-white">{{ talent.name }}</h3>
+                            <h3 class="text-lg font-semibold text-white">{{ talent.name }} <template v-if="talent.pivot.additional_talent_name">({{ talent.pivot.additional_talent_name }})</template></h3>
                             <div>{{ talent.description }}</div>
                         </div>
                         <button @click="removeTalent(talent, index)"

@@ -22,6 +22,17 @@
                                 class="custom-select w-full"
                             ></v-select>
                         </v-col>
+
+                        <!--Broń specjalna wymaga specjalizacji-->
+                        <v-col v-if="newTalentId === 31" cols="12">
+                            <v-select
+                                v-model="specialWeaponTalentName"
+                                :options="SpecialWeaponSpecialisation"
+                                label="Specjalizacja"
+                                placeholder="Wybierz specjalizację"
+                                class="custom-select w-full"
+                            ></v-select>
+                        </v-col>
                     </v-row>
                 </v-card-text>
             </template>
@@ -42,6 +53,8 @@
 import {ref, defineProps, defineEmits, watch} from 'vue'
 import {useToast} from "vue-toast-notification";
 import {Talent} from "../../../types/Talent";
+import {SpecialWeaponSpecialisation} from '../../../data/SpecialWeaponSpecialisation';
+import axios from "axios";
 
 const props = defineProps<{
     heroId: number;
@@ -55,6 +68,7 @@ const isLoading = ref<boolean>(false);
 const dialog = ref<boolean>(false);
 const talents = ref<Talent[]>([]);
 const newTalentId = ref<number | null>(null);
+const specialWeaponTalentName = ref<string | null>(null);
 
 const getTalents = (): void => {
     isLoading.value = true;
@@ -73,7 +87,7 @@ const getTalents = (): void => {
 };
 const addTalent = (): void => {
     axios
-        .post('karta-postaci/' + props.heroId + '/add-talent', {talentId: newTalentId.value})
+        .post('karta-postaci/' + props.heroId + '/add-talent', {talentId: newTalentId.value, specialisation: specialWeaponTalentName.value})
         .then((response) => {
             dialog.value = false;
             newTalentId.value = null;
