@@ -15,7 +15,7 @@ class SkillsSeeder extends Seeder
         Skill::insert([
             [
                 'type' => 'ZAAWANSOWANA',
-                'name' => 'Brzuchóstwo',
+                'name' => 'Brzuchomówstwo',
                 'characteristic' => 'Ogd',
                 'description' => 'Bohater potrafi mówić bez otwierania ust. Osoby uważnie obserwujące Bohatera korzystającego z tej umiejętności mogą wykonać test spostrzegawczości przeciwko testowi brzuchomówstwa BG, żeby wykryć sztuczkę Bohatera.'
             ],

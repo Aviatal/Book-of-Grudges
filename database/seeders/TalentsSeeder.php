@@ -105,7 +105,7 @@ class TalentsSeeder extends Seeder
                 'description' => 'Bohater wychowal się w jaskiniach bądź często po nich wędrowal. Bez trudu potrafi poruszać się w podziemiach. Otrzymuje modyfikator +10 do testów skradania się i ukrywania się wykonywanych pod powierzchnią ziemi lub w jaskiniach.'
             ],
             [
-                'name' => 'Grożny',
+                'name' => 'Groźny',
                 'description' => 'Wygląd, wzrost lub zachowanie Bohatera wzbudzają respekt i instynktowny niepokój wśród obserwatorów. Otrzymuje modyfikator +10 do testów zastraszania i torturowania.'
             ],
             [
