@@ -7,466 +7,578 @@ use App\Models\Armor;
 use App\Models\CommonItems;
 use App\Models\Profession;
 use App\Models\Weapon;
-use DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ProfessionEquipmentSeeder extends Seeder
 {
-
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $professions = Profession::all()->pluck('id', 'name')->toArray();
-        $commonItems = CommonItems::with('marketplaceItem')
-            ->get()
-            ->keyBy('name');
-        $weapons = Weapon::with('marketplaceItem')
-            ->get()
-            ->keyBy('name');
+
+        $commonItems = CommonItems::with('marketplaceItem')->get()->keyBy('name');
+        $weapons = Weapon::with('marketplaceItem')->get()->keyBy('name');
         $armors = Armor::select([DB::raw("CONCAT(name, '-', category) as name"), 'id'])
             ->with('marketplaceItem')
             ->get()
             ->keyBy('name');
-        $ammunition = Ammunition::with('marketplaceItem')
-            ->get()
-            ->keyBy('name');
+        $ammunition = Ammunition::with('marketplaceItem')->get()->keyBy('name');
+
         $professionsEquipment = [
             'Akolita' => [
-                ['item_name' => '', 'option_1' => $commonItems['Szaty kapłańskie']->marketplaceItem->id],
-                ['item_name' => 'Symbol Boga', 'option_1' => $commonItems['Symbol religijny']->marketplaceItem->id],
+                [
+                    ['item_id' => $commonItems['Szaty kapłańskie']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $commonItems['Symbol religijny']->marketplaceItem->id, 'item_name' => 'Symbol Boga']
+                ],
             ],
             'Banita' => [
-                ['item_name' => '', 'option_1' => $weapons['Łuk']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']
+                ],
+                [
+                    ['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Berserker z Norski' => [
-                ['item_name' => '', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'option_2' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Butelka gorzałki']->marketplaceItem->id],
+                [ // Wybór
+                    ['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Chłop' => [
-                ['item_name' => '', 'option_1' => $weapons['Proca']->marketplaceItem->id, 'option_2' => $weapons['Kij']->marketplaceItem->id],
-                ['item_name' => 'Skórzany bukłak', 'option_1' => $commonItems['Bukłak']->marketplaceItem->id],
+                [ // Wybór
+                    ['item_id' => $weapons['Proca']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Kij']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $commonItems['Bukłak']->marketplaceItem->id, 'item_name' => 'Skórzany bukłak']
+                ],
             ],
             'Ciura obozowa' => [
-                ['item_name' => '', 'option_1' => $commonItems['Talizman szczęścia']->marketplaceItem->id, 'option_2' => $commonItems['Narzędzia (rzemieślnika)']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Sakiewka']->marketplaceItem->id],
+                [ // Wybór
+                    ['item_id' => $commonItems['Talizman szczęścia']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Narzędzia (rzemieślnika)']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $commonItems['Sakiewka']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Cyrkowiec' => [
-                ['item_name' => '', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
                 [
-                    'item_name' => '',
-                    'option_1' => $weapons['Nóż do rzucania']->marketplaceItem->id,
-                    'option_2' => $weapons['Topór do rzucania']->marketplaceItem->id,
-                    'option_3' => $commonItems['Instrument muzyczny']->marketplaceItem->id,
+                    ['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => null]
                 ],
-                ['item_name' => '', 'option_1' => $commonItems['Narzędzia (kuglarza)']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kostium (cyrkowca)']->marketplaceItem->id, 'option_2' => $commonItems['Dobre ubranie']->marketplaceItem->id],
+                [ // Wybór z 3 opcji
+                    ['item_id' => $weapons['Nóż do rzucania']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Topór do rzucania']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Instrument muzyczny']->marketplaceItem->id, 'item_name' => null],
+                ],
+                [
+                    ['item_id' => $commonItems['Narzędzia (kuglarza)']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [ // Wybór
+                    ['item_id' => $commonItems['Kostium (cyrkowca)']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Cyrulik' => [
-                ['item_name' => '', 'option_1' => $commonItems['Narzędzia (cyrulika)']->marketplaceItem->id],
-            ],
-            'Fanatyk' => [
-                ['item_name' => '', 'option_1' => $weapons['Korbacz']->marketplaceItem->id, 'option_2' => $weapons['Morgensztern']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'option_2' => $commonItems['Butelka spirytusu']->marketplaceItem->id],
-            ],
-            'Flisak' => [
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Łódź wiosłowa']->marketplaceItem->id],
-            ],
-            'Giermek' => [
-                ['item_name' => '', 'option_1' => $weapons['Lanca']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Czepiec kolczy', 'option_1' => $armors['Czepiec-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-            ],
-            'Gladiator' => [
-                ['item_name' => '', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'option_2' => $weapons['Korbacz']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Kastet']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id, 'option_2' => $weapons['Puklerz']->marketplaceItem->id],
-            ],
-            'Goniec' => [
-                ['item_name' => '', 'option_1' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mikstura lecznicza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Talizman szczęścia']->marketplaceItem->id],
-            ],
-            'Górnik' => [
-                ['item_name' => 'Dwuręczny kilof', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kilof']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Łopata']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia sztormowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
-            ],
-            'Guślarz' => [
-                ['item_name' => '', 'option_1' => $commonItems['Mikstura lecznicza']->marketplaceItem->id],
-                ['item_name' => 'Płaszcz z kapturem', 'option_1' => $commonItems['Płaszcz']->marketplaceItem->id],
-            ],
-            'Hiena cmentarna' => [
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Łom']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
-            ],
-            'Kanciarz' => [[
-                    'item_name' => '',
-                    'option_1' => $commonItems['Szykowne ubranie']->marketplaceItem->id,
-                    'option_2' => $commonItems['Kości do gry']->marketplaceItem->id,
-                    'option_3' => $commonItems['Talia kart']->marketplaceItem->id
+                [
+                    ['item_id' => $commonItems['Narzędzia (cyrulika)']->marketplaceItem->id, 'item_name' => null]
                 ],
             ],
+            'Fanatyk' => [
+                [ // Wybór
+                    ['item_id' => $weapons['Korbacz']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Morgensztern']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']
+                ],
+                [ // Wybór
+                    ['item_id' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Butelka spirytusu']->marketplaceItem->id, 'item_name' => null]
+                ],
+            ],
+            'Flisak' => [
+                [
+                    ['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']
+                ],
+                [
+                    ['item_id' => $commonItems['Łódź wiosłowa']->marketplaceItem->id, 'item_name' => null]
+                ],
+            ],
+            'Giermek' => [
+                [['item_id' => $weapons['Lanca']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Czepiec-KOLCZA']->marketplaceItem->id, 'item_name' => 'Czepiec kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+            ],
+            'Gladiator' => [
+                [
+                    ['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Korbacz']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $weapons['Kastet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [
+                    ['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Puklerz']->marketplaceItem->id, 'item_name' => null]
+                ],
+            ],
+            'Goniec' => [
+                [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Mikstura lecznicza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Talizman szczęścia']->marketplaceItem->id, 'item_name' => null]],
+            ],
+            'Górnik' => [
+                [['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => 'Dwuręczny kilof']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Kilof']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Łopata']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia sztormowa']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
+            ],
+            'Guślarz' => [
+                [['item_id' => $commonItems['Mikstura lecznicza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Płaszcz']->marketplaceItem->id, 'item_name' => 'Płaszcz z kapturem']],
+            ],
+            'Hiena cmentarna' => [
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Łom']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
+            ],
+            'Kanciarz' => [
+                [
+                    ['item_id' => $commonItems['Szykowne ubranie']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Kości do gry']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Talia kart']->marketplaceItem->id, 'item_name' => null],
+                ]
+            ],
             'Kozak kislevski' => [
-                ['item_name' => '', 'option_1' => $weapons['Łuk']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => 'Dwuręczny topór', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id],
-                ['item_name' => 'Kolczuga', 'option_1' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Odtrutki']->marketplaceItem->id],
-
+                [['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => 'Dwuręczny topór']],
+                [['item_id' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kolczuga']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Odtrutki']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Leśnik' => [
-                ['item_name' => 'Dwuręczny topór', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Odtrutki']->marketplaceItem->id],
+                [['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => 'Dwuręczny topór']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Odtrutki']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Łowca' => [
-                ['item_name' => '', 'option_1' => $weapons['Długi łuk']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Potrzask']->marketplaceItem->id, 'option_2' => $commonItems['Wnyki']->marketplaceItem->id],
+                [['item_id' => $weapons['Długi łuk']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [
+                    ['item_id' => $commonItems['Potrzask']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Wnyki']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Łowca nagród' => [
-                ['item_name' => '', 'option_1' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Sieć']->marketplaceItem->id],
-                ['item_name' => 'Skórzany Kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana hełm', 'option_1' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kajdany']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
+                [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Sieć']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany Kaftan']],
+                [['item_id' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana hełm']],
+                [['item_id' => $commonItems['Kajdany']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Mieszczanin' => [
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Liczydło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia']->marketplaceItem->id],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Liczydło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Mytnik' => [
-                ['item_name' => '', 'option_1' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zamykana na kłódkę skrzynia']->marketplaceItem->id],
+                [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zamykana na kłódkę skrzynia']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Najemnik' => [
-                ['item_name' => '', 'option_1' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mikstura lecznicza']->marketplaceItem->id],
+                [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Mikstura lecznicza']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Ochotnik' => [
-                ['item_name' => '', 'option_1' => $weapons['Halabarda']->marketplaceItem->id, 'option_2' => $weapons['Łuk']->marketplaceItem->id],
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana hełm', 'option_1' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mundur']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Halabarda']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana hełm']],
+                [['item_id' => $commonItems['Mundur']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Ochroniarz' => [
-                ['item_name' => '', 'option_1' => $weapons['Topór do rzucania']->marketplaceItem->id, 'option_2' => $weapons['Nóż do rzucania']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Topór do rzucania']->marketplaceItem->id, 'option_2' => $weapons['Nóż do rzucania']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Kastet']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Kastet']->marketplaceItem->id],
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Puklerz']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Topór do rzucania']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Nóż do rzucania']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $weapons['Topór do rzucania']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Nóż do rzucania']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $weapons['Kastet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Kastet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $weapons['Puklerz']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Oprych' => [
-                ['item_name' => '', 'option_1' => $weapons['Kastet']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Kastet']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
+                [['item_id' => $weapons['Kastet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Kastet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
             ],
             'Paź' => [
-                ['item_name' => 'Ubranie najlepszej jakości', 'option_1' => $commonItems['Szykowne ubranie']->marketplaceItem->id],
-                ['item_name' => 'Ubranie najlepszej jakości', 'option_1' => $commonItems['Szykowne ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Liberia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Perfumy']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mieszek']->marketplaceItem->id],
+                [['item_id' => $commonItems['Szykowne ubranie']->marketplaceItem->id, 'item_name' => 'Ubranie najlepszej jakości']],
+                [['item_id' => $commonItems['Szykowne ubranie']->marketplaceItem->id, 'item_name' => 'Ubranie najlepszej jakości']],
+                [['item_id' => $commonItems['Liberia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Perfumy']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Mieszek']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Podżegacz' => [
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => 'Ulotki różnej treści', 'option_1' => $commonItems['Przybory do pisania']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Przybory do pisania']->marketplaceItem->id, 'item_name' => 'Ulotki różnej treści']],
             ],
             'Porywacz zwłok' => [
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kilof']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Łopata']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
+                [['item_id' => $commonItems['Latarnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kilof']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Łopata']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Posłaniec' => [
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-                ['item_name' => 'Tuba na mapy', 'option_1' => $commonItems['Tuba na mapy/pergaminy']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Tuba na mapy/pergaminy']->marketplaceItem->id, 'item_name' => 'Tuba na mapy']],
             ],
             'Przemytnik' => [
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Koń pociągowy i wóz', 'option_1' => $commonItems['Koń pociągowy']->marketplaceItem->id, 'option_2' => $commonItems['Łódź wiosłowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pochodnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pochodnia']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [
+                    ['item_id' => $commonItems['Koń pociągowy']->marketplaceItem->id, 'item_name' => 'Koń pociągowy i wóz'],
+                    ['item_id' => $commonItems['Łódź wiosłowa']->marketplaceItem->id, 'item_name' => 'Koń pociągowy i wóz']
+                ],
+                [['item_id' => $commonItems['Pochodnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pochodnia']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Przepatrywacz' => [
-                ['item_name' => '', 'option_1' => $weapons['Łuk']->marketplaceItem->id, 'option_2' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id, 'option_2' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id, 'option_2' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Przewoźnik' => [
-                ['item_name' => '', 'option_1' => $weapons['Garłacz']->marketplaceItem->id, 'option_2' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'option_2' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Garłacz']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
             ],
             'Rybak' => [
-                ['item_name' => '', 'option_1' => $weapons['Włócznia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Sieć']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id],
+                [['item_id' => $weapons['Włócznia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Sieć']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Rzecznik rodu' => [
-                ['item_name' => 'Skórzana Kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Przybory do pisania']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Przybory do pisania']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Rzemieślnik' => [
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
             ],
             'Rzezimieszek' => [
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Skryba' => [
-                ['item_name' => '', 'option_1' => $weapons['Nóż']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Świeczka woskowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Świeczka woskowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zapałka']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zapałka']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zapałka']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zapałka']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Zapałka']->marketplaceItem->id],
-                ['item_name' => 'Ilustrowana księga', 'option_1' => $commonItems['Książka drukowana']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Przybory do pisania']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Wosk do pieczęci']->marketplaceItem->id],
+                [['item_id' => $weapons['Nóż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Świeczka woskowa']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Świeczka woskowa']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zapałka']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zapałka']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zapałka']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zapałka']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Zapałka']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Książka drukowana']->marketplaceItem->id, 'item_name' => 'Ilustrowana księga']],
+                [['item_id' => $commonItems['Przybory do pisania']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Wosk do pieczęci']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Sługa' => [
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Manierka metalowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Hubka i krzesiwo']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia sztormowa']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Manierka metalowa']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Hubka i krzesiwo']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia sztormowa']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Strażnik' => [
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mundur']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia na drągu']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Mundur']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia na drągu']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Strażnik dróg' => [
-                ['item_name' => '', 'option_1' => $weapons['Pistolet']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Kule do broni palnej']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Proch strzelniczy']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lekki koń bojowy']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
+                [['item_id' => $weapons['Pistolet']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Proch strzelniczy']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lekki koń bojowy']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Strażnik pól' => [
-                ['item_name' => '', 'option_1' => $weapons['Proca']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kuc']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Latarnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Olej do latarni']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Łopata']->marketplaceItem->id],
+                [['item_id' => $weapons['Proca']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kuc']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Olej do latarni']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Łopata']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Strażnik więzienny' => [
                 [
-                    'item_name' => '',
-                    'option_1' => $weapons['Bolas']->marketplaceItem->id,
-                    'option_2' => $weapons['Sieć']->marketplaceItem->id,
-                    'option_3' => $weapons['Arkan']->marketplaceItem->id
+                    ['item_id' => $weapons['Bolas']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Sieć']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Arkan']->marketplaceItem->id, 'item_name' => null],
                 ],
-                ['item_name' => 'Butelka podłego wina', 'option_1' => $commonItems['Wino pospolite']->marketplaceItem->id],
-                ['item_name' => 'Butelka podłego wina', 'option_1' => $commonItems['Manierka skórzana']->marketplaceItem->id],
+                [['item_id' => $commonItems['Wino pospolite']->marketplaceItem->id, 'item_name' => 'Butelka podłego wina']],
+                [['item_id' => $commonItems['Manierka skórzana']->marketplaceItem->id, 'item_name' => 'Butelka podłego wina']],
             ],
             'Szczurołap' => [
-                ['item_name' => '', 'option_1' => $weapons['Proca']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pułapka na szczury']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pułapka na szczury']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pułapka na szczury']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pułapka na szczury']->marketplaceItem->id],
-                ['item_name' => 'Drąg z martwymi szczurami (1k10zk)', 'option_1' => $commonItems['Latarnia na drągu']->marketplaceItem->id],
-                ['item_name' => 'Mały, ale zajadły pies', 'option_1' => $commonItems['Pies']->marketplaceItem->id],
+                [['item_id' => $weapons['Proca']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pułapka na szczury']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pułapka na szczury']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pułapka na szczury']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pułapka na szczury']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Latarnia na drągu']->marketplaceItem->id, 'item_name' => 'Drąg z martwymi szczurami (1k10zk)']],
+                [['item_id' => $commonItems['Pies']->marketplaceItem->id, 'item_name' => 'Mały, ale zajadły pies']],
             ],
             'Szermierz estalijski' => [
-                ['item_name' => '', 'option_1' => $weapons['Szpada']->marketplaceItem->id, 'option_2' => $weapons['Rapier']->marketplaceItem->id],
-                ['item_name' => 'Ubranie najlepszej jakości', 'option_1' => $commonItems['Szykowne ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Perfumy']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mikstura lecznicza']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Szpada']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Rapier']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $commonItems['Szykowne ubranie']->marketplaceItem->id, 'item_name' => 'Ubranie najlepszej jakości']],
+                [['item_id' => $commonItems['Perfumy']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Mikstura lecznicza']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Szlachcic' => [
-                ['item_name' => '', 'option_1' => $weapons['Szpada']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Lewak']->marketplaceItem->id],
-                ['item_name' => 'Strój szlachecki z herbem', 'option_1' => $commonItems['Szykowne ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
-                ['item_name' => 'Biżuteria (wartość 6x10zk)', 'option_1' => $commonItems['Kolczyk']->marketplaceItem->id],
+                [['item_id' => $weapons['Szpada']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Lewak']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Szykowne ubranie']->marketplaceItem->id, 'item_name' => 'Strój szlachecki z herbem']],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kolczyk']->marketplaceItem->id, 'item_name' => 'Biżuteria (wartość 6x10zk)']],
             ],
             'Śmieciarz' => [
-                ['item_name' => '', 'option_1' => $commonItems['Wózek']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
+                [['item_id' => $commonItems['Wózek']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Tarczownik' => [
-                ['item_name' => '', 'option_1' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Kolczuga', 'option_1' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Skórzane nogawice', 'option_1' => $armors['Nogawice-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id],
-                ['item_name' => 'Bukłak z wodą', 'option_1' => $commonItems['Bukłak']->marketplaceItem->id],
+                [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kolczuga']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $armors['Nogawice-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzane nogawice']],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Bukłak']->marketplaceItem->id, 'item_name' => 'Bukłak z wodą']],
             ],
             'Uczeń czarodzieja' => [
-                ['item_name' => '', 'option_1' => $weapons['Kij']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Księga wiedzy tajemnej']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Plecak']->marketplaceItem->id],
+                [['item_id' => $weapons['Kij']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Księga wiedzy tajemnej']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Plecak']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Węglarz' => [
-                ['item_name' => 'Pałka', 'option_1' => $weapons['Bron jednoręczna']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pochodnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pochodnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Pochodnia']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Hubka i krzesiwo']->marketplaceItem->id],
+                [['item_id' => $weapons['Bron jednoręczna']->marketplaceItem->id, 'item_name' => 'Pałka']],
+                [['item_id' => $commonItems['Pochodnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pochodnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Pochodnia']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Hubka i krzesiwo']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Włóczykij' => [
-                ['item_name' => '', 'option_1' => $commonItems['Plecak']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Prowiant (porcje na 1 tydzień)']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Namiot']->marketplaceItem->id],
-                ['item_name' => 'Bukłak z wodą', 'option_1' => $commonItems['Bukłak']->marketplaceItem->id],
+                [['item_id' => $commonItems['Plecak']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Prowiant (porcje na 1 tydzień)']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Namiot']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Bukłak']->marketplaceItem->id, 'item_name' => 'Bukłak z wodą']],
             ],
             'Wojownik klanowy' => [
-                ['item_name' => '', 'option_1' => $weapons['Elfi łuk']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
+                [['item_id' => $weapons['Elfi łuk']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
             ],
             'Woźnica' => [
-                ['item_name' => '', 'option_1' => $weapons['Garłacz']->marketplaceItem->id,],
-                ['item_name' => '', 'option_1' => $ammunition['Kule do broni palnej']->marketplaceItem->id],
-                ['item_name' => 'Kaftan kolczy', 'option_1' => $armors['Kaftan-KOLCZA']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Róg woźnicy', 'option_1' => $commonItems['Instrument muzyczny']->marketplaceItem->id],
+                [['item_id' => $weapons['Garłacz']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Instrument muzyczny']->marketplaceItem->id, 'item_name' => 'Róg woźnicy']],
             ],
             'Zabójca trolli' => [
-                ['item_name' => '', 'option_1' => $weapons['Broń dwuręczna']->marketplaceItem->id],
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'option_2' => $commonItems['Butelka spirytusu']->marketplaceItem->id],
+                [['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
+                [
+                    ['item_id' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $commonItems['Butelka spirytusu']->marketplaceItem->id, 'item_name' => null]
+                ],
             ],
             'Zarządca' => [
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Skórzany hełm', 'option_1' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Dobre ubranie']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Koń']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Siodło']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Uprząż']->marketplaceItem->id],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany hełm']],
+                [['item_id' => $commonItems['Dobre ubranie']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Koń']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Siodło']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Uprząż']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Złodziej' => [
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Worek']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Wytrychy']->marketplaceItem->id],
-
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
+                [['item_id' => $commonItems['Worek']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Wytrychy']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Żak' => [
-                ['item_name' => 'Księga związana z wybraną dziedziną nauki', 'option_1' => $commonItems['Ilustrowana księga']->marketplaceItem->id],
-                ['item_name' => 'Księga związana z wybraną dziedziną nauki', 'option_1' => $commonItems['Ilustrowana księga']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Przybory do pisania']->marketplaceItem->id],
+                [['item_id' => $commonItems['Ilustrowana księga']->marketplaceItem->id, 'item_name' => 'Księga związana z wybraną dziedziną nauki']],
+                [['item_id' => $commonItems['Ilustrowana księga']->marketplaceItem->id, 'item_name' => 'Księga związana z wybraną dziedziną nauki']],
+                [['item_id' => $commonItems['Przybory do pisania']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Żeglarz' => [
-                ['item_name' => 'Skórzany kaftan', 'option_1' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => 'Butelka gorzałki kiepskiej jakości', 'option_1' => $commonItems['Butelka gorzałki']->marketplaceItem->id],
+                [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
+                [['item_id' => $commonItems['Butelka gorzałki']->marketplaceItem->id, 'item_name' => 'Butelka gorzałki kiepskiej jakości']],
             ],
             'Żołnierz' => [
-                ['item_name' => '', 'option_1' => $weapons['Halabarda']->marketplaceItem->id, 'option_2' => $weapons['Rusznica']->marketplaceItem->id],
-                ['item_name' => 'Skórznia', 'option_1' => $armors['Skórznia-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Mundur']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $weapons['Tarcza']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Halabarda']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Rusznica']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $armors['Skórznia-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórznia']],
+                [['item_id' => $commonItems['Mundur']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
             ],
             'Żołnierz okrętowy' => [
-                ['item_name' => '', 'option_1' => $weapons['Łuk']->marketplaceItem->id, 'option_2' => $weapons['Kusza']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id, 'option_2' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $ammunition['Strzały']->marketplaceItem->id, 'option_2' => $ammunition['Bełty']->marketplaceItem->id],
-                ['item_name' => 'Skórzana kurta', 'option_1' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Lina']->marketplaceItem->id],
-                ['item_name' => '', 'option_1' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id],
+                [
+                    ['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                ],
+                [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
+                [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $commonItems['Kotwiczka do wspinaczki']->marketplaceItem->id, 'item_name' => null]],
             ],
         ];
+
         $insertData = [];
-        foreach ($professionsEquipment as $professionName => $equipment) {
-            foreach ($equipment as $equipmentItem) {
-                $item = $equipmentItem;
-                $item['profession_id'] = $professions[$professionName];
-                if (!isset($item['option_2'])) {
-                    $item['option_2'] = null;
+        $globalGroupCounter = 1;
+
+        try {
+            foreach ($professionsEquipment as $professionName => $slots) {
+                if (!isset($professions[$professionName])) {
+                    throw new ModelNotFoundException("Profesja $professionName nie istnieje w bazie danych");
                 }
-                if (!isset($item['option_3'])) {
-                    $item['option_3'] = null;
+                $profId = $professions[$professionName];
+
+                foreach ($slots as $groupId => $itemOptions) {
+                    foreach ($itemOptions as $option) {
+                        $insertData[] = [
+                            'profession_id' => $profId,
+                            'item_id'       => $option['item_id'],
+                            'item_name'     => $option['item_name'],
+                            'group_id'      => $groupId,
+                            'created_at'    => now(),
+                            'updated_at'    => now(),
+                        ];
+                    }
                 }
-                $insertData[] = $item;
             }
+            DB::table('profession_equipment')->truncate();
+            DB::table('profession_equipment')->insert($insertData);
+        } catch (ModelNotFoundException $e) {
+            echo $e->getMessage();
+        } catch (\Throwable $e) {
+            echo $e->getMessage();
         }
-        DB::table('profession_equipment')->insert($insertData);
+
     }
 }
