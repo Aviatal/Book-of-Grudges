@@ -1161,10 +1161,8 @@ class ProfessionTalentsAndSkillsSeeder extends Seeder
 
             'Sługa' => [
                 'skills' => [
-                    [
-                        ['skill_id' => $skills['Czytanie i pisanie'], 'additional_name' => null],
-                        ['skill_id' => $skills['Zwinne palce'], 'additional_name' => null]
-                    ],
+                    [['skill_id' => $skills['Czytanie i pisanie'], 'additional_name' => null]],
+                    [['skill_id' => $skills['Zwinne palce'], 'additional_name' => null]],
                     [['skill_id' => $skills['Gadanina'], 'additional_name' => null]],
                     [
                         ['skill_id' => $skills['Opieka nad zwierzętami'], 'additional_name' => null],
