@@ -98,7 +98,7 @@ class HeroCharacteristicSeeder extends Seeder
             [
                 'hero_id' => 1,
                 'name' => 'Żywotność',
-                'short_name' => 'Zyw',
+                'short_name' => 'Żyw',
                 'start_value' => rand(8, 12),
                 'advancement' => rand(1, 3),
                 'current_value' => rand(12, 16),

@@ -19,7 +19,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
         'sw' => 7,
         'ogd' => 8,
         'a' => 9,
-        'zyw' => 10,
+        'żyw' => 10,
         'sz' => 13,
         'mag' => 14,
     ];
@@ -31,7 +31,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 10,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Banita' => [
             'ww' => 10,
@@ -39,14 +39,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Berseker z Norski' => [
             'ww' => 15,
             'k' => 10,
             'odp' => 10,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Chłop' => [
             'ww' => 5,
@@ -55,7 +55,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 10,
             'zr' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Ciura obozowa' => [
             'odp' => 5,
@@ -63,7 +63,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Cyrkowiec' => [
             'ww' => 5,
@@ -71,7 +71,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Cyrulik' => [
             'ww' => 5,
@@ -79,7 +79,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Fanatyk' => [
             'ww' => 10,
@@ -87,7 +87,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 10,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Flisak' => [
             'ww' => 10,
@@ -96,7 +96,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 5,
             'zr' => 10,
             'int' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Giermek' => [
             'ww' => 10,
@@ -106,14 +106,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'ogd' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Gladiator' => [
             'ww' => 15,
             'odp' => 10,
             'zr' => 10,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Goniec' => [
             'ww' => 10,
@@ -122,7 +122,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
             'sz' => 1,
         ],
         'Górnik' => [
@@ -131,7 +131,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'k' => 10,
             'odp' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Guślarz' => [
             'odp' => 5,
@@ -139,7 +139,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 10,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
             'mag' => 1,
         ],
         'Hiena cmentarna' => [
@@ -148,7 +148,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Kanciarz' => [
             'ww' => 5,
@@ -157,35 +157,35 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Kozak kislevski' => [
             'ww' => 10,
             'us' => 10,
             'odp' => 10,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Leśnik' => [
             'ww' => 10,
             'k' => 10,
             'zr' => 5,
             'sw' => 10,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Łowca' => [
             'us' => 15,
             'odp' => 5,
             'zr' => 10,
             'int' => 5,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Łowca nagród' => [
             'ww' => 5,
             'us' => 10,
             'k' => 5,
             'zr' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Mieszczanin' => [
             'ww' => 5,
@@ -193,7 +193,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 5,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Mytnik' => [
             'ww' => 10,
@@ -202,7 +202,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 10,
             'zr' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Najemnik' => [
             'ww' => 10,
@@ -212,7 +212,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'sw' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Ochotnik' => [
             'ww' => 10,
@@ -220,7 +220,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'k' => 5,
             'odp' => 5,
             'zr' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Ochroniarz' => [
             'ww' => 10,
@@ -228,7 +228,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 5,
             'zr' => 5,
             'a' => 1,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Oprych' => [
             'ww' => 10,
@@ -238,14 +238,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 5,
             'ogd' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Paź' => [
             'zr' => 10,
             'int' => 10,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Podżegacz' => [
             'ww' => 5,
@@ -253,7 +253,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'int' => 10,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Porywacz zwłok' => [
             'ww' => 5,
@@ -261,7 +261,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'k' => 5,
             'zr' => 10,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Posłaniec' => [
             'ww' => 5,
@@ -270,7 +270,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Przemytnik' => [
             'ww' => 5,
@@ -278,7 +278,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 10,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Przepatrywacz' => [
             'ww' => 5,
@@ -286,7 +286,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 10,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Przewoźnik' => [
             'ww' => 5,
@@ -302,7 +302,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 5,
             'zr' => 10,
             'int' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Rzecznik rodu' => [
             'ww' => 5,
@@ -311,7 +311,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Rzemieślnik' => [
             'k' => 5,
@@ -319,7 +319,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Rzezimieszek' => [
             'ww' => 10,
@@ -327,14 +327,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 10,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Skryba' => [
             'zr' => 10,
             'int' => 10,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Sługa' => [
             'ww' => 5,
@@ -343,7 +343,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Strażnik' => [
             'ww' => 10,
@@ -352,7 +352,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'int' => 10,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Strażnik dróg' => [
             'ww' => 10,
@@ -361,7 +361,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Strażnik pól' => [
             'ww' => 5,
@@ -370,14 +370,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Strażnik więzienny' => [
             'ww' => 10,
             'k' => 10,
             'odp' => 10,
             'sw' => 5,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Szczurołap' => [
             'ww' => 5,
@@ -385,7 +385,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'odp' => 5,
             'zr' => 10,
             'sw' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Szermierz estalijski' => [
             'ww' => 15,
@@ -394,7 +394,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Szlachcic' => [
             'ww' => 10,
@@ -403,7 +403,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Śmieciarz' => [
             'ww' => 5,
@@ -412,7 +412,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'sw' => 5,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Tarczownik' => [
             'ww' => 10,
@@ -421,14 +421,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 5,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Uczeń czarodzieja' => [
             'zr' => 5,
             'int' => 10,
             'sw' => 15,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
             'mag' => 1,
         ],
         'Węglarz' => [
@@ -439,7 +439,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 5,
             'sw' => 5,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Włóczykij' => [
             'ww' => 5,
@@ -447,7 +447,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 5,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Wojownik klanowy' => [
             'ww' => 5,
@@ -455,7 +455,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 10,
             'sw' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Woźnica' => [
             'ww' => 5,
@@ -463,7 +463,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 5,
             'ogd' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Zabójca trolli' => [
             'ww' => 10,
@@ -472,7 +472,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'sw' => 10,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Zarządca' => [
             'ww' => 5,
@@ -481,7 +481,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Złodziej' => [
             'ww' => 5,
@@ -489,14 +489,14 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 15,
             'int' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Żak' => [
             'zr' => 10,
             'int' => 10,
             'sw' => 5,
             'ogd' => 10,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Żeglarz' => [
             'ww' => 10,
@@ -504,7 +504,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'k' => 10,
             'zr' => 10,
             'a' => 1,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Żołnierz' => [
             'ww' => 10,
@@ -512,7 +512,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 5,
             'a' => 5,
-            'zyw' => 2,
+            'żyw' => 2,
         ],
         'Żołnierz okrętowy' => [
             'ww' => 10,
@@ -521,7 +521,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 5,
             'sw' => 5,
             'a' => 1,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Arcykapłan' => [
             'ww' => 20,
@@ -533,7 +533,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 30,
             'ogd' => 25,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
             'mag' => 3,
         ],
         'Arcymag' => [
@@ -545,7 +545,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 35,
             'sw' => 40,
             'ogd' => 20,
-            'zyw' => 5,
+            'żyw' => 5,
             'mag' => 4,
         ],
         'Arystokrata' => [
@@ -558,7 +558,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 30,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Bard' => [
             'ww' => 10,
@@ -567,7 +567,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 5,
             'ogd' => 25,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Biczownik' => [
             'ww' => 15,
@@ -577,7 +577,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 10,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Bosman' => [
             'ww' => 15,
@@ -589,7 +589,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 10,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Demagog' => [
             'ww' => 10,
@@ -600,7 +600,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 30,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Dworzanin' => [
             'ww' => 5,
@@ -609,7 +609,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 20,
             'sw' => 20,
             'ogd' => 20,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Fechtmistrz' => [
             'ww' => 40,
@@ -619,7 +619,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 30,
             'sw' => 20,
             'a' => 2,
-            'zyw' => 8,
+            'żyw' => 8,
         ],
         'Herold' => [
             'ww' => 10,
@@ -630,7 +630,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 15,
             'sw' => 10,
             'ogd' => 20,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Herszt banitów' => [
             'ww' => 20,
@@ -642,7 +642,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 20,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Inżynier' => [
             'ww' => 10,
@@ -652,7 +652,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'int' => 20,
             'sw' => 10,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Kapitan' => [
             'ww' => 25,
@@ -664,7 +664,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 25,
             'ogd' => 30,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Kapłan' => [
             'ww' => 10,
@@ -675,7 +675,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 20,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
             'mag' => 1,
         ],
         'Karczmarz' => [
@@ -687,7 +687,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 10,
             'ogd' => 20,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Książę złodziei' => [
             'ww' => 20,
@@ -699,7 +699,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 30,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Kupiec' => [
             'ww' => 10,
@@ -710,7 +710,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 25,
             'sw' => 20,
             'ogd' => 20,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Leśny duch' => [
             'ww' => 20,
@@ -721,7 +721,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 20,
             'sw' => 20,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Łowca czarownic' => [
             'ww' => 30,
@@ -733,7 +733,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 35,
             'ogd' => 20,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Łowca wampirów' => [
             'ww' => 20,
@@ -744,7 +744,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 15,
             'sw' => 20,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Majordomus' => [
             'ww' => 10,
@@ -754,7 +754,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 30,
             'sw' => 20,
             'ogd' => 25,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Medyk' => [
             'k' => 10,
@@ -763,7 +763,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 30,
             'sw' => 20,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Mistrz cieni' => [
             'ww' => 20,
@@ -775,7 +775,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 25,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Mistrz gildii' => [
             'ww' => 10,
@@ -786,7 +786,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 35,
             'a' => 1,
-            'zyw' => 5,
+            'żyw' => 5,
         ],
         'Mistrz magii' => [
             'ww' => 10,
@@ -796,7 +796,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 30,
             'sw' => 35,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
             'mag' => 3,
         ],
         'Mistrz rzemiosła' => [
@@ -806,7 +806,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 10,
             'ogd' => 10,
-            'zyw' => 3,
+            'żyw' => 3,
         ],
         'Mistrz zakonny' => [
             'ww' => 35,
@@ -818,7 +818,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 25,
             'ogd' => 15,
             'a' => 2,
-            'zyw' => 8,
+            'żyw' => 8,
         ],
         'Nawigator' => [
             'ww' => 10,
@@ -829,7 +829,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 25,
             'sw' => 10,
             'ogd' => 5,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Odkrywca' => [
             'ww' => 20,
@@ -841,7 +841,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 15,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Oficer' => [
             'ww' => 30,
@@ -853,7 +853,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 25,
             'a' => 2,
-            'zyw' => 7,
+            'żyw' => 7,
         ],
         'Oprawca' => [
             'ww' => 15,
@@ -863,7 +863,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 20,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Paser' => [
             'ww' => 15,
@@ -875,7 +875,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 10,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Rajtar' => [
             'ww' => 20,
@@ -886,7 +886,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 15,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Reketer' => [
             'ww' => 20,
@@ -897,7 +897,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 10,
             'a' => 1,
-            'zyw' => 5,
+            'żyw' => 5,
         ],
         'Rozbójnik' => [
             'ww' => 20,
@@ -909,7 +909,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 25,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Rycerz' => [
             'ww' => 25,
@@ -920,7 +920,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 5,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Sierżant' => [
             'ww' => 20,
@@ -932,7 +932,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 20,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Skrytobójca' => [
             'ww' => 25,
@@ -944,7 +944,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 20,
             'a' => 2,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Strzelec' => [
             'us' => 35,
@@ -955,7 +955,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 20,
             'ogd' => 15,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Szampierz' => [
             'ww' => 35,
@@ -965,7 +965,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 10,
             'sw' => 15,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Szarlatan' => [
             'ww' => 10,
@@ -976,7 +976,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 15,
             'sw' => 15,
             'ogd' => 25,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Szpieg' => [
             'ww' => 15,
@@ -988,7 +988,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 35,
             'ogd' => 20,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Uczony' => [
             'ww' => 5,
@@ -999,7 +999,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 30,
             'sw' => 15,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Urzędnik' => [
             'ww' => 5,
@@ -1009,7 +1009,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 20,
             'sw' => 10,
             'ogd' => 20,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Weteran' => [
             'ww' => 20,
@@ -1019,7 +1019,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 15,
             'sw' => 15,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Wędrowny czarodziej' => [
             'ww' => 5,
@@ -1029,7 +1029,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 20,
             'sw' => 25,
             'ogd' => 10,
-            'zyw' => 3,
+            'żyw' => 3,
             'mag' => 2,
         ],
         'Włamywacz' => [
@@ -1040,7 +1040,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 25,
             'int' => 10,
             'sw' => 10,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Wybraniec boży' => [
             'ww' => 15,
@@ -1052,7 +1052,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 25,
             'ogd' => 20,
             'a' => 1,
-            'zyw' => 5,
+            'żyw' => 5,
             'mag' => 2
         ],
         'Zabójca demonów' => [
@@ -1062,7 +1062,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 20,
             'sw' => 30,
             'a' => 2,
-            'zyw' => 8,
+            'żyw' => 8,
         ],
         'Zabójca olbrzymów' => [
             'ww' => 25,
@@ -1071,7 +1071,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'zr' => 10,
             'sw' => 20,
             'a' => 1,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
         'Zakonnik' => [
             'ww' => 10,
@@ -1080,7 +1080,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'int' => 15,
             'sw' => 15,
             'ogd' => 15,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Zwadźca' => [
             'ww' => 20,
@@ -1092,7 +1092,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 15,
             'ogd' => 10,
             'a' => 1,
-            'zyw' => 4,
+            'żyw' => 4,
         ],
         'Zwiadowca' => [
             'ww' => 10,
@@ -1104,7 +1104,7 @@ class ProfessionCharacteristicsSeeder extends Seeder
             'sw' => 10,
             'ogd' => 20,
             'a' => 2,
-            'zyw' => 6,
+            'żyw' => 6,
         ],
     ];
 

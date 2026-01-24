@@ -122,7 +122,7 @@ class InitialCharactersSeeder extends Seeder
             [
                 'hero_id' => 1,
                 'name' => 'Żywotność',
-                'short_name' => 'Zyw',
+                'short_name' => 'Żyw',
                 'start_value' => 10,
                 'advancement' => 2,
                 'current_value' => 10,
@@ -536,7 +536,7 @@ class InitialCharactersSeeder extends Seeder
             [
                 'hero_id' => 2,
                 'name' => 'Żywotność',
-                'short_name' => 'Zyw',
+                'short_name' => 'Żyw',
                 'start_value' => 11,
                 'advancement' => 2,
                 'current_value' => 11,
@@ -871,7 +871,7 @@ class InitialCharactersSeeder extends Seeder
             [
                 'hero_id' => 3,
                 'name' => 'Żywotność',
-                'short_name' => 'Zyw',
+                'short_name' => 'Żyw',
                 'start_value' => 11,
                 'advancement' => 2,
                 'current_value' => 11,

@@ -191,7 +191,7 @@
                         {{ characteristic['A']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zyw']?.pivot.start_value }}
+                        {{ characteristic['Żyw']?.pivot.start_value }}
                     </td>
                     <td class="border border-[#8b5a2b]">
                         {{ characteristic['S']?.pivot.start_value }}
@@ -217,7 +217,7 @@
                         {{ characteristic['A']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zyw']?.available_advancement ?? '-' }}
+                        {{ characteristic['Żyw']?.available_advancement ?? '-' }}
                     </td>
                     <td class="border border-[#8b5a2b]">
                         {{ characteristic['S']?.available_advancement ?? '-' }}
@@ -251,11 +251,11 @@
                     </td>
                     <td
                         class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Zyw')"
+                        @click="developCharacteristic('Żyw')"
                         title="Kliknij, aby rozwinąć umiejętność"
                     >
                         <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Zyw']?.pivot.start_value + characteristic['Zyw']?.pivot.advancement }}
+                            {{ characteristic['Żyw']?.pivot.start_value + characteristic['Żyw']?.pivot.advancement }}
                             <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
                         </div>
                     </td>

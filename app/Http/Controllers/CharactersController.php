@@ -110,7 +110,7 @@ class CharactersController extends Controller
             ]);
             $changeCurrentWounds = 0;
             if (
-                $characteristic['short_name'] === 'Zyw' &&
+                $characteristic['short_name'] === 'Żyw' &&
                 $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value === $hero->current_wounds
             ) {
                 $hero->update(['current_wounds' => $characteristic['pivot']['current_value']]);
