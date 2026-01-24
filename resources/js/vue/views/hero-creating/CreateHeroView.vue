@@ -98,87 +98,119 @@
                     <transition name="fade-slide">
                         <div v-if="selectedProfession && !isRollingProfession" class="profession-display-container">
                             <div class="profession-display">
-                                <!-- Nagłówek profesji -->
                                 <div class="profession-header">
                                     <h3 class="profession-name">{{ selectedProfession.name }}</h3>
-                                    <div class="profession-class">{{ selectedProfession.class }}</div>
+                                    <div class="profession-class" v-if="selectedProfession.class">
+                                        {{ selectedProfession.class }}
+                                    </div>
                                     <div class="dice-roll-indicator">
-                                        Wynik rzutu: {{ selectedProfession.diceRoll }}
+                                        Wynik rzutu: {{ professionRoll }}
                                     </div>
                                 </div>
 
-                                <!-- Opis i detale - teraz w przewijalnym kontenerze -->
-                                <div class="profession-content-scroll">Q
+                                <div class="profession-content-scroll">
                                     <div class="profession-description">
-                                        <p>{{ selectedProfession.description }}</p>
+                                        <p v-if="selectedProfession.description">{{ selectedProfession.description }}</p>
+                                        <p v-else>Profesja wylosowana pomyślnie. Twoja postać jest gotowa do drogi.</p>
                                     </div>
 
                                     <div class="profession-details-grid">
-                                        <!-- Schemat rozwoju -->
-                                        <div class="detail-section">
+                                        <div class="detail-section full-width">
                                             <h4 class="detail-title">Schemat Rozwoju</h4>
-                                            <div class="characteristics-table">
-                                                <div class="char-row"
-                                                     v-for="(bonus, charKey) in selectedProfession.characteristics"
-                                                     :key="charKey">
-                                                    <span class="char-name">{{ getCharacteristicName(charKey) }}</span>
-                                                    <span class="char-bonus">+{{ bonus }}</span>
+
+                                            <div class="stat-category-label">Cechy Główne</div>
+                                            <div class="wfrp-stat-grid">
+                                                <div v-for="stat in mainProfileConfig" :key="stat.label" class="stat-cell">
+                                                    <div class="stat-header">{{ stat.label }}</div>
+                                                    <div class="stat-value">
+                                                        {{ formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label)) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-category-label secondary-label">Cechy Drugorzędne</div>
+                                            <div class="wfrp-stat-grid">
+                                                <div v-for="stat in secondaryProfileConfig" :key="stat.label" class="stat-cell">
+                                                    <div class="stat-header">{{ stat.label }}</div>
+                                                    <div class="stat-value">
+                                                        {{ formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label)) }}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Umiejętności -->
                                         <div class="detail-section">
                                             <h4 class="detail-title">Umiejętności</h4>
-                                            <div class="skills-list">
-                                                <span v-for="skill in selectedProfession.skills" :key="skill" class="skill-tag">
-                                                    {{ skill }}
-                                                </span>
+                                            <div class="items-container">
+                                                <div class="mandatory-group" v-if="getMandatoryItems(selectedProfession.skills).length">
+                                                    <span class="group-label">Otrzymujesz:</span>
+                                                    <div class="tags-wrapper">
+                                                        <span v-for="skill in getMandatoryItems(selectedProfession.skills)" :key="skill.id" class="skill-tag">
+                                                            {{ formatSkillName(skill) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.skills).length">
+                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.skills)" :key="'s-choice-'+index" class="choice-block">
+                                                        <span class="choice-label">Wybierz jedną z:</span>
+                                                        <div class="choice-options">
+                                                            <span v-for="(skill, i) in group" :key="skill.id">
+                                                                <span class="choice-item">{{ formatSkillName(skill) }}</span>
+                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <!-- Zdolności -->
                                         <div class="detail-section">
                                             <h4 class="detail-title">Zdolności</h4>
-                                            <div class="talents-list">
-                                                <span v-for="talent in selectedProfession.talents" :key="talent" class="talent-tag">
-                                                    {{ talent }}
-                                                </span>
+                                            <div class="items-container">
+                                                <div class="mandatory-group" v-if="getMandatoryItems(selectedProfession.talents).length">
+                                                    <span class="group-label">Otrzymujesz:</span>
+                                                    <div class="tags-wrapper">
+                                                        <span v-for="talent in getMandatoryItems(selectedProfession.talents)" :key="talent.id" class="talent-tag">
+                                                            {{ formatTalentName(talent) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.talents).length">
+                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.talents)" :key="'t-choice-'+index" class="choice-block">
+                                                        <span class="choice-label">Wybierz jedną z:</span>
+                                                        <div class="choice-options">
+                                                            <span v-for="(talent, i) in group" :key="talent.id">
+                                                                <span class="choice-item">{{ formatTalentName(talent) }}</span>
+                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <!-- Wyposażenie -->
                                         <div class="detail-section">
                                             <h4 class="detail-title">Wyposażenie</h4>
                                             <div class="equipment-list">
-                                                <div v-for="item in selectedProfession.equipment" :key="item"
-                                                     class="equipment-item">
-                                                    {{ item }}
+                                                <div class="mandatory-eq" v-if="getMandatoryItems(selectedProfession.equipments).length">
+                                                    <div v-for="item in getMandatoryItems(selectedProfession.equipments)" :key="item.id" class="equipment-item">
+                                                        {{ formatItemName(item) }}
+                                                    </div>
+                                                </div>
+                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.equipments).length">
+                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.equipments)" :key="'t-choice-'+index" class="choice-block">
+                                                        <span class="choice-label">Wybierz jedną z:</span>
+                                                        <div class="choice-options">
+                                                            <span v-for="(item, i) in group" :key="item.id">
+                                                                <span class="choice-item">{{ formatItemName(item) }}</span>
+                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Profesje wstępne -->
-                                        <div class="detail-section">
-                                            <h4 class="detail-title">Profesje Wstępne</h4>
-                                            <div class="professions-list">
-                                                <span v-for="prof in selectedProfession.entryProfessions" :key="prof"
-                                                      class="profession-tag entry">
-                                                    {{ prof }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Profesje wyjściowe -->
-                                        <div class="detail-section">
-                                            <h4 class="detail-title">Profesje Wyjściowe</h4>
-                                            <div class="professions-list">
-                                                <span v-for="prof in selectedProfession.exitProfessions" :key="prof"
-                                                      class="profession-tag exit">
-                                                    {{ prof }}
-                                                </span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -285,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted, nextTick, watch} from 'vue'
+import {computed, nextTick, onMounted, ref, watch} from 'vue'
 import {rollProfession} from '../../../data/professions'
 import DiceBox from '@3d-dice/dice-box'
 
@@ -495,62 +527,37 @@ const getCharacteristicName = (charKey) => {
     return names[charKey] || charKey
 }
 
-// Metoda rzutu z prawdziwą fizyką
+
 const rollForProfession = async () => {
     if (!selectedRace.value || isRollingProfession.value) return
 
-    // Jeśli DiceBox nie jest zainicjalizowany, spróbuj ponownie
     if (!diceBox) {
-        console.log('DiceBox nie jest zainicjalizowany, próba ponownej inicjalizacji...')
         await initializeDiceBox()
-
-        if (!diceBox) {
-            console.error('Nie można zainicjalizować DiceBox')
-            return
-        }
+        if (!diceBox) return
     }
 
     try {
         isRollingProfession.value = true
+
         selectedProfession.value = null
         professionRoll.value = 0
 
-        console.log('DiceBox state:', diceBox)
-
-        // Wyczyść poprzednie kostki
+        await new Promise(resolve => setTimeout(resolve, 500))
         await diceBox.clear()
-
-        console.log('Rolling dice...')
-        // Rzuć dwoma d10
         const results = await diceBox.roll('1d100')
-
-        console.log('Roll results:', results)
-
-        // Przetwórz wyniki
         const total = results[0].value
-
         professionRoll.value = total;
 
-        // Wylosuj profesję
         try {
-            const raceKey = selectedRace.value.key.toLowerCase()
-            console.log(raceKey, total)
-            selectedProfession.value = rollProfession(raceKey, total)
-            heroData.value.profession = selectedProfession.value
+            const raceKey = selectedRace.value.key
+            const response = await rollProfession(raceKey, total)
+            const professionData = response.data || response;
+
+            selectedProfession.value = professionData;
+            heroData.value.profession = professionData;
+
         } catch (error) {
-            console.error('Błąd podczas losowania profesji:', error)
-            selectedProfession.value = {
-                name: 'Chłop',
-                description: 'Prosty rolnik pracujący na roli',
-                diceRoll: total,
-                class: 'Łokciowa',
-                characteristics: {},
-                skills: [],
-                talents: [],
-                equipment: [],
-                entryProfessions: [],
-                exitProfessions: []
-            }
+            console.error('Błąd pobierania profesji:', error)
         }
 
     } catch (error) {
@@ -560,6 +567,97 @@ const rollForProfession = async () => {
     }
 }
 
+const mainProfileConfig = [
+    { label: 'WW',  keys: ['ws', 'weapon_skill', 'weaponSkill', 'Walka Wręcz'] },
+    { label: 'US',  keys: ['bs', 'ballistic_skill', 'ballisticSkill', 'Umiejętności Strzeleckie'] },
+    { label: 'K',   keys: ['s', 'strength', 'Siła'] },
+    { label: 'Odp', keys: ['t', 'toughness', 'Wytrzymałość'] },
+    { label: 'Zr',  keys: ['ag', 'agility', 'Zwinność'] },
+    { label: 'Int', keys: ['int', 'intelligence', 'Inteligencja'] },
+    { label: 'SW',  keys: ['wp', 'willpower', 'Siła Woli'] },
+    { label: 'Ogd', keys: ['fel', 'fellowship', 'Ogłada'] }
+]
+
+const secondaryProfileConfig = [
+    { label: 'A',   keys: ['a', 'attacks', 'Ataki'] },
+    { label: 'Żyw', keys: ['w', 'wounds', 'Żywotność'] },
+    { label: 'S',   keys: ['sb', 'strength_bonus'] },
+    { label: 'Wt',  keys: ['tb', 'toughness_bonus'] },
+    { label: 'Sz',  keys: ['m', 'movement', 'Szybkość'] },
+    { label: 'Mag', keys: ['mag', 'magic', 'Magia'] },
+    { label: 'PO',  keys: ['ip', 'insanity', 'Punkty Obłędu'] },
+    { label: 'PP',  keys: ['fp', 'fate', 'Punkty Przeznaczenia'] }
+]
+
+// Funkcja szukająca wartości w obiekcie characteristics niezależnie od nazewnictwa klucza
+// Uniwersalna funkcja szukająca wartości w Tablicy LUB Obiekcie
+const getStatValue = (characteristics: any, label: string) => {
+    if (!characteristics) return null;
+    // PRZYPADEK 1: Backend zwraca TABLICĘ obiektów (np. [{name: 'ws', value: 10}, ...])
+    if (Array.isArray(characteristics)) {
+        const foundItem = characteristics.find(item => {
+            return label === item?.characteristic?.short_name;
+        });
+
+        if (foundItem) {
+            return foundItem.available_advancement ?? null;
+        }
+        return null;
+    }
+
+    // PRZYPADEK 2: Backend zwraca OBIEKT (np. { ws: 10, bs: 5 })
+    for (const key of keys) {
+        if (characteristics[key] !== undefined && characteristics[key] !== null) {
+            return characteristics[key];
+        }
+    }
+
+    return null;
+}
+
+// Formatowanie wartości (dodaje "+", chyba że to 0 lub null)
+const formatStatBonus = (val: any) => {
+    if (val === null || val === 0 || val === undefined) return '—';
+    return `+${val}`;
+}
+
+// Pobiera listę przedmiotów obowiązkowych (klucz "0")
+const getMandatoryItems = (groupedCollection: any) => {
+    if (!groupedCollection) return [];
+    console.log(groupedCollection)
+    return Object.values(groupedCollection)
+        .filter((group: any) => Array.isArray(group) && group.length === 1)
+        .flat();
+}
+
+const getChoiceGroups = (groupedCollection: any) => {
+    if (!groupedCollection) return [];
+    return Object.values(groupedCollection)
+        .filter((group: any) => Array.isArray(group) && group.length > 1);
+}
+// Formatowanie nazwy umiejętności (Obsługa HasMany z modelem pośrednim)
+// Formatowanie nazwy umiejętności
+const formatSkillName = (item: any) => {
+    const name = item.skill?.name || 'Nieznana umiejętność';
+    const additional = item.additional_name;
+
+    return additional ? `${name} (${additional})` : name;
+}
+
+// Formatowanie nazwy zdolności
+const formatTalentName = (item: any) => {
+    const name = item.talent?.name;
+    const additional = item.additional_name;
+    return additional ? `${name} (${additional})` : name;
+}
+
+// Formatowanie nazwy ekwipunku
+const formatItemName = (pivotItem: any) => {
+    const customName = pivotItem.item_name;
+    if (customName) return customName;
+
+    return pivotItem?.item?.tradeable?.name || 'Nieznany';
+}
 const canProceed = computed(() => {
     switch (currentStep.value) {
         case 1:
@@ -646,6 +744,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* =========================================
+   1. GŁÓWNY UKŁAD (LAYOUT)
+   ========================================= */
+
 .hero-creation-overlay {
     position: fixed;
     top: 0;
@@ -654,10 +756,11 @@ onMounted(() => {
     height: 100vh;
     z-index: 1000;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.9); /* Mocniejsze przyciemnienie tła */
+    padding: 1rem;
     overflow-y: auto;
-    padding: 2rem 0;
 }
 
 .creation-background {
@@ -666,209 +769,148 @@ onMounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
-    overflow: hidden;
+    background: #111;
     pointer-events: none;
+    z-index: -1;
 }
 
 .parchment-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.7) 70%);
-    backdrop-filter: blur(1px);
-}
-
-.floating-runes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.rune {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23d4af37" opacity="0.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>') no-repeat center;
-    animation: float 6s ease-in-out infinite;
-}
-
-.rune:nth-child(1) {
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.rune:nth-child(2) {
-    top: 20%;
-    right: 15%;
-    animation-delay: 1.5s;
-}
-
-.rune:nth-child(3) {
-    bottom: 20%;
-    left: 20%;
-    animation-delay: 3s;
-}
-
-.rune:nth-child(4) {
-    bottom: 15%;
-    right: 10%;
-    animation-delay: 4.5s;
-}
-
-.rune:nth-child(5) {
-    top: 50%;
-    left: 5%;
-    animation-delay: 2s;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-20px) rotate(180deg);
-    }
+    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0.9));
 }
 
 .creation-container {
     position: relative;
-    width: 95vw;
-    max-width: 1600px;
-    min-height: 80vh;
-    max-height: none;
-    background: linear-gradient(145deg, #2a2926 0%, #3d3a35 100%);
+    width: 100%;
+    max-width: 1400px;
+    height: 90vh;
+    background: linear-gradient(145deg, #1f1e1b 0%, #2d2a25 100%);
     border: 3px solid #d4af37;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 1);
     font-family: 'Cinzel', serif;
-    margin: auto;
+    color: #e4d8b4;
+    overflow: hidden;
 }
 
+/* =========================================
+   2. NAGŁÓWEK I PASEK POSTĘPU
+   ========================================= */
+
 .progress-section {
-    padding: 2rem;
+    padding: 1rem 1.5rem;
     border-bottom: 2px solid #d4af37;
     text-align: center;
+    background: rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
 }
 
 .progress-bar {
     width: 100%;
-    height: 6px;
-    background: rgba(212, 175, 55, 0.2);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 1rem;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #d4af37 0%, #f4d03f 100%);
-    border-radius: 3px;
+    background: #d4af37;
     transition: width 0.5s ease-out;
+    box-shadow: 0 0 10px #d4af37;
 }
 
 .progress-text {
     color: #d4af37;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
+
+/* =========================================
+   3. SLAJDY (SLIDES)
+   ========================================= */
 
 .creation-slide {
     flex: 1;
-    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    padding: 1.5rem;
     overflow-y: auto;
-    max-height: calc(100vh - 300px);
-}
-
-.slide-enter {
-    animation: slideIn 0.5s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    position: relative;
+    /* Ukrywamy scrollbar systemowy, ale zachowujemy funkcjonalność */
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 transparent;
 }
 
 .slide-header {
     text-align: center;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
 }
 
 .slide-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: #d4af37;
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .slide-subtitle {
-    font-size: 1.2rem;
-    color: #c09f80;
-    margin: 0;
+    color: #a89f91;
+    font-size: 1rem;
 }
 
-/* Race Selection Styles */
+/* =========================================
+   4. KROK 1: WYBÓR RASY
+   ========================================= */
+
 .race-selection-grid {
     display: flex;
+    gap: 1.5rem;
     justify-content: center;
-    gap: 2rem;
-    margin-top: 2rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
 }
 
 .race-card {
-    background: linear-gradient(145deg, #3a3935 0%, #4a4540 100%);
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
     padding: 1.5rem;
+    width: 250px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    overflow: hidden;
-    flex: 1;
-    max-width: 320px;
-    min-width: 280px;
 }
 
 .race-card:hover {
     border-color: #d4af37;
+    background: rgba(255, 255, 255, 0.07);
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .race-card.active {
     border-color: #d4af37;
-    background: linear-gradient(145deg, #4a4540 0%, #5a5145 100%);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(0, 0, 0, 0.4));
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
-/* Zmienione wartości */
 .race-icon {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 1.5rem;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 1rem;
     border-radius: 50%;
-    background: rgba(212, 175, 55, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 2px solid rgba(212, 175, 55, 0.4);
     overflow: hidden;
-    border: 2px solid rgba(212, 175, 55, 0.5);
 }
 
 .race-icon img {
@@ -881,1164 +923,697 @@ onMounted(() => {
     color: #d4af37;
     font-size: 1.3rem;
     margin-bottom: 0.5rem;
-    text-align: center;
 }
 
 .race-description {
-    color: #c09f80;
-    font-size: 0.95rem;
     text-align: center;
+    font-size: 0.85rem;
+    color: #ccc;
     margin-bottom: 1rem;
-    line-height: 1.4;
 }
 
 .race-bonuses {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
     justify-content: center;
 }
 
 .bonus-tag {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     color: #d4af37;
-    padding: 0.3rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.selection-indicator {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #d4af37;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.race-card.active .selection-indicator {
-    opacity: 1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .check-mark {
-    color: #2a2926;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-/* Name Input Styles */
-.name-input-section {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.input-group {
-    margin-bottom: 2rem;
-}
-
-.input-label {
-    display: block;
-    color: #d4af37;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.fantasy-input {
-    width: 100%;
-    padding: 1rem;
-    background: rgba(42, 41, 38, 0.8);
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    border-radius: 10px;
-    color: #e4d8b4;
-    font-size: 1.1rem;
-    font-family: 'Cinzel', serif;
-    transition: all 0.3s ease;
-}
-
-.fantasy-input:focus {
-    outline: none;
-    border-color: #d4af37;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-}
-
-.name-suggestions {
-    margin-top: 2rem;
-    text-align: center;
-}
-
-.name-suggestions h4 {
-    color: #c09f80;
-    margin-bottom: 1rem;
-}
-
-.suggestion-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    justify-content: center;
-}
-
-.suggestion-tag {
-    background: rgba(192, 159, 128, 0.2);
-    color: #c09f80;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.suggestion-tag:hover {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-    transform: scale(1.05);
-}
-
-/* Dice Rolling Styles */
-.dice-rolling-section {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.characteristics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.characteristic-card {
-    background: linear-gradient(145deg, #3a3935 0%, #4a4540 100%);
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.characteristic-card.rolling {
-    border-color: #d4af37;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-
-.characteristic-name {
-    color: #d4af37;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.dice-container {
-    margin-bottom: 1rem;
-}
-
-.dice-display {
-    margin-bottom: 0.5rem;
-}
-
-.dice-faces {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.die-face {
-    width: 40px;
-    height: 40px;
-    background: #d4af37;
-    color: #2a2926;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.rolling-dice {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.rolling-die {
-    font-size: 2rem;
-    animation: roll 0.5s infinite;
-}
-
-@keyframes roll {
-    0%, 100% {
-        transform: rotate(0deg);
-    }
-    25% {
-        transform: rotate(90deg);
-    }
-    50% {
-        transform: rotate(180deg);
-    }
-    75% {
-        transform: rotate(270deg);
-    }
-}
-
-.dice-canvas {
-    width: 100%;
-    height: 300px !important;
-    border-radius: 15px;
-    background: linear-gradient(135deg, #1a4a1a 0%, #0d2d0d 100%);
-    border: 4px solid #8b4513;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7),
-    0 10px 30px rgba(0, 0, 0, 0.4);
-    position: relative;
-    overflow: hidden;
-}
-
-.dice-canvas::before {
-    content: '';
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    border: 2px solid rgba(212, 175, 55, 0.4);
-    border-radius: 10px;
-    pointer-events: none;
-    z-index: 1;
+    top: 10px;
+    right: 10px;
+    color: #d4af37;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
+
+/* =========================================
+   5. KROK 2: RZUT I SZCZEGÓŁY (Kluczowe poprawki)
+   ========================================= */
 
 .profession-rolling-section {
-    max-width: 1000px;
-    margin: 0 auto;
     display: flex;
-    flex-direction: column;
     gap: 2rem;
-    /* Rezerwujemy miejsce na dole, by scroll nie skakał przy pojawieniu się profesji */
-    padding-bottom: 50px;
+    height: 100%;
+    overflow: hidden;
+    padding-bottom: 1rem;
+    /* Centrujemy zawartość. Jeśli jest tylko lewa kolumna, będzie na środku.
+       Jeśli dojdzie prawa, obie się zmieszczą obok siebie. */
+    justify-content: center;
 }
 
-.profession-display-container {
-    width: 100%;
-    margin-top: 1rem;
-    /* Zapobiegamy gwałtownemu rozpychaniu */
+/* --- LEWA KOLUMNA: KOSTKI --- */
+.dice-roll-container {
+    /* KLUCZOWA ZMIANA: */
+    flex: 0 0 450px; /* 0: nie rośnij, 0: nie malej, 450px: bazowa szerokość */
+    width: 450px;    /* Sztywna szerokość */
+
+    background: #0a0a0a;
+    border: 2px solid #444;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 500px; /* Stała wysokość */
+    overflow: hidden;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.5s ease;
+    max-height: 1000px; /* Potrzebne do animacji wysokości */
+    opacity: 1;
     overflow: hidden;
 }
 
-.dice-roll-container {
-    text-align: center;
-    padding: 2rem;
-    background: rgba(42, 41, 38, 0.5);
-    border-radius: 15px;
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    /* Wymuszamy stałą wysokość całego bloku rzutu, aby opis profesji pod spodem nie skakał */
-    min-width: 1000px;
-    display: flex;
-    min-height: 800px;
-    flex-direction: column;
-    align-items: center;
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateX(50px);
+    max-height: 0; /* Zwijamy element przy wyjściu */
+    margin: 0;
+    padding: 0;
 }
-
-.dice-result-display {
-    margin-top: 2rem;
-    text-align: center;
-}
-
-.individual-results {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    margin-bottom: 1.5rem;
-}
-
-.die-result {
-    background: rgba(42, 41, 38, 0.7);
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    min-width: 160px;
-    transition: all 0.3s ease;
-}
-
-.die-result.tens {
-    background: linear-gradient(145deg, #8b4513 0%, #a0522d 100%);
-    border-color: #d2691e;
-}
-
-.die-result.units {
-    background: linear-gradient(145deg, #2e7d32 0%, #388e3c 100%);
-    border-color: #4caf50;
-}
-
-.die-label {
+/* Canvas biblioteki */
+#dice-box-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
     display: block;
-    color: #e4d8b4;
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
 }
 
-.die-value {
-    display: block;
-    color: white;
-    font-size: 2.2rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-}
-
-.total-result {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    padding: 2rem;
-    border-radius: 20px;
-    display: inline-block;
-    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5),
-    inset 0 0 20px rgba(255, 255, 255, 0.2);
-    animation: resultAppear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    transform: scale(1.05);
-}
-
-@keyframes resultAppear {
-    0% {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.15) rotate(-90deg);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1.05) rotate(0deg);
-        opacity: 1;
-    }
-}
-
-.total-label {
-    display: block;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-.total-value {
-    display: block;
-    font-size: 3.5rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.roll-controls {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.roll-profession-btn {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    border: none;
-    padding: 1.2rem 2.5rem;
-    border-radius: 12px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.roll-profession-btn:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(212, 175, 55, 0.6);
-}
-
-:deep(.dice-box-canvas),
-:deep(canvas[id^="dice-canvas"]) {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+:deep(canvas) {
+    display: block !important;
     width: 100% !important;
     height: 100% !important;
-    display: block !important;
 }
 
-.roll-profession-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
+/* UI nad kostkami */
+.dice-result-display {
+    position: relative;
+    z-index: 10;
+    margin-top: 2rem;
+    margin-bottom: auto;
 }
 
-.reroll-btn {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-    border: 2px solid #d4af37;
-    padding: 1rem 2rem;
-    border-radius: 10px;
+.total-result {
+    background: rgba(212, 175, 55, 0.95);
+    color: #1a1a1a;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    min-width: 140px;
+    border: 1px solid #fff;
+}
+
+.total-label {
+    display: block;
+    font-size: 0.7rem;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.reroll-btn:hover {
-    background: rgba(212, 175, 55, 0.3);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-}
-
-.characteristic-total {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #d4af37;
-}
-
-.reroll-btn {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-    border: 1px solid rgba(212, 175, 55, 0.5);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.reroll-btn:hover:not(:disabled) {
-    background: rgba(212, 175, 55, 0.3);
-    transform: scale(1.05);
-}
-
-.reroll-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.dice-controls {
-    text-align: center;
-}
-
-.roll-all-btn {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.roll-all-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
-}
-
-/* Navigation Styles */
-.navigation-section {
-    padding: 2rem;
-    border-top: 2px solid #d4af37;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-btn {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Cinzel', serif;
-}
-
-.nav-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
-}
-
-.nav-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.finish-btn {
-    background: linear-gradient(145deg, #c09f80 0%, #d4af37 100%);
-}
-
-.step-indicators {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.step-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(212, 175, 55, 0.3);
-    transition: all 0.3s ease;
-}
-
-.step-dot.active {
-    background: #d4af37;
-    transform: scale(1.2);
-}
-
-.step-dot.completed {
-    background: #c09f80;
-}
-
-.close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 50%;
-    color: #d4af37;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-btn:hover {
-    background: rgba(212, 175, 55, 0.2);
-    transform: scale(1.1);
-}
-
-.close-icon {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.btn-icon {
-    font-size: 1.1rem;
-}
-
-.profession-content-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 10px;
-    margin-top: 1rem;
-}
-
-.profession-content-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 10px;
-    margin-top: 1rem;
-}
-
-/* Stylizacja scrollbara w klimacie Warhammera */
-.profession-content-scroll::-webkit-scrollbar {
-    width: 8px;
-}
-.profession-content-scroll::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-}
-.profession-content-scroll::-webkit-scrollbar-thumb {
-    background: #d4af37;
-    border-radius: 4px;
-}
-
-@keyframes throwMotion {
-    0% {
-        transform: translateX(-50%) translateY(-50px) rotate(-45deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translateX(-50%) translateY(0px) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateX(-50%) translateY(50px) rotate(45deg);
-        opacity: 0;
-    }
-}
-
-@keyframes bounce-flash {
-    0%, 100% {
-        filter: brightness(1);
-    }
-    50% {
-        filter: brightness(1.3) drop-shadow(0 0 10px #d4af37);
-    }
-}
-
-@keyframes settleGlow {
-    0% {
-        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8)) brightness(1.2);
-    }
-    100% {
-        filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3)) brightness(1);
-    }
-}
-
-.profession-rolling-section {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.dice-roll-container {
-    text-align: center;
-    padding: 2rem;
-    background: rgba(42, 41, 38, 0.5);
-    border-radius: 15px;
-    border: 2px solid rgba(212, 175, 55, 0.3);
-}
-
-@keyframes diceTableShake {
-    0%, 100% {
-        transform: translateX(0) translateY(0);
-    }
-    25% {
-        transform: translateX(-3px) translateY(-1px);
-    }
-    50% {
-        transform: translateX(3px) translateY(1px);
-    }
-    75% {
-        transform: translateX(-2px) translateY(2px);
-    }
-}
-
-@keyframes bounce {
-    0% {
-        transform: translateY(0px) rotateX(0deg);
-    }
-    100% {
-        transform: translateY(-10px) rotateX(180deg);
-    }
-}
-
-.total-result {
+.total-value {
+    display: block;
     font-size: 2.5rem;
-    color: #d4af37;
-    font-weight: bold;
-    margin-left: 1rem;
+    font-weight: 800;
+    line-height: 1;
 }
 
 .roll-controls {
+    position: relative;
+    z-index: 10;
+    margin-top: auto;
+    padding-bottom: 2rem;
     display: flex;
-    justify-content: center;
     gap: 1rem;
+    width: 100%;
+    justify-content: center;
 }
 
 .roll-profession-btn {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-size: 1.2rem;
+    background: linear-gradient(to bottom, #d4af37, #b4941f);
+    border: 1px solid #ffd700;
+    color: #1a1a1a;
+    padding: 12px 30px;
     font-weight: bold;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    transition: 0.2s;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .roll-profession-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+    transform: scale(1.05);
+    filter: brightness(1.1);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
 }
 
 .roll-profession-btn:disabled {
+    filter: grayscale(1);
     opacity: 0.7;
     cursor: not-allowed;
 }
 
 .reroll-btn {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #d4af37;
     color: #d4af37;
-    border: 2px solid #d4af37;
-    padding: 0.8rem 1.5rem;
-    border-radius: 10px;
+    padding: 10px 20px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
+    border-radius: 4px;
+    transition: 0.2s;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .reroll-btn:hover {
-    background: rgba(212, 175, 55, 0.3);
-    transform: scale(1.05);
+    background: rgba(212, 175, 55, 0.2);
 }
 
-.dice-d10-container:nth-child(1) .triangle-face {
-    background: #8b0000;
-    color: white;
-}
-
-/* Czerwona - dziesiątki */
-.dice-d10-container:nth-child(2) .triangle-face {
-    background: #1a1a1a;
-    color: #d4af37;
-}
-
-@keyframes realisticThrow {
-    0% {
-        transform: translateX(-50%) translateY(-80px) rotate(-60deg) scale(0.8);
-        opacity: 0.8;
-    }
-    30% {
-        transform: translateX(-50%) translateY(-20px) rotate(-20deg) scale(1);
-        opacity: 1;
-    }
-    70% {
-        transform: translateX(-50%) translateY(20px) rotate(30deg) scale(1.1);
-        opacity: 1;
-    }
-    100% {
-        transform: translateX(-50%) translateY(80px) rotate(60deg) scale(1.2);
-        opacity: 0;
-    }
-}
-
-@keyframes tableShake {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    25% {
-        transform: translateX(-2px) translateY(-1px);
-    }
-    75% {
-        transform: translateX(2px) translateY(1px);
-    }
-}
-
-@keyframes diceRoll {
-    0% {
-        filter: blur(0px);
-    }
-    50% {
-        filter: blur(2px);
-    }
-    100% {
-        filter: blur(0px);
-    }
-}
-
-.total-result {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5),
-    inset 0 0 20px rgba(255, 255, 255, 0.2);
-    animation: resultAppear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes resultAppear {
-    0% {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.1) rotate(-90deg);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-    }
-}
-
-.dice-result-display {
-    margin-top: 2rem;
-    text-align: center;
-}
-
-.total-result {
-    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
-    color: #2a2926;
-    padding: 1.5rem;
-    border-radius: 15px;
-    display: inline-block;
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
-    transform: scale(1.05);
-}
-
-.total-label {
-    display: block;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-.total-value {
-    display: block;
-    font-size: 3rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes glowPulse {
-    0% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0.7;
-        transform: scale(1.1);
-    }
-}
-
-/* Profession Display */
-.profession-display {
-    background: linear-gradient(145deg, #3a3935 0%, #4a4540 100%);
-    border: 2px solid #d4af37;
-    border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    /* Stała wysokość lub max-height dla stabilności */
-    height: 600px;
+/* --- PRAWA KOLUMNA: OPIS PROFESJI --- */
+.profession-display-container {
+    /* Zmieniamy na flex: 1, ale z ograniczeniem szerokości */
+    flex: 1;
+    max-width: 800px; /* Nie pozwalamy, żeby była zbyt szeroka */
+    height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.5s ease-out;
 }
 
+.profession-display {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid #d4af37;
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsywność dla kroku 2 */
+@media (max-width: 1024px) {
+    .profession-rolling-section {
+        flex-direction: column;
+        align-items: center; /* Centrujemy na tablecie */
+        overflow-y: auto;
+    }
+
+    .dice-roll-container {
+        /* Na małych ekranach pozwalamy na 100% szerokości */
+        flex: none;
+        width: 100%;
+        max-width: 500px;
+        min-height: 350px;
+    }
+
+    .profession-display-container {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        overflow: visible;
+    }
+
+    .profession-display {
+        height: auto;
+    }
+}
 
 .profession-header {
     text-align: center;
-    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
     padding-bottom: 1rem;
-    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .profession-name {
     font-size: 2.2rem;
     color: #d4af37;
-    margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
 }
 
 .profession-class {
-    color: #c09f80;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    color: #888;
+    font-style: italic;
+    font-size: 1rem;
+    margin-top: 0.3rem;
 }
 
-.dice-roll-indicator {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    display: inline-block;
-    font-weight: bold;
+/* Przewijalna treść */
+.profession-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+    /* Firefox scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 rgba(255,255,255,0.05);
 }
+
+/* Chrome/Safari Scrollbar */
+.profession-content-scroll::-webkit-scrollbar { width: 6px; }
+.profession-content-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+.profession-content-scroll::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
 
 .profession-description {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 1rem;
-    background: rgba(42, 41, 38, 0.5);
-    border-radius: 10px;
-    color: #e4d8b4;
-    font-size: 1.1rem;
-    line-height: 1.6;
     font-style: italic;
+    color: #c09f80;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-left: 2px solid #d4af37;
+    border-radius: 0 4px 4px 0;
 }
 
 .profession-details-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
 .detail-section {
-    background: rgba(42, 41, 38, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 1rem;
 }
 
 .detail-title {
     color: #d4af37;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     font-weight: bold;
-    margin-bottom: 1rem;
-    text-align: center;
     text-transform: uppercase;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
     letter-spacing: 1px;
 }
 
+/* Statystyki */
 .characteristics-table {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
     gap: 0.5rem;
 }
 
 .char-row {
-    display: contents;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.4rem;
+    border-radius: 4px;
 }
 
-.char-name {
-    color: #c09f80;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+.char-name { font-size: 0.7rem; color: #888; font-weight: bold; }
+.char-bonus { font-size: 1rem; color: #d4af37; font-weight: bold; }
+
+/* Umiejętności i Zdolności */
+.items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.char-bonus {
-    color: #d4af37;
-    font-weight: bold;
-    text-align: right;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+.group-label {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.3rem;
 }
 
-.skills-list, .talents-list {
+.tags-wrapper {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
 .skill-tag, .talent-tag {
-    background: rgba(192, 159, 128, 0.2);
-    color: #c09f80;
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+/* Wybory (Choices) */
+.choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    border-top: 1px dashed #444;
+    padding-top: 0.8rem;
+}
+
+.choice-block {
+    background: rgba(212, 175, 55, 0.05);
+    border-left: 3px solid #d4af37;
+    padding: 0.6rem 0.8rem;
+}
+
+.choice-label {
+    color: #d4af37;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.choice-options {
     font-size: 0.9rem;
+    color: #fff;
+    line-height: 1.4;
+}
+
+.separator {
+    color: #d4af37;
+    font-size: 0.7rem;
+    margin: 0 0.4rem;
+    opacity: 0.7;
+}
+
+.choice-item {
     font-weight: 500;
 }
 
-.talent-tag {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-}
-
+/* Ekwipunek */
 .equipment-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .equipment-item {
+    font-size: 0.9rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.equipment-choice-row {
+    background: rgba(212, 175, 55, 0.05);
+    padding: 0.4rem;
+    border-radius: 3px;
+    display: flex;
+    align-items: baseline;
+}
+
+.choice-label-inline {
+    color: #d4af37;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.text-separator {
+    color: #d4af37;
+    font-weight: bold;
+    margin: 0 0.3rem;
+}
+
+/* =========================================
+   6. KROK 3: IMIĘ (INPUTY)
+   ========================================= */
+
+.name-input-section {
+    width: 100%;
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.input-group { margin-bottom: 1.5rem; }
+.input-label { display: block; color: #d4af37; margin-bottom: 0.5rem; font-weight: bold; }
+
+.fantasy-input {
+    width: 100%;
+    padding: 12px;
+    background: #0f0f0f;
+    border: 1px solid #444;
     color: #e4d8b4;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-    font-size: 0.95rem;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    transition: 0.3s;
 }
 
-.equipment-item:last-child {
-    border-bottom: none;
+.fantasy-input:focus {
+    border-color: #d4af37;
+    outline: none;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
-.professions-list {
+.suggestion-tags {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.5rem;
+    margin-top: 1rem;
 }
 
-.profession-tag {
-    padding: 0.4rem 0.8rem;
+.suggestion-tag {
+    background: rgba(212, 175, 55, 0.1);
+    color: #d4af37;
+    padding: 4px 10px;
     border-radius: 15px;
+    cursor: pointer;
+    border: 1px solid rgba(212, 175, 55, 0.2);
     font-size: 0.9rem;
-    font-weight: 500;
+    transition: 0.2s;
 }
 
-.profession-tag.entry {
-    background: rgba(159, 122, 234, 0.2);
-    color: #9f7aea;
+.suggestion-tag:hover {
+    background: #d4af37;
+    color: #000;
 }
 
-.profession-tag.exit {
-    background: rgba(72, 187, 120, 0.2);
-    color: #48bb78;
+/* =========================================
+   7. STOPKA I NAWIGACJA
+   ========================================= */
+
+.navigation-section {
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
-.profession-details-grid {
+.nav-btn {
+    background: #d4af37;
+    border: none;
+    padding: 10px 25px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #1a1a1a;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #f4d03f;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.nav-btn:disabled {
+    background: #444;
+    color: #777;
+    cursor: not-allowed;
+}
+
+.nav-btn.prev-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+}
+
+.nav-btn.prev-btn:hover {
+    color: #d4af37;
+    border-color: #d4af37;
+}
+
+.step-indicators { display: flex; gap: 0.5rem; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; transition: 0.3s; }
+.step-dot.active { background: #d4af37; transform: scale(1.4); }
+.step-dot.completed { background: #888; }
+
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 100;
+    transition: 0.3s;
+}
+
+.close-btn:hover {
+    color: #d4af37;
+    transform: rotate(90deg);
+}
+
+/* =========================================
+   8. ANIMACJE I MOBILE
+   ========================================= */
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-enter {
+    animation: slideIn 0.4s ease-out;
+}
+
+@media (max-width: 1024px) {
+    .profession-rolling-section {
+        flex-direction: column;
+        overflow-y: auto; /* Pozwala scrollować na tablecie */
+        padding-bottom: 2rem;
+    }
+
+    .dice-roll-container {
+        width: 100%;
+        max-width: none;
+        min-height: 350px;
+        flex-shrink: 0;
+    }
+
+    .profession-display-container {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .profession-display {
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-creation-overlay { padding: 0; align-items: flex-end; }
+    .creation-container { width: 100%; height: 100%; border-radius: 0; border: none; max-height: none; }
+    .race-selection-grid { gap: 1rem; }
+    .race-card { width: 100%; }
+}
+
+.detail-section.full-width {
+    grid-column: 1 / -1; /* Rozciągnij na całą szerokość grida */
+}
+
+.stat-category-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.secondary-label {
+    margin-top: 1.5rem;
+}
+
+.wfrp-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    max-height: 60vh; /* Ograniczenie wysokości */
-    overflow-y: auto; /* Przewijanie jeśli za długie */
-    padding-right: 0.5rem; /* Miejsce na scrollbar */
-}
-
-/* Stylizacja scrollbar */
-.profession-details-grid::-webkit-scrollbar,
-.creation-slide::-webkit-scrollbar,
-.hero-creation-overlay::-webkit-scrollbar {
-    width: 8px;
-}
-
-.profession-details-grid::-webkit-scrollbar-track,
-.creation-slide::-webkit-scrollbar-track,
-.hero-creation-overlay::-webkit-scrollbar-track {
-    background: rgba(42, 41, 38, 0.3);
+    /* 8 kolumn dla cech głównych i drugorzędnych */
+    grid-template-columns: repeat(8, 1fr);
+    border: 2px solid #d4af37;
     border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    overflow: hidden; /* Żeby border-radius działał na dzieci */
 }
 
-.profession-details-grid::-webkit-scrollbar-thumb,
-.creation-slide::-webkit-scrollbar-thumb,
-.hero-creation-overlay::-webkit-scrollbar-thumb {
-    background: rgba(212, 175, 55, 0.5);
-    border-radius: 4px;
+.stat-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.profession-details-grid::-webkit-scrollbar-thumb:hover,
-.creation-slide::-webkit-scrollbar-thumb:hover,
-.hero-creation-overlay::-webkit-scrollbar-thumb:hover {
-    background: rgba(212, 175, 55, 0.7);
+.stat-cell:last-child {
+    border-right: none;
 }
 
-@media (max-width: 768px) {
-    .dice-canvas {
-        height: 250px;
-    }
-
-    .total-value {
-        font-size: 2.8rem;
-    }
-
-    .roll-controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .profession-details-grid {
-        grid-template-columns: 1fr;
-    }
+.stat-header {
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #111;
+    background: #d4af37; /* Złote tło nagłówka */
+    padding: 0.3rem 0;
+    text-transform: uppercase;
 }
 
-.bottom-face .face-number {
-    transform: rotateZ(180deg);
+.stat-value {
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #e4d8b4;
+    padding: 0.5rem 0;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@media (max-width: 1400px) {
-    .creation-container {
-        max-width: 1400px;
+/* Responsywność dla tabelki */
+@media (max-width: 600px) {
+    .wfrp-stat-grid {
+        /* Na bardzo małych ekranach dzielimy na 2 rzędy po 4 */
+        grid-template-columns: repeat(4, 1fr);
     }
 
-    .race-selection-grid {
-        gap: 1.5rem;
+    .stat-cell:nth-child(4n) {
+        border-right: none; /* Usuń border co 4 element */
     }
 
-    .race-card {
-        max-width: 300px;
-        min-width: 260px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .creation-container {
-        max-width: 1200px;
-    }
-
-    .race-card {
-        max-width: 280px;
-        min-width: 240px;
+    .stat-cell:nth-child(-n+4) {
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Linia pozioma */
     }
 }
-
-@media (max-height: 800px) {
-    .creation-slide {
-        max-height: calc(100vh - 200px);
-    }
-}
-
-@media (max-width: 768px) {
-    .hero-creation-overlay {
-        padding: 1rem 0;
-    }
-
-    .creation-container {
-        width: 95vw;
-        min-height: auto;
-    }
-
-    .creation-slide {
-        max-height: calc(100vh - 250px);
-        padding: 1rem;
-    }
-
-    .slide-title {
-        font-size: 2rem;
-    }
-
-    .race-selection-grid {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .race-card {
-        flex: none;
-        min-width: 250px;
-        max-width: 300px;
-    }
-
-    .characteristics-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-
-    .navigation-section {
-        flex-direction: column;
-        gap: 1rem;
-    }
-}
-
-/* Globalne style dla canvas DiceBox */
-#dice-box-canvas canvas {
-    width: 100% !important;
-    height: 300px !important;
-    display: block !important;
-    position: relative !important;
-    z-index: 2 !important;
-}
-
-.dice-box-canvas {
-    width: 100% !important;
-    height: 300px !important;
-    display: block !important;
-    position: relative !important;
-    z-index: 2 !important;
-}
-
 </style>

@@ -28,7 +28,7 @@ class Profession extends Model
         return $this->hasMany(ProfessionTalent::class);
     }
 
-    public function rolledProfession($query, string $race, int $rolledValue)
+    public function scopeRolledProfession($query, string $race, int $rolledValue)
     {
         return $query->whereHas('startingProfessionRolls', function ($query) use ($rolledValue, $race) {
             $query->where('min_roll', '<=', $rolledValue)->where('max_roll', '>=', $rolledValue)->where('race', $race);

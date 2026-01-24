@@ -10,23 +10,29 @@ use App\Models\Hero;
 use App\Models\HeroInventory;
 use App\Models\Talent;
 use App\Models\Weapon;
+use App\Repositories\ProfessionsRepository;
+use App\Services\CreateCharacterService;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
 use App\Services\TransactionsService;
 use Auth;
 use DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
 
 class CharactersController extends Controller
 {
     private HeroService $heroService;
     private FortunePointSatisfactionService $fortunePointSatisfactionService;
+    private CreateCharacterService $createCharacterService;
     public function __construct()
     {
         $this->heroService = new HeroService();
         $this->fortunePointSatisfactionService = new FortunePointSatisfactionService();
+        $this->createCharacterService = new CreateCharacterService(new ProfessionsRepository());
     }
 
     public function getHero(int $userId)
@@ -368,6 +374,22 @@ class CharactersController extends Controller
         } catch (\Throwable $exception) {
             \Log::error('ERROR LOGGING FORTUNE POINTS SATISFACTION: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się zapisać oceny punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getRolledProfession(Request $request): JsonResponse
+    {
+        try {
+            if (!$request->query('race') || !$request->query('rolledValue')) {
+                throw new BadRequestException('Nie przesłano wymaganych danych');
+            }
+            return response()->json($this->createCharacterService->getFormatedRolledProfession($request->query('race'), $request->query('rolledValue')), Response::HTTP_OK);
+        } catch (ModelNotFoundException $exception) {
+            \Log::error('PROFESSION NOT FOUND. Request data:' . print_r($request->all(), true) . $exception->getMessage());
+            return response()->json(['message' => 'Nie znaleziono profesji tego wyniku rzutu.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING ROLLED PROFESSION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
