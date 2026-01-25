@@ -221,6 +221,113 @@
             <!-- Slajd 3: Imię bohatera -->
             <div v-if="currentStep === 3" class="creation-slide slide-enter">
                 <div class="slide-header">
+                    <h2 class="slide-title">Wylosuj i Przypisz Cechy</h2>
+                    <p class="slide-subtitle">Rzuć kośćmi, a następnie przypisz wyniki do odpowiednich cech. Możesz przerzucić jeden wynik.</p>
+                </div>
+
+                <div class="attributes-assignment-container">
+
+                    <div class="stats-column">
+                        <div class="stats-header-row">
+                            <span class="col-lbl">Cecha</span>
+                            <span class="col-lbl">Baza</span>
+                            <span class="col-lbl">Rzut</span>
+                            <span class="col-lbl">Suma</span>
+                        </div>
+
+                        <div
+                            v-for="(char, key) in characteristics"
+                            :key="key"
+                            class="stat-assignment-row"
+                            :class="{
+                                'ready-to-receive': selectedPoolIndex !== null && char.assignedValue === null,
+                                'filled': char.assignedValue !== null
+                            }"
+                            @click="assignSelectedToStat(key)"
+                        >
+                            <div class="stat-name-block">
+                                <span class="stat-abbr">{{ mainProfileConfig.find(c => c.keys.includes(key))?.label }}</span>
+                                <span class="stat-full">{{ char.name }}</span>
+                            </div>
+
+                            <div class="stat-base-val">{{ char.base }}</div>
+
+                            <div class="stat-assigned-slot">
+                                <span v-if="char.assignedValue !== null" class="assigned-val">
+                                    {{ char.assignedValue }}
+                                </span>
+                                <span v-else class="empty-slot-marker">
+                                    {{ selectedPoolIndex !== null ? '↓' : '—' }}
+                                </span>
+                                <button
+                                    v-if="char.assignedValue !== null"
+                                    class="remove-assign-btn"
+                                    @click.stop="unassignStat(key)"
+                                    title="Cofnij przypisanie"
+                                >✕</button>
+                            </div>
+
+                            <div class="stat-total-val">
+                                <span v-if="char.assignedValue !== null">{{ char.base + char.assignedValue }}</span>
+                                <span v-else class="dimmed">{{ char.base }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pool-column">
+                        <div class="dice-area-small">
+                            <div id="dice-box-attributes" class="dice-canvas"></div>
+
+                            <button
+                                v-if="rollPool.length === 0"
+                                class="roll-attributes-btn"
+                                @click="rollAttributesPool"
+                                :disabled="isRollingAttributes"
+                            >
+                                <span class="btn-icon">🎲</span> Rzuć na Cechy
+                            </button>
+                        </div>
+
+                        <div class="results-pool-grid" v-if="rollPool.length > 0">
+                            <div class="pool-label">Twoja Pula Wyników:</div>
+
+                            <div class="pool-items">
+                                <div
+                                    v-for="(item, index) in rollPool"
+                                    :key="item.id"
+                                    class="pool-item"
+                                    :class="{
+                                        'selected': selectedPoolIndex === index,
+                                        'used': item.isUsed
+                                    }"
+                                    @click="selectPoolItem(index)"
+                                >
+                                    {{ item.value }}
+                                    <div class="used-overlay" v-if="item.isUsed">✓</div>
+                                </div>
+                            </div>
+
+                            <div class="pool-actions" v-if="!allAssigned">
+                                <div v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed" class="mercy-section">
+                                    <p class="mercy-desc">Niezadowolony z tego wyniku?</p>
+                                    <button class="reroll-one-btn" @click="rerollSelectedPoolItem">
+                                        <span class="btn-icon">✨</span> Przerzuć (Łaska Shallyi)
+                                    </button>
+                                </div>
+                                <div v-else-if="mercyUsed" class="mercy-used-info">
+                                    Łaska Shallyi została wykorzystana.
+                                </div>
+                                <div v-else class="instruction-text">
+                                    Kliknij wynik w puli, a potem cechę po lewej.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentStep === 4" class="creation-slide slide-enter">
+                <div class="slide-header">
                     <h2 class="slide-title">Nazwij swojego bohatera</h2>
                     <p class="slide-subtitle">Wybierz imię godne {{ selectedRace?.name || 'bohatera' }}</p>
                 </div>
@@ -233,10 +340,8 @@
                             type="text"
                             class="fantasy-input"
                             placeholder="Wpisz imię bohatera..."
-                            @input="validateName"
                         >
                     </div>
-
                     <div class="input-group">
                         <label class="input-label">Nazwisko (opcjonalne)</label>
                         <input
@@ -246,9 +351,8 @@
                             placeholder="Wpisz nazwisko bohatera..."
                         >
                     </div>
-
                     <div class="name-suggestions" v-if="selectedRace">
-                        <h4>Sugerowane imiona dla {{ selectedRace.name }}:</h4>
+                        <h4>Sugerowane imiona:</h4>
                         <div class="suggestion-tags">
                           <span
                               v-for="name in selectedRace.suggestedNames"
@@ -321,15 +425,16 @@ import {computed, nextTick, onMounted, ref, watch} from 'vue'
 import {rollProfession} from '../../../data/professions'
 import DiceBox from '@3d-dice/dice-box'
 
-let diceBox = null
-
 // Props i emits
 const emit = defineEmits(['hero-created', 'creation-closed'])
 
 // Stan komponentu
 const isCreating = ref(false)
 const currentStep = ref(1)
-const totalSteps = 3
+const totalSteps = 4
+
+let diceBox = null // Instancja dla profesji
+let diceBoxAttributes = null // Instancja dla atrybutów
 
 // Dane bohatera
 const heroData = ref({
@@ -416,101 +521,93 @@ const closeCreation = () => {
 // Dostępne rasy (przykładowe dane)
 const availableRaces = ref([
     {
-        id: 1,
-        name: 'Człowiek',
-        key: 'human',
-        description: 'Wszechstronni i ambitni',
-        icon: '/images/races/human.png',
-        bonuses: ['Wszechstronność', 'Ambicja',],
-        suggestedNames: ['Alexa', 'Felix', 'Klara', 'Otto', 'Mathilde', 'Wolfgang']
+        id: 1, name: 'Człowiek', key: 'human', description: 'Wszechstronni i ambitni', icon: '/images/races/human.png',
+        bonuses: ['Wszechstronność', 'Ambicja'],
+        suggestedNames: ['Felix', 'Klara', 'Otto', 'Mathilde'],
+        // Baza 20 dla wszystkich
+        baseStats: { ws: 20, bs: 20, s: 20, t: 20, ag: 20, int: 20, wp: 20, fel: 20 }
     },
     {
-        id: 2,
-        name: 'Krasnolud',
-        key: 'dwarf',
-        description: 'Krzepcy i odważni',
-        icon: '/images/races/dwarf.png',
-        bonuses: ['Pamiętliwość', 'Tradycjonalizm', 'Solisdność'],
-        suggestedNames: ['Gotrek', 'Astrid', 'Bardin', 'Greta', 'Anika', 'Thylda']
+        id: 2, name: 'Krasnolud', key: 'dwarf', description: 'Krzepcy i odważni', icon: '/images/races/dwarf.png',
+        bonuses: ['Odporność na magię', 'Krzepki', 'Widzenie w ciemności'],
+        suggestedNames: ['Gotrek', 'Bardin', 'Greta', 'Thylda'],
+        // Wysokie WW, Odp, niskie Zr, Ogd
+        baseStats: { ws: 30, bs: 20, s: 20, t: 30, ag: 10, int: 20, wp: 20, fel: 10 }
     },
     {
-        id: 3,
-        name: 'Elf',
-        key: 'elf',
-        description: 'Dostojni i długowieczni',
-        icon: '/images/races/elf.png',
-        bonuses: ['Perfekcjonizm', 'Długowieczność', 'Wyczulone zmysły'],
-        suggestedNames: ['Halion', 'Teclis', 'Ulliana', 'Aluthol', 'Dolwen']
+        id: 3, name: 'Elf', key: 'elf', description: 'Dostojni i długowieczni', icon: '/images/races/elf.png',
+        bonuses: ['Bystry wzrok', 'Nocne widzenie'],
+        suggestedNames: ['Teclis', 'Ulliana', 'Aluthol', 'Dolwen'],
+        // Wysokie US, Zr, niskie Odp
+        baseStats: { ws: 30, bs: 30, s: 20, t: 20, ag: 30, int: 20, wp: 20, fel: 20 }
     },
     {
-        id: 4,
-        name: 'Niziołek',
-        key: 'halfling',
-        description: 'Spokojni i łakomi',
-        icon: '/images/races/halfling.png',
-        bonuses: ['Zaradność', 'Pogodność', 'Odporność na strach'],
-        suggestedNames: ['Ludo', 'Paul', 'Leni', 'Max', 'Theo', 'Sophia']
+        id: 4, name: 'Niziołek', key: 'halfling', description: 'Spokojni i łakomi', icon: '/images/races/halfling.png',
+        bonuses: ['Odporność na Chaos', 'Nocne widzenie'],
+        suggestedNames: ['Ludo', 'Leni', 'Max', 'Sophia'],
+        // Niskie WW, S, Odp, wysokie US, Zr, Ogd
+        baseStats: { ws: 10, bs: 30, s: 10, t: 10, ag: 30, int: 20, wp: 20, fel: 30 }
     }
 ])
-
-// Cechy
+// --- Logika Cech (Zaktualizowana) ---
 const characteristics = ref({
-    weaponSkill: {
-        name: 'Walka Wręcz',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    ballisticSkill: {
-        name: 'Umiejętności Strzeleckie',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    strength: {
-        name: 'Siła',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    toughness: {
-        name: 'Wytrzymałość',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    agility: {
-        name: 'Zwinność',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    intelligence: {
-        name: 'Inteligencja',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    willpower: {
-        name: 'Siła Woli',
-        dice: [],
-        total: 0,
-        isRolling: false
-    },
-    fellowship: {
-        name: 'Ogłada',
-        dice: [],
-        total: 0,
-        isRolling: false
-    }
+    ws:  { name: 'Walka Wręcz', base: 0, assignedValue: null },
+    bs:  { name: 'Um. Strzeleckie', base: 0, assignedValue: null },
+    s:   { name: 'Siła', base: 0, assignedValue: null },
+    t:   { name: 'Wytrzymałość', base: 0, assignedValue: null },
+    ag:  { name: 'Zwinność', base: 0, assignedValue: null },
+    int: { name: 'Inteligencja', base: 0, assignedValue: null },
+    wp:  { name: 'Siła Woli', base: 0, assignedValue: null },
+    fel: { name: 'Ogłada', base: 0, assignedValue: null }
 })
-
+interface PoolItem {
+    id: number;
+    value: number;
+    isUsed: boolean;
+}
 const selectedProfession = ref(null)
 const professionRoll = ref(0)
 const isRollingProfession = ref(false)
 
 const progressPercentage = computed(() => {
     return (currentStep.value / totalSteps) * 100
+})
+
+const rollPool = ref<PoolItem[]>([])
+const selectedPoolIndex = ref<number | null>(null)
+const isRollingAttributes = ref(false)
+const hasRolledAttributes = ref(false)
+const mercyUsed = ref(false)
+
+// Przy wyborze rasy ustawiamy bazy
+const selectRace = (race) => {
+    selectedRace.value = race
+    heroData.value.race = race
+
+    // Reset Cech
+    hasRolledAttributes.value = false
+    mercyUsed.value = false
+    Object.keys(characteristics.value).forEach(key => {
+        characteristics.value[key].base = race.baseStats[key] || 20
+        characteristics.value[key].roll = 0
+        characteristics.value[key].total = 0
+    })
+}
+watch(currentStep, async (newStep) => {
+    await nextTick()
+
+    // Inicjalizacja dla kroku 2 (Profesje)
+    if (newStep === 2) {
+        if (!diceBox) initDiceBox('#dice-box-canvas').then(db => diceBox = db)
+    }
+
+    // Inicjalizacja dla kroku 3 (Cechy - NOWE)
+    if (newStep === 3) {
+        // Czyścimy poprzednie diceboxy dla wydajności, jeśli trzeba, ale lepiej mieć osobną instancję
+        if (!diceBoxAttributes) {
+            initDiceBox('#dice-box-attributes').then(db => diceBoxAttributes = db)
+        }
+    }
 })
 
 const getCharacteristicName = (charKey) => {
@@ -526,8 +623,159 @@ const getCharacteristicName = (charKey) => {
     }
     return names[charKey] || charKey
 }
+const rollAttributesPool = async () => {
+    if (isRollingAttributes.value || !diceBoxAttributes) return;
 
+    isRollingAttributes.value = true;
+    rollPool.value = []; // Reset puli
+    selectedPoolIndex.value = null;
+    mercyUsed.value = false;
 
+    // Reset przypisań w cechach
+    Object.keys(characteristics.value).forEach(k => characteristics.value[k].assignedValue = null);
+
+    try {
+        diceBoxAttributes.clear();
+        // Rzucamy wizualnie np. 5 kostkami 10-ściennymi, żeby zrobić hałas i efekt
+        await diceBoxAttributes.roll('16d10');
+
+        // Logika matematyczna (w tle)
+        const newPool = [];
+        for (let i = 0; i < 8; i++) {
+            // Rzut 2d10
+            const val = Math.floor(Math.random() * 10) + 1 + Math.floor(Math.random() * 10) + 1;
+            newPool.push({ id: i, value: val, isUsed: false });
+        }
+
+        // Czekamy chwilę na animację
+        setTimeout(() => {
+            rollPool.value = newPool;
+            isRollingAttributes.value = false;
+        }, 1000);
+
+    } catch (e) {
+        console.error(e);
+        isRollingAttributes.value = false;
+    }
+}
+
+// Wybór elementu z puli
+const selectPoolItem = (index: number) => {
+    if (rollPool.value[index].isUsed) return; // Nie można wybrać zużytego
+
+    // Jeśli klikniemy ten sam, odznaczamy
+    if (selectedPoolIndex.value === index) {
+        selectedPoolIndex.value = null;
+    } else {
+        selectedPoolIndex.value = index;
+    }
+}
+
+// Przypisanie wybranego wyniku do cechy
+const assignSelectedToStat = (statKey: string) => {
+    // Sprawdź czy mamy co przypisać
+    if (selectedPoolIndex.value === null) return;
+
+    const poolItem = rollPool.value[selectedPoolIndex.value];
+    const stat = characteristics.value[statKey];
+
+    // Jeśli cecha jest już zajęta, najpierw "zwróć" starą wartość do puli
+    if (stat.assignedValue !== null) {
+        unassignStat(statKey);
+        // Uwaga: unassignStat czyści assignedValue, więc możemy kontynuować
+    }
+
+    // Przypisz nową wartość
+    stat.assignedValue = poolItem.value;
+
+    // Oznacz w puli jako zużyte
+    rollPool.value[selectedPoolIndex.value].isUsed = true;
+
+    // Odznacz wybór
+    selectedPoolIndex.value = null;
+}
+
+// Cofnięcie przypisania (zwrot do puli)
+const unassignStat = (statKey: string) => {
+    const stat = characteristics.value[statKey];
+    if (stat.assignedValue === null) return;
+
+    // Znajdź w puli element, który ma tę wartość i jest oznaczony jako used
+    // (W uproszczonym modelu szukamy po wartości, ale najlepiej byłoby trzymać ID przypisanego elementu w statystyce.
+    //  Tutaj uprościmy: szukamy pierwszego zużytego o tej wartości).
+    //  Dla 100% poprawności przy duplikatach wartości:
+    //  Warto dodać 'assignedPoolId' do characteristics. Zróbmy to porządnie.
+
+    // Wyszukanie w puli po wartości (Prosta implementacja, zakładamy, że user pamięta co gdzie dał, albo system sam zarządza)
+    // Ulepszenie: przypisujemy ID z puli do cechy
+    const poolItemIndex = rollPool.value.findIndex(p => p.value === stat.assignedValue && p.isUsed);
+
+    if (poolItemIndex !== -1) {
+        rollPool.value[poolItemIndex].isUsed = false;
+    }
+
+    stat.assignedValue = null;
+}
+
+// Łaska Shallyi (Przerzut w puli)
+const rerollSelectedPoolItem = async () => {
+    if (selectedPoolIndex.value === null || mercyUsed.value || isRollingAttributes.value) return;
+
+    isRollingAttributes.value = true;
+    mercyUsed.value = true; // Zaznaczamy zużycie przed rzutem
+
+    try {
+        diceBoxAttributes.clear();
+        await diceBoxAttributes.roll('2d10'); // Wizualny rzut 2k10
+
+        // Aktualizacja puli
+        rollPool.value[selectedPoolIndex.value].value = Math.floor(Math.random() * 10) + 1 + Math.floor(Math.random() * 10) + 1;
+
+        isRollingAttributes.value = false;
+    } catch (e) {
+        console.error(e);
+        isRollingAttributes.value = false;
+    }
+}
+
+// Computed: Czy można przejść dalej
+const allAssigned = computed(() => {
+    return Object.values(characteristics.value).every(c => c.assignedValue !== null);
+})
+const initDiceBox = async (selector) => {
+    const container = document.querySelector(selector);
+    if (!container) return null;
+    const {width, height} = container.getBoundingClientRect();
+
+    const db = new DiceBox(selector, {
+        assetPath: '/assets/dice-box/', // Dostosuj ścieżkę do swoich assets
+        origin: window.location.origin,
+        theme: 'default',
+        themeColor: '#d4af37',
+        scale: 8, // Mniejsze kostki dla atrybutów
+        container_width: width,
+        container_height: height
+    });
+    await db.init();
+
+    // Fix CSS canvas
+    const canvas = container.querySelector('canvas');
+    if (canvas) { canvas.style.width = '100%'; canvas.style.height = '100%'; }
+
+    return db;
+}
+
+const roll2d10 = () => Math.floor(Math.random() * 10) + 1 + Math.floor(Math.random() * 10) + 1
+
+// Przerzut pojedynczej cechy (Łaska Shallyi)
+const rerollSpecificStat = (key) => {
+    if (mercyUsed.value) return
+
+    const newRoll = roll2d10()
+    characteristics.value[key].roll = newRoll
+    characteristics.value[key].total = characteristics.value[key].base + newRoll
+    mercyUsed.value = true
+}
 const rollForProfession = async () => {
     if (!selectedRace.value || isRollingProfession.value) return
 
@@ -660,23 +908,16 @@ const formatItemName = (pivotItem: any) => {
 }
 const canProceed = computed(() => {
     switch (currentStep.value) {
-        case 1:
-            return selectedRace.value !== null
-        case 2:
-            return heroData.value.firstName.trim().length > 0
-        case 3:
-            return Object.values(characteristics.value).every(char => char.total > 0)
-        default:
-            return false
+        case 1: return selectedRace.value !== null
+        case 2: return selectedProfession.value !== null
+        case 3: return !Object.values(characteristics.value).find(item => item.assignedValue === null)
+        case 4: return heroData.value.firstName.trim().length > 0
+        default: return false
     }
 })
 
 // Metody
 
-const selectRace = (race) => {
-    selectedRace.value = race
-    heroData.value.race = race
-}
 
 const validateName = () => {
     // Dodatkowa walidacja nazwy jeśli potrzebna
@@ -1615,5 +1856,334 @@ onMounted(() => {
     .stat-cell:nth-child(-n+4) {
         border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Linia pozioma */
     }
+}
+.attributes-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.attributes-grid {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.attr-header-row {
+    display: flex;
+    background: #d4af37;
+    color: #1a1a1a;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px;
+    font-size: 0.85rem;
+}
+
+.attr-row {
+    display: flex;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    align-items: center;
+    padding: 12px 10px;
+    transition: background 0.2s;
+}
+
+.attr-row:hover {
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.attr-row:last-child {
+    border-bottom: none;
+}
+
+/* Kolumny tabeli */
+.col-name { flex: 2; display: flex; align-items: center; gap: 10px; }
+.col-base, .col-roll, .col-total, .col-action { flex: 1; text-align: center; }
+
+.attr-abbr {
+    font-weight: bold;
+    color: #d4af37;
+    width: 35px;
+    display: inline-block;
+}
+.attr-full { color: #ccc; font-size: 0.9rem; }
+
+.col-base { color: #888; font-family: monospace; font-size: 1.1rem; }
+.roll-val { color: #fff; font-family: monospace; font-size: 1.1rem; }
+.total-val {
+    color: #d4af37;
+    font-weight: bold;
+    font-size: 1.3rem;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Przycisk Przerzutu */
+.sm-reroll-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 4px 8px;
+    transition: 0.2s;
+}
+.sm-reroll-btn:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.1);
+    transform: scale(1.1);
+}
+
+.attributes-controls {
+    text-align: center;
+}
+
+.mercy-info { color: #ccc; font-style: italic; font-size: 0.9rem; }
+.mercy-used { color: #888; text-decoration: line-through; font-size: 0.9rem; }
+.attributes-assignment-container {
+    display: flex;
+    gap: 2rem;
+    height: 100%;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+.stats-column {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stats-header-row {
+    display: flex;
+    padding: 0 1rem 0.5rem 1rem;
+    border-bottom: 2px solid #d4af37;
+    margin-bottom: 0.5rem;
+    color: #d4af37;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+.col-lbl { flex: 1; text-align: center; }
+.col-lbl:first-child { flex: 2; text-align: left; }
+
+.stat-assignment-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.8rem 1rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+/* Stan: Gotowy do przyjęcia wartości (gdy wybrano liczbę z puli) */
+.stat-assignment-row.ready-to-receive {
+    cursor: pointer;
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+    animation: pulseBorder 2s infinite;
+}
+.stat-assignment-row.ready-to-receive:hover {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+@keyframes pulseBorder {
+    0% { border-color: rgba(212, 175, 55, 0.3); }
+    50% { border-color: rgba(212, 175, 55, 0.8); }
+    100% { border-color: rgba(212, 175, 55, 0.3); }
+}
+
+.stat-name-block { flex: 2; display: flex; align-items: center; gap: 10px; }
+.stat-abbr { font-weight: bold; color: #d4af37; font-size: 1rem; width: 40px; }
+.stat-full { color: #aaa; font-size: 0.85rem; }
+
+.stat-base-val { flex: 1; text-align: center; color: #666; font-family: monospace; font-size: 1.1rem; }
+.stat-total-val { flex: 1; text-align: center; color: #d4af37; font-weight: bold; font-size: 1.2rem; }
+.dimmed { color: #444; }
+
+/* Slot na przypisaną wartość */
+.stat-assigned-slot {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 40px;
+    width: 40px;
+}
+
+.assigned-val {
+    font-family: monospace;
+    font-size: 1.3rem;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #d4af37;
+}
+
+.empty-slot-marker {
+    color: #444;
+    font-size: 1.2rem;
+}
+
+.remove-assign-btn {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.stat-assignment-row:hover .remove-assign-btn { opacity: 1; }
+
+
+/* --- PRAWA KOLUMNA (PULA) --- */
+.pool-column {
+    flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dice-area-small {
+    position: relative;
+    height: 200px;
+    background: #000;
+    border: 2px solid #444;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#dice-box-attributes {
+    width: 100%;
+    height: 100%;
+}
+
+.roll-attributes-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: #d4af37;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    white-space: nowrap;
+}
+
+.results-pool-grid {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pool-label {
+    color: #ccc;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+
+.pool-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.pool-item {
+    width: 50px;
+    height: 50px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.pool-item:hover:not(.used) {
+    border-color: #d4af37;
+    transform: scale(1.1);
+}
+
+.pool-item.selected {
+    background: #d4af37;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+    transform: scale(1.15);
+}
+
+.pool-item.used {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #111;
+    border-color: #333;
+}
+
+.used-overlay {
+    position: absolute;
+    color: #d4af37;
+    font-size: 1.5rem;
+}
+
+/* Sekcja akcji (Przerzut) */
+.pool-actions {
+    text-align: center;
+    min-height: 60px;
+}
+
+.reroll-one-btn {
+    background: transparent;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+.reroll-one-btn:hover { background: rgba(212, 175, 55, 0.1); }
+
+.instruction-text { font-size: 0.8rem; color: #888; font-style: italic; }
+.mercy-used-info { color: #666; font-size: 0.8rem; text-decoration: line-through; }
+.mercy-desc { margin: 0 0 0.5rem 0; font-size: 0.8rem; color: #aaa; }
+
+/* Mobile */
+@media (max-width: 900px) {
+    .attributes-assignment-container { flex-direction: column-reverse; }
+    .pool-column { flex: none; width: 100%; }
+    .dice-area-small { height: 150px; }
 }
 </style>
