@@ -221,18 +221,20 @@
             <!-- Slajd 3: Imię bohatera -->
             <div v-if="currentStep === 3" class="creation-slide slide-enter">
                 <div class="slide-header">
-                    <h2 class="slide-title">Wylosuj i Przypisz Cechy</h2>
-                    <p class="slide-subtitle">Rzuć kośćmi, a następnie przypisz wyniki do odpowiednich cech. Możesz przerzucić jeden wynik.</p>
+                    <h2 class="slide-title">Cechy Bohatera</h2>
+                    <p class="slide-subtitle">Najpierw rzuć na cechy główne i przypisz je, a następnie wylosuj Żywotność i Przeznaczenie.</p>
                 </div>
 
                 <div class="attributes-assignment-container">
 
                     <div class="stats-column">
+
+                        <div class="section-label">Cechy Główne</div>
                         <div class="stats-header-row">
                             <span class="col-lbl">Cecha</span>
                             <span class="col-lbl">Baza</span>
-                            <span class="col-lbl">Rzut</span>
                             <span class="col-lbl">Suma</span>
+                            <span class="col-lbl action-col">Przypisz</span>
                         </div>
 
                         <div
@@ -252,9 +254,14 @@
 
                             <div class="stat-base-val">{{ char.base }}</div>
 
+                            <div class="stat-total-val">
+                                <span v-if="char.assignedValue !== null">{{ char.base + char.assignedValue }}</span>
+                                <span v-else class="dimmed">-</span>
+                            </div>
+
                             <div class="stat-assigned-slot">
                                 <span v-if="char.assignedValue !== null" class="assigned-val">
-                                    {{ char.assignedValue }}
+                                    +{{ char.assignedValue }}
                                 </span>
                                 <span v-else class="empty-slot-marker">
                                     {{ selectedPoolIndex !== null ? '↓' : '—' }}
@@ -263,15 +270,63 @@
                                     v-if="char.assignedValue !== null"
                                     class="remove-assign-btn"
                                     @click.stop="unassignStat(key)"
-                                    title="Cofnij przypisanie"
+                                    title="Cofnij"
                                 >✕</button>
                             </div>
+                        </div>
 
-                            <div class="stat-total-val">
-                                <span v-if="char.assignedValue !== null">{{ char.base + char.assignedValue }}</span>
-                                <span v-else class="dimmed">{{ char.base }}</span>
+                        <div class="secondary-stats-section">
+                            <div class="section-label mt-4">Cechy Drugorzędne (Rzut 1k10)</div>
+
+                            <div class="secondary-row">
+                                <div class="sec-name">
+                                    <span class="stat-abbr">Żyw</span>
+                                    <span class="stat-full">Żywotność</span>
+                                </div>
+                                <div class="sec-val">
+                                    <span v-if="secondaryStats.wounds.val" class="final-val">{{ secondaryStats.wounds.val }}</span>
+                                    <span v-else class="dimmed">-</span>
+                                </div>
+                                <div class="sec-action">
+                                    <button
+                                        v-if="!secondaryStats.wounds.val"
+                                        class="mini-roll-btn"
+                                        @click="rollSecondary('wounds')"
+                                        :disabled="isRollingAny"
+                                    >
+                                        🎲 Rzuć
+                                    </button>
+                                    <span v-else class="roll-info">
+                                        (Rzut: {{ secondaryStats.wounds.roll }})
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="secondary-row">
+                                <div class="sec-name">
+                                    <span class="stat-abbr">PP</span>
+                                    <span class="stat-full">Przeznaczenie</span>
+                                </div>
+                                <div class="sec-val">
+                                    <span v-if="secondaryStats.fate.val" class="final-val">{{ secondaryStats.fate.val }}</span>
+                                    <span v-else class="dimmed">-</span>
+                                </div>
+                                <div class="sec-action">
+                                    <button
+                                        v-if="!secondaryStats.fate.val"
+                                        class="mini-roll-btn"
+                                        @click="rollSecondary('fate')"
+                                        :disabled="isRollingAny"
+                                    >
+                                        🎲 Rzuć
+                                    </button>
+                                    <span v-else class="roll-info">
+                                        (Rzut: {{ secondaryStats.fate.roll }})
+                                    </span>
+                                </div>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="pool-column">
@@ -282,24 +337,21 @@
                                 v-if="rollPool.length === 0"
                                 class="roll-attributes-btn"
                                 @click="rollAttributesPool"
-                                :disabled="isRollingAttributes"
+                                :disabled="isRollingAny"
                             >
-                                <span class="btn-icon">🎲</span> Rzuć na Cechy
+                                <span class="btn-icon">🎲</span> Rzuć Pule Cech
                             </button>
                         </div>
 
                         <div class="results-pool-grid" v-if="rollPool.length > 0">
-                            <div class="pool-label">Twoja Pula Wyników:</div>
+                            <div class="pool-label">Pula Cech Głównych:</div>
 
                             <div class="pool-items">
                                 <div
                                     v-for="(item, index) in rollPool"
                                     :key="item.id"
                                     class="pool-item"
-                                    :class="{
-                                        'selected': selectedPoolIndex === index,
-                                        'used': item.isUsed
-                                    }"
+                                    :class="{ 'selected': selectedPoolIndex === index, 'used': item.isUsed }"
                                     @click="selectPoolItem(index)"
                                 >
                                     {{ item.value }}
@@ -307,19 +359,13 @@
                                 </div>
                             </div>
 
-                            <div class="pool-actions" v-if="!allAssigned">
-                                <div v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed" class="mercy-section">
-                                    <p class="mercy-desc">Niezadowolony z tego wyniku?</p>
+                            <div class="pool-actions">
+                                <div v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed">
                                     <button class="reroll-one-btn" @click="rerollSelectedPoolItem">
-                                        <span class="btn-icon">✨</span> Przerzuć (Łaska Shallyi)
+                                        ✨ Łaska Shallyi (Przerzut)
                                     </button>
                                 </div>
-                                <div v-else-if="mercyUsed" class="mercy-used-info">
-                                    Łaska Shallyi została wykorzystana.
-                                </div>
-                                <div v-else class="instruction-text">
-                                    Kliknij wynik w puli, a potem cechę po lewej.
-                                </div>
+                                <div v-else-if="mercyUsed" class="mercy-used-info">Łaska Shallyi zużyta</div>
                             </div>
                         </div>
                     </div>
@@ -524,41 +570,41 @@ const availableRaces = ref([
         id: 1, name: 'Człowiek', key: 'human', description: 'Wszechstronni i ambitni', icon: '/images/races/human.png',
         bonuses: ['Wszechstronność', 'Ambicja'],
         suggestedNames: ['Felix', 'Klara', 'Otto', 'Mathilde'],
-        // Baza 20 dla wszystkich
-        baseStats: { ws: 20, bs: 20, s: 20, t: 20, ag: 20, int: 20, wp: 20, fel: 20 }
+        baseStats: { WW: 20, US: 20, K: 20, Odp: 20, Zr: 20, Int: 20, SW: 20, Ogd: 20 }
     },
     {
         id: 2, name: 'Krasnolud', key: 'dwarf', description: 'Krzepcy i odważni', icon: '/images/races/dwarf.png',
         bonuses: ['Odporność na magię', 'Krzepki', 'Widzenie w ciemności'],
         suggestedNames: ['Gotrek', 'Bardin', 'Greta', 'Thylda'],
-        // Wysokie WW, Odp, niskie Zr, Ogd
-        baseStats: { ws: 30, bs: 20, s: 20, t: 30, ag: 10, int: 20, wp: 20, fel: 10 }
+        baseStats: { WW: 30, US: 20, K: 20, Odp: 30, Zr: 10, Int: 20, SW: 20, Ogd: 41 }
     },
     {
         id: 3, name: 'Elf', key: 'elf', description: 'Dostojni i długowieczni', icon: '/images/races/elf.png',
         bonuses: ['Bystry wzrok', 'Nocne widzenie'],
         suggestedNames: ['Teclis', 'Ulliana', 'Aluthol', 'Dolwen'],
-        // Wysokie US, Zr, niskie Odp
-        baseStats: { ws: 30, bs: 30, s: 20, t: 20, ag: 30, int: 20, wp: 20, fel: 20 }
+        baseStats: { WW: 20, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 20 }
     },
     {
         id: 4, name: 'Niziołek', key: 'halfling', description: 'Spokojni i łakomi', icon: '/images/races/halfling.png',
         bonuses: ['Odporność na Chaos', 'Nocne widzenie'],
         suggestedNames: ['Ludo', 'Leni', 'Max', 'Sophia'],
-        // Niskie WW, S, Odp, wysokie US, Zr, Ogd
-        baseStats: { ws: 10, bs: 30, s: 10, t: 10, ag: 30, int: 20, wp: 20, fel: 30 }
+        baseStats: { WW: 10, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 30 }
     }
 ])
 // --- Logika Cech (Zaktualizowana) ---
 const characteristics = ref({
-    ws:  { name: 'Walka Wręcz', base: 0, assignedValue: null },
-    bs:  { name: 'Um. Strzeleckie', base: 0, assignedValue: null },
-    s:   { name: 'Siła', base: 0, assignedValue: null },
-    t:   { name: 'Wytrzymałość', base: 0, assignedValue: null },
-    ag:  { name: 'Zwinność', base: 0, assignedValue: null },
-    int: { name: 'Inteligencja', base: 0, assignedValue: null },
-    wp:  { name: 'Siła Woli', base: 0, assignedValue: null },
-    fel: { name: 'Ogłada', base: 0, assignedValue: null }
+    WW:  { name: 'Walka Wręcz', base: 0, assignedValue: null },
+    US:  { name: 'Um. Strzeleckie', base: 0, assignedValue: null },
+    K:   { name: 'Krzepa', base: 0, assignedValue: null },
+    Odp:   { name: 'Odporność', base: 0, assignedValue: null },
+    Zr:  { name: 'Zręczność', base: 0, assignedValue: null },
+    Int: { name: 'Inteligencja', base: 0, assignedValue: null },
+    SW:  { name: 'Siła Woli', base: 0, assignedValue: null },
+    Ogd: { name: 'Ogłada', base: 0, assignedValue: null }
+})
+const secondaryStats = ref({
+    wounds: { val: null, roll: null },
+    fate: { val: null, roll: null }
 })
 interface PoolItem {
     id: number;
@@ -579,6 +625,54 @@ const isRollingAttributes = ref(false)
 const hasRolledAttributes = ref(false)
 const mercyUsed = ref(false)
 
+const isRollingSecondary = ref(false)
+
+const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
+
+const calculateSecondaryStats = (raceKey: string, type: 'wounds'|'fate', roll: number) => {
+    // Tabela Żywotności (WFRP 2ed str. 19)
+    const woundsTable = {
+        human:    (r: number) => r <= 3 ? 10 : (r <= 6 ? 11 : (r <= 9 ? 12 : 13)),
+        elf:      (r: number) => r <= 3 ? 9  : (r <= 6 ? 10 : (r <= 9 ? 11 : 12)),
+        dwarf:    (r: number) => r <= 3 ? 11 : (r <= 6 ? 12 : (r <= 9 ? 13 : 14)),
+        halfling: (r: number) => r <= 3 ? 8  : (r <= 6 ? 9  : (r <= 9 ? 10 : 11))
+    }
+
+    // Tabela Punktów Przeznaczenia (WFRP 2ed str. 19)
+    const fateTable = {
+        human:    (r: number) => r <= 4 ? 2 : 3,
+        elf:      (r: number) => r <= 4 ? 1 : 2,
+        dwarf:    (r: number) => r <= 4 ? 1 : (r <= 7 ? 2 : 3),
+        halfling: (r: number) => r <= 4 ? 2 : (r <= 7 ? 2 : 3) // Standardowo Niziołki mają szczęście (2-3)
+    }
+
+    const key = raceKey || 'human'
+
+    if (type === 'wounds') return woundsTable[key] ? woundsTable[key](roll) : 10
+    if (type === 'fate') return fateTable[key] ? fateTable[key](roll) : 2
+    return 0
+}
+
+const rollSecondary = async (type: 'wounds'|'fate') => {
+    if (isRollingAny.value || !diceBoxAttributes) return
+
+    isRollingSecondary.value = true
+
+    try {
+        diceBoxAttributes.clear()
+        await diceBoxAttributes.roll('1d10')
+
+        const roll = Math.floor(Math.random() * 10) + 1
+        const raceKey = selectedRace.value?.key || 'human'
+        const result = calculateSecondaryStats(raceKey, type, roll)
+
+        secondaryStats.value[type].roll = roll
+        secondaryStats.value[type].val = result
+
+    } catch (e) { console.error(e) }
+    finally { isRollingSecondary.value = false }
+}
+
 // Przy wyborze rasy ustawiamy bazy
 const selectRace = (race) => {
     selectedRace.value = race
@@ -592,6 +686,8 @@ const selectRace = (race) => {
         characteristics.value[key].roll = 0
         characteristics.value[key].total = 0
     })
+    secondaryStats.value.wounds = { val: null, roll: null }
+    secondaryStats.value.fate = { val: null, roll: null }
 }
 watch(currentStep, async (newStep) => {
     await nextTick()
@@ -816,25 +912,25 @@ const rollForProfession = async () => {
 }
 
 const mainProfileConfig = [
-    { label: 'WW',  keys: ['ws', 'weapon_skill', 'weaponSkill', 'Walka Wręcz'] },
-    { label: 'US',  keys: ['bs', 'ballistic_skill', 'ballisticSkill', 'Umiejętności Strzeleckie'] },
-    { label: 'K',   keys: ['s', 'strength', 'Siła'] },
-    { label: 'Odp', keys: ['t', 'toughness', 'Wytrzymałość'] },
-    { label: 'Zr',  keys: ['ag', 'agility', 'Zwinność'] },
-    { label: 'Int', keys: ['int', 'intelligence', 'Inteligencja'] },
-    { label: 'SW',  keys: ['wp', 'willpower', 'Siła Woli'] },
-    { label: 'Ogd', keys: ['fel', 'fellowship', 'Ogłada'] }
+    { label: 'WW',  keys: ['WW', 'weapon_skill', 'weaponSkill', 'Walka Wręcz'] },
+    { label: 'US',  keys: ['US', 'ballistic_skill', 'ballisticSkill', 'Umiejętności Strzeleckie'] },
+    { label: 'K',   keys: ['K', 'strength', 'Siła'] },
+    { label: 'Odp', keys: ['Odp', 'toughness', 'Wytrzymałość'] },
+    { label: 'Zr',  keys: ['Zr', 'agility', 'Zwinność'] },
+    { label: 'Int', keys: ['Int', 'intelligence', 'Inteligencja'] },
+    { label: 'SW',  keys: ['SW', 'willpower', 'Siła Woli'] },
+    { label: 'Ogd', keys: ['Ogd', 'fellowship', 'Ogłada'] }
 ]
 
 const secondaryProfileConfig = [
-    { label: 'A',   keys: ['a', 'attacks', 'Ataki'] },
-    { label: 'Żyw', keys: ['w', 'wounds', 'Żywotność'] },
-    { label: 'S',   keys: ['sb', 'strength_bonus'] },
-    { label: 'Wt',  keys: ['tb', 'toughness_bonus'] },
-    { label: 'Sz',  keys: ['m', 'movement', 'Szybkość'] },
-    { label: 'Mag', keys: ['mag', 'magic', 'Magia'] },
-    { label: 'PO',  keys: ['ip', 'insanity', 'Punkty Obłędu'] },
-    { label: 'PP',  keys: ['fp', 'fate', 'Punkty Przeznaczenia'] }
+    { label: 'A',   keys: ['A', 'attacks', 'Ataki'] },
+    { label: 'Żyw', keys: ['Żyw', 'wounds', 'Żywotność'] },
+    { label: 'S',   keys: ['S', 'strength_bonus'] },
+    { label: 'Wt',  keys: ['Wt', 'toughness_bonus'] },
+    { label: 'Sz',  keys: ['Sz', 'movement', 'Szybkość'] },
+    { label: 'Mag', keys: ['Mag', 'magic', 'Magia'] },
+    { label: 'PO',  keys: ['PO', 'insanity', 'Punkty Obłędu'] },
+    { label: 'PP',  keys: ['PP', 'fate', 'Punkty Przeznaczenia'] }
 ]
 
 // Funkcja szukająca wartości w obiekcie characteristics niezależnie od nazewnictwa klucza
@@ -853,7 +949,6 @@ const getStatValue = (characteristics: any, label: string) => {
         return null;
     }
 
-    // PRZYPADEK 2: Backend zwraca OBIEKT (np. { ws: 10, bs: 5 })
     for (const key of keys) {
         if (characteristics[key] !== undefined && characteristics[key] !== null) {
             return characteristics[key];
@@ -910,7 +1005,10 @@ const canProceed = computed(() => {
     switch (currentStep.value) {
         case 1: return selectedRace.value !== null
         case 2: return selectedProfession.value !== null
-        case 3: return !Object.values(characteristics.value).find(item => item.assignedValue === null)
+        case 3:
+            const mainStatsDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
+            const secStatsDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
+            return mainStatsDone && secStatsDone
         case 4: return heroData.value.firstName.trim().length > 0
         default: return false
     }
@@ -960,16 +1058,20 @@ const previousStep = () => {
 }
 
 const finishCreation = () => {
-    // Przygotowanie danych do wysłania
     const finalHeroData = {
         firstName: heroData.value.firstName,
         lastName: heroData.value.lastName,
         race: selectedRace.value,
+        profession: selectedProfession.value,
         characteristics: Object.fromEntries(
-            Object.entries(characteristics.value).map(([key, value]) => [key, value.total])
-        )
+            Object.entries(characteristics.value).map(([key, value]) => [key, value.base + value.assignedValue])
+        ),
+        // Dodajemy drugorzędne
+        secondaryCharacteristics: {
+            wounds: secondaryStats.value.wounds.val,
+            fate: secondaryStats.value.fate.val
+        }
     }
-
     emit('hero-created', finalHeroData)
     isCreating.value = false
 }
@@ -2186,4 +2288,54 @@ onMounted(() => {
     .pool-column { flex: none; width: 100%; }
     .dice-area-small { height: 150px; }
 }
+
+.section-label {
+    color: #d4af37;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.mt-4 { margin-top: 1.5rem; }
+
+.secondary-stats-section {
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.secondary-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.sec-name { flex: 2; display: flex; gap: 10px; align-items: center; }
+.sec-val { flex: 1; text-align: center; font-size: 1.2rem; color: #fff; font-weight: bold; }
+.sec-action { flex: 1; text-align: right; }
+
+.final-val { color: #d4af37; text-shadow: 0 0 5px rgba(212,175,55,0.5); }
+
+.mini-roll-btn {
+    background: #d4af37;
+    border: none;
+    color: #000;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+.mini-roll-btn:hover:not(:disabled) { background: #fff; }
+.mini-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; }
+
+.roll-info { font-size: 0.75rem; color: #888; font-style: italic; }
 </style>
