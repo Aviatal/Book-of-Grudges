@@ -110,7 +110,9 @@
 
                                 <div class="profession-content-scroll">
                                     <div class="profession-description">
-                                        <p v-if="selectedProfession.description">{{ selectedProfession.description }}</p>
+                                        <p v-if="selectedProfession.description">{{
+                                                selectedProfession.description
+                                            }}</p>
                                         <p v-else>Profesja wylosowana pomyślnie. Twoja postać jest gotowa do drogi.</p>
                                     </div>
 
@@ -120,20 +122,26 @@
 
                                             <div class="stat-category-label">Cechy Główne</div>
                                             <div class="wfrp-stat-grid">
-                                                <div v-for="stat in mainProfileConfig" :key="stat.label" class="stat-cell">
+                                                <div v-for="stat in mainProfileConfig" :key="stat.label"
+                                                     class="stat-cell">
                                                     <div class="stat-header">{{ stat.label }}</div>
                                                     <div class="stat-value">
-                                                        {{ formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label)) }}
+                                                        {{
+                                                            formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label))
+                                                        }}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="stat-category-label secondary-label">Cechy Drugorzędne</div>
                                             <div class="wfrp-stat-grid">
-                                                <div v-for="stat in secondaryProfileConfig" :key="stat.label" class="stat-cell">
+                                                <div v-for="stat in secondaryProfileConfig" :key="stat.label"
+                                                     class="stat-cell">
                                                     <div class="stat-header">{{ stat.label }}</div>
                                                     <div class="stat-value">
-                                                        {{ formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label)) }}
+                                                        {{
+                                                            formatStatBonus(getStatValue(selectedProfession.characteristics, stat.label))
+                                                        }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -142,21 +150,30 @@
                                         <div class="detail-section">
                                             <h4 class="detail-title">Umiejętności</h4>
                                             <div class="items-container">
-                                                <div class="mandatory-group" v-if="getMandatoryItems(selectedProfession.skills).length">
+                                                <div class="mandatory-group"
+                                                     v-if="getMandatoryItems(selectedProfession.skills).length">
                                                     <span class="group-label">Otrzymujesz:</span>
                                                     <div class="tags-wrapper">
-                                                        <span v-for="skill in getMandatoryItems(selectedProfession.skills)" :key="skill.id" class="skill-tag">
+                                                        <span
+                                                            v-for="skill in getMandatoryItems(selectedProfession.skills)"
+                                                            :key="skill.id" class="skill-tag">
                                                             {{ formatSkillName(skill) }}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.skills).length">
-                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.skills)" :key="'s-choice-'+index" class="choice-block">
+                                                <div class="choices-container"
+                                                     v-if="getChoiceGroups(selectedProfession.skills).length">
+                                                    <div
+                                                        v-for="(group, index) in getChoiceGroups(selectedProfession.skills)"
+                                                        :key="'s-choice-'+index" class="choice-block">
                                                         <span class="choice-label">Wybierz jedną z:</span>
                                                         <div class="choice-options">
                                                             <span v-for="(skill, i) in group" :key="skill.id">
-                                                                <span class="choice-item">{{ formatSkillName(skill) }}</span>
-                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                                <span class="choice-item">{{
+                                                                        formatSkillName(skill)
+                                                                    }}</span>
+                                                                <span v-if="i < group.length - 1"
+                                                                      class="separator">LUB</span>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -167,21 +184,30 @@
                                         <div class="detail-section">
                                             <h4 class="detail-title">Zdolności</h4>
                                             <div class="items-container">
-                                                <div class="mandatory-group" v-if="getMandatoryItems(selectedProfession.talents).length">
+                                                <div class="mandatory-group"
+                                                     v-if="getMandatoryItems(selectedProfession.talents).length">
                                                     <span class="group-label">Otrzymujesz:</span>
                                                     <div class="tags-wrapper">
-                                                        <span v-for="talent in getMandatoryItems(selectedProfession.talents)" :key="talent.id" class="talent-tag">
+                                                        <span
+                                                            v-for="talent in getMandatoryItems(selectedProfession.talents)"
+                                                            :key="talent.id" class="talent-tag">
                                                             {{ formatTalentName(talent) }}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.talents).length">
-                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.talents)" :key="'t-choice-'+index" class="choice-block">
+                                                <div class="choices-container"
+                                                     v-if="getChoiceGroups(selectedProfession.talents).length">
+                                                    <div
+                                                        v-for="(group, index) in getChoiceGroups(selectedProfession.talents)"
+                                                        :key="'t-choice-'+index" class="choice-block">
                                                         <span class="choice-label">Wybierz jedną z:</span>
                                                         <div class="choice-options">
                                                             <span v-for="(talent, i) in group" :key="talent.id">
-                                                                <span class="choice-item">{{ formatTalentName(talent) }}</span>
-                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                                <span class="choice-item">{{
+                                                                        formatTalentName(talent)
+                                                                    }}</span>
+                                                                <span v-if="i < group.length - 1"
+                                                                      class="separator">LUB</span>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -192,18 +218,27 @@
                                         <div class="detail-section">
                                             <h4 class="detail-title">Wyposażenie</h4>
                                             <div class="equipment-list">
-                                                <div class="mandatory-eq" v-if="getMandatoryItems(selectedProfession.equipments).length">
-                                                    <div v-for="item in getMandatoryItems(selectedProfession.equipments)" :key="item.id" class="equipment-item">
+                                                <div class="mandatory-eq"
+                                                     v-if="getMandatoryItems(selectedProfession.equipments).length">
+                                                    <div
+                                                        v-for="item in getMandatoryItems(selectedProfession.equipments)"
+                                                        :key="item.id" class="equipment-item">
                                                         {{ formatItemName(item) }}
                                                     </div>
                                                 </div>
-                                                <div class="choices-container" v-if="getChoiceGroups(selectedProfession.equipments).length">
-                                                    <div v-for="(group, index) in getChoiceGroups(selectedProfession.equipments)" :key="'t-choice-'+index" class="choice-block">
+                                                <div class="choices-container"
+                                                     v-if="getChoiceGroups(selectedProfession.equipments).length">
+                                                    <div
+                                                        v-for="(group, index) in getChoiceGroups(selectedProfession.equipments)"
+                                                        :key="'t-choice-'+index" class="choice-block">
                                                         <span class="choice-label">Wybierz jedną z:</span>
                                                         <div class="choice-options">
                                                             <span v-for="(item, i) in group" :key="item.id">
-                                                                <span class="choice-item">{{ formatItemName(item) }}</span>
-                                                                <span v-if="i < group.length - 1" class="separator">LUB</span>
+                                                                <span class="choice-item">{{
+                                                                        formatItemName(item)
+                                                                    }}</span>
+                                                                <span v-if="i < group.length - 1"
+                                                                      class="separator">LUB</span>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -222,7 +257,8 @@
             <div v-if="currentStep === 3" class="creation-slide slide-enter">
                 <div class="slide-header">
                     <h2 class="slide-title">Cechy Bohatera</h2>
-                    <p class="slide-subtitle">Najpierw rzuć na cechy główne i przypisz je, a następnie wylosuj Żywotność i Przeznaczenie.</p>
+                    <p class="slide-subtitle">Najpierw rzuć na cechy główne i przypisz je, a następnie wylosuj Żywotność
+                        i Przeznaczenie.</p>
                 </div>
 
                 <div class="attributes-assignment-container">
@@ -248,7 +284,9 @@
                             @click="assignSelectedToStat(key)"
                         >
                             <div class="stat-name-block">
-                                <span class="stat-abbr">{{ mainProfileConfig.find(c => c.keys.includes(key))?.label }}</span>
+                                <span class="stat-abbr">{{
+                                        mainProfileConfig.find(c => c.keys.includes(key))?.label
+                                    }}</span>
                                 <span class="stat-full">{{ char.name }}</span>
                             </div>
 
@@ -271,7 +309,8 @@
                                     class="remove-assign-btn"
                                     @click.stop="unassignStat(key)"
                                     title="Cofnij"
-                                >✕</button>
+                                >✕
+                                </button>
                             </div>
                         </div>
 
@@ -284,7 +323,8 @@
                                     <span class="stat-full">Żywotność</span>
                                 </div>
                                 <div class="sec-val">
-                                    <span v-if="secondaryStats.wounds.val" class="final-val">{{ secondaryStats.wounds.val }}</span>
+                                    <span v-if="secondaryStats.wounds.val"
+                                          class="final-val">{{ secondaryStats.wounds.val }}</span>
                                     <span v-else class="dimmed">-</span>
                                 </div>
                                 <div class="sec-action">
@@ -308,7 +348,9 @@
                                     <span class="stat-full">Przeznaczenie</span>
                                 </div>
                                 <div class="sec-val">
-                                    <span v-if="secondaryStats.fate.val" class="final-val">{{ secondaryStats.fate.val }}</span>
+                                    <span v-if="secondaryStats.fate.val" class="final-val">{{
+                                            secondaryStats.fate.val
+                                        }}</span>
                                     <span v-else class="dimmed">-</span>
                                 </div>
                                 <div class="sec-action">
@@ -360,7 +402,8 @@
                             </div>
 
                             <div class="pool-actions">
-                                <div v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed">
+                                <div
+                                    v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed">
                                     <button class="reroll-one-btn" @click="rerollSelectedPoolItem">
                                         ✨ Łaska Shallyi (Przerzut)
                                     </button>
@@ -373,6 +416,93 @@
             </div>
 
             <div v-if="currentStep === 4" class="creation-slide slide-enter">
+                <div class="slide-header">
+                    <h2 class="slide-title">Umiejętności i Zdolności</h2>
+                    <p class="slide-subtitle">Twoja profesja ({{ selectedProfession?.name }}) zapewnia ci wiedzę i
+                        talenty. Dokonaj wyboru tam, gdzie to konieczne.</p>
+                </div>
+
+                <div class="skills-selection-container">
+
+                    <div class="selection-section">
+                        <h3 class="section-title-deco">Umiejętności</h3>
+
+                        <div class="mandatory-list" v-if="mandatorySkills.length > 0">
+                            <span class="label-small">Otrzymujesz automatycznie:</span>
+                            <div class="tags-group">
+                                <span v-for="skill in mandatorySkills" :key="skill.id" class="static-tag"
+                                      title="Umiejętność obowiązkowa">
+                                    {{ formatSkillName(skill) }}
+                                    <span class="check-icon">✓</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="choices-list" v-if="skillChoices.length > 0">
+                            <span class="label-small highlight">Musisz wybrać:</span>
+
+                            <div v-for="(group, gIndex) in skillChoices" :key="'s-group-'+gIndex" class="choice-row">
+                                <div class="choice-options-wrapper">
+                                    <div
+                                        v-for="(skillPivot, sIndex) in group"
+                                        :key="skillPivot.skill.id"
+                                        class="choice-card"
+                                        :class="{ 'selected': selectedChoices.skills[gIndex] === skillPivot.skill.id }"
+                                        @click="selectSkill(gIndex, skill.skillPivot.skill.id)"
+                                    >
+                                        <div class="radio-circle"></div>
+                                        <span class="choice-text">{{ formatSkillName(skillPivot) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="selection-section">
+                        <h3 class="section-title-deco">Zdolności</h3>
+
+                        <div class="mandatory-list" v-if="mandatoryTalents.length > 0">
+                            <span class="label-small">Otrzymujesz automatycznie:</span>
+                            <div class="tags-group">
+                                <span v-for="talent in mandatoryTalents" :key="talent.id" class="static-tag"
+                                      title="Zdolność obowiązkowa">
+                                    {{ formatTalentName(talent) }}
+                                    <span class="check-icon">✓</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="choices-list" v-if="talentChoices.length > 0">
+                            <span class="label-small highlight">Musisz wybrać:</span>
+
+                            <div v-for="(group, gIndex) in talentChoices" :key="'t-group-'+gIndex" class="choice-row">
+                                <div class="choice-options-wrapper">
+                                    <div
+                                        v-for="(talentPivot, tIndex) in group"
+                                        :key="talentPivot.talent.id"
+                                        class="choice-card"
+                                        :class="{ 'selected': selectedChoices.talents[gIndex] === talentPivot.talent.id }"
+                                        @click="selectTalent(gIndex, talentPivot.talent.id)"
+                                    >
+                                        <div class="radio-circle"></div>
+                                        <span class="choice-text">{{ formatTalentName(talentPivot) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div v-if="currentStep === 5" class="creation-slide slide-enter">
+                <div class="slide-header">
+                    <h2 class="slide-title">Finalizacja</h2>
+                    <p class="slide-subtitle">Nazwij swojego bohatera</p>
+                </div>
+            </div>
+
+            <div v-if="currentStep === 5" class="creation-slide slide-enter">
                 <div class="slide-header">
                     <h2 class="slide-title">Nazwij swojego bohatera</h2>
                     <p class="slide-subtitle">Wybierz imię godne {{ selectedRace?.name || 'bohatera' }}</p>
@@ -477,7 +607,7 @@ const emit = defineEmits(['hero-created', 'creation-closed'])
 // Stan komponentu
 const isCreating = ref(false)
 const currentStep = ref(1)
-const totalSteps = 4
+const totalSteps = 5
 
 let diceBox = null // Instancja dla profesji
 let diceBoxAttributes = null // Instancja dla atrybutów
@@ -488,6 +618,49 @@ const heroData = ref({
     lastName: '',
     race: null,
     characteristics: {}
+})
+
+const selectedChoices = ref({
+    skills: {},
+    talents: {}
+})
+
+const selectSkill = (groupIndex, skillId) => {+
+    // Używamy spread operatora (...), aby stworzyć nową kopię obiektu.
+    // To gwarantuje, że Vue zauważy zmianę i odświeży klasy CSS.
+    console.log('selectSkill', groupIndex, skillId)
+    console.log(selectedChoices.value)
+    selectedChoices.value.skills = {
+        ...selectedChoices.value.skills,
+        [groupIndex]: skillId
+    }
+}
+
+const selectTalent = (groupIndex, talentId) => {
+    selectedChoices.value.talents = {
+        ...selectedChoices.value.talents,
+        [groupIndex]: talentId
+    }
+}
+const mandatorySkills = computed(() => {
+    return selectedProfession.value ? getMandatoryItems(selectedProfession.value.skills) : []
+})
+const skillChoices = computed(() => {
+    return selectedProfession.value ? getChoiceGroups(selectedProfession.value.skills) : []
+})
+
+const mandatoryTalents = computed(() => {
+    return selectedProfession.value ? getMandatoryItems(selectedProfession.value.talents) : []
+})
+const talentChoices = computed(() => {
+    return selectedProfession.value ? getChoiceGroups(selectedProfession.value.talents) : []
+})
+
+const areAllChoicesMade = computed(() => {
+    // Sprawdź czy liczba dokonanych wyborów równa się liczbie grup do wyboru
+    const skillsDone = Object.keys(selectedChoices.value.skills).length === skillChoices.value.length
+    const talentsDone = Object.keys(selectedChoices.value.talents).length === talentChoices.value.length
+    return skillsDone && talentsDone
 })
 
 const selectedRace = ref(null)
@@ -570,47 +743,49 @@ const availableRaces = ref([
         id: 1, name: 'Człowiek', key: 'human', description: 'Wszechstronni i ambitni', icon: '/images/races/human.png',
         bonuses: ['Wszechstronność', 'Ambicja'],
         suggestedNames: ['Felix', 'Klara', 'Otto', 'Mathilde'],
-        baseStats: { WW: 20, US: 20, K: 20, Odp: 20, Zr: 20, Int: 20, SW: 20, Ogd: 20 }
+        baseStats: {WW: 20, US: 20, K: 20, Odp: 20, Zr: 20, Int: 20, SW: 20, Ogd: 20}
     },
     {
         id: 2, name: 'Krasnolud', key: 'dwarf', description: 'Krzepcy i odważni', icon: '/images/races/dwarf.png',
         bonuses: ['Odporność na magię', 'Krzepki', 'Widzenie w ciemności'],
         suggestedNames: ['Gotrek', 'Bardin', 'Greta', 'Thylda'],
-        baseStats: { WW: 30, US: 20, K: 20, Odp: 30, Zr: 10, Int: 20, SW: 20, Ogd: 41 }
+        baseStats: {WW: 30, US: 20, K: 20, Odp: 30, Zr: 10, Int: 20, SW: 20, Ogd: 41}
     },
     {
         id: 3, name: 'Elf', key: 'elf', description: 'Dostojni i długowieczni', icon: '/images/races/elf.png',
         bonuses: ['Bystry wzrok', 'Nocne widzenie'],
         suggestedNames: ['Teclis', 'Ulliana', 'Aluthol', 'Dolwen'],
-        baseStats: { WW: 20, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 20 }
+        baseStats: {WW: 20, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 20}
     },
     {
         id: 4, name: 'Niziołek', key: 'halfling', description: 'Spokojni i łakomi', icon: '/images/races/halfling.png',
         bonuses: ['Odporność na Chaos', 'Nocne widzenie'],
         suggestedNames: ['Ludo', 'Leni', 'Max', 'Sophia'],
-        baseStats: { WW: 10, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 30 }
+        baseStats: {WW: 10, US: 30, K: 20, Odp: 20, Zr: 30, Int: 20, SW: 20, Ogd: 30}
     }
 ])
 // --- Logika Cech (Zaktualizowana) ---
 const characteristics = ref({
-    WW:  { name: 'Walka Wręcz', base: 0, assignedValue: null },
-    US:  { name: 'Um. Strzeleckie', base: 0, assignedValue: null },
-    K:   { name: 'Krzepa', base: 0, assignedValue: null },
-    Odp:   { name: 'Odporność', base: 0, assignedValue: null },
-    Zr:  { name: 'Zręczność', base: 0, assignedValue: null },
-    Int: { name: 'Inteligencja', base: 0, assignedValue: null },
-    SW:  { name: 'Siła Woli', base: 0, assignedValue: null },
-    Ogd: { name: 'Ogłada', base: 0, assignedValue: null }
+    WW: {name: 'Walka Wręcz', base: 0, assignedValue: null},
+    US: {name: 'Um. Strzeleckie', base: 0, assignedValue: null},
+    K: {name: 'Krzepa', base: 0, assignedValue: null},
+    Odp: {name: 'Odporność', base: 0, assignedValue: null},
+    Zr: {name: 'Zręczność', base: 0, assignedValue: null},
+    Int: {name: 'Inteligencja', base: 0, assignedValue: null},
+    SW: {name: 'Siła Woli', base: 0, assignedValue: null},
+    Ogd: {name: 'Ogłada', base: 0, assignedValue: null}
 })
 const secondaryStats = ref({
-    wounds: { val: null, roll: null },
-    fate: { val: null, roll: null }
+    wounds: {val: null, roll: null},
+    fate: {val: null, roll: null}
 })
+
 interface PoolItem {
     id: number;
     value: number;
     isUsed: boolean;
 }
+
 const selectedProfession = ref(null)
 const professionRoll = ref(0)
 const isRollingProfession = ref(false)
@@ -629,20 +804,20 @@ const isRollingSecondary = ref(false)
 
 const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
 
-const calculateSecondaryStats = (raceKey: string, type: 'wounds'|'fate', roll: number) => {
+const calculateSecondaryStats = (raceKey: string, type: 'wounds' | 'fate', roll: number) => {
     // Tabela Żywotności (WFRP 2ed str. 19)
     const woundsTable = {
-        human:    (r: number) => r <= 3 ? 10 : (r <= 6 ? 11 : (r <= 9 ? 12 : 13)),
-        elf:      (r: number) => r <= 3 ? 9  : (r <= 6 ? 10 : (r <= 9 ? 11 : 12)),
-        dwarf:    (r: number) => r <= 3 ? 11 : (r <= 6 ? 12 : (r <= 9 ? 13 : 14)),
-        halfling: (r: number) => r <= 3 ? 8  : (r <= 6 ? 9  : (r <= 9 ? 10 : 11))
+        human: (r: number) => r <= 3 ? 10 : (r <= 6 ? 11 : (r <= 9 ? 12 : 13)),
+        elf: (r: number) => r <= 3 ? 9 : (r <= 6 ? 10 : (r <= 9 ? 11 : 12)),
+        dwarf: (r: number) => r <= 3 ? 11 : (r <= 6 ? 12 : (r <= 9 ? 13 : 14)),
+        halfling: (r: number) => r <= 3 ? 8 : (r <= 6 ? 9 : (r <= 9 ? 10 : 11))
     }
 
     // Tabela Punktów Przeznaczenia (WFRP 2ed str. 19)
     const fateTable = {
-        human:    (r: number) => r <= 4 ? 2 : 3,
-        elf:      (r: number) => r <= 4 ? 1 : 2,
-        dwarf:    (r: number) => r <= 4 ? 1 : (r <= 7 ? 2 : 3),
+        human: (r: number) => r <= 4 ? 2 : 3,
+        elf: (r: number) => r <= 4 ? 1 : 2,
+        dwarf: (r: number) => r <= 4 ? 1 : (r <= 7 ? 2 : 3),
         halfling: (r: number) => r <= 4 ? 2 : (r <= 7 ? 2 : 3) // Standardowo Niziołki mają szczęście (2-3)
     }
 
@@ -653,7 +828,7 @@ const calculateSecondaryStats = (raceKey: string, type: 'wounds'|'fate', roll: n
     return 0
 }
 
-const rollSecondary = async (type: 'wounds'|'fate') => {
+const rollSecondary = async (type: 'wounds' | 'fate') => {
     if (isRollingAny.value || !diceBoxAttributes) return
 
     isRollingSecondary.value = true
@@ -669,8 +844,11 @@ const rollSecondary = async (type: 'wounds'|'fate') => {
         secondaryStats.value[type].roll = roll
         secondaryStats.value[type].val = result
 
-    } catch (e) { console.error(e) }
-    finally { isRollingSecondary.value = false }
+    } catch (e) {
+        console.error(e)
+    } finally {
+        isRollingSecondary.value = false
+    }
 }
 
 // Przy wyborze rasy ustawiamy bazy
@@ -686,8 +864,8 @@ const selectRace = (race) => {
         characteristics.value[key].roll = 0
         characteristics.value[key].total = 0
     })
-    secondaryStats.value.wounds = { val: null, roll: null }
-    secondaryStats.value.fate = { val: null, roll: null }
+    secondaryStats.value.wounds = {val: null, roll: null}
+    secondaryStats.value.fate = {val: null, roll: null}
 }
 watch(currentStep, async (newStep) => {
     await nextTick()
@@ -740,7 +918,7 @@ const rollAttributesPool = async () => {
         for (let i = 0; i < 8; i++) {
             // Rzut 2d10
             const val = Math.floor(Math.random() * 10) + 1 + Math.floor(Math.random() * 10) + 1;
-            newPool.push({ id: i, value: val, isUsed: false });
+            newPool.push({id: i, value: val, isUsed: false});
         }
 
         // Czekamy chwilę na animację
@@ -856,7 +1034,10 @@ const initDiceBox = async (selector) => {
 
     // Fix CSS canvas
     const canvas = container.querySelector('canvas');
-    if (canvas) { canvas.style.width = '100%'; canvas.style.height = '100%'; }
+    if (canvas) {
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+    }
 
     return db;
 }
@@ -912,25 +1093,25 @@ const rollForProfession = async () => {
 }
 
 const mainProfileConfig = [
-    { label: 'WW',  keys: ['WW', 'weapon_skill', 'weaponSkill', 'Walka Wręcz'] },
-    { label: 'US',  keys: ['US', 'ballistic_skill', 'ballisticSkill', 'Umiejętności Strzeleckie'] },
-    { label: 'K',   keys: ['K', 'strength', 'Siła'] },
-    { label: 'Odp', keys: ['Odp', 'toughness', 'Wytrzymałość'] },
-    { label: 'Zr',  keys: ['Zr', 'agility', 'Zwinność'] },
-    { label: 'Int', keys: ['Int', 'intelligence', 'Inteligencja'] },
-    { label: 'SW',  keys: ['SW', 'willpower', 'Siła Woli'] },
-    { label: 'Ogd', keys: ['Ogd', 'fellowship', 'Ogłada'] }
+    {label: 'WW', keys: ['WW', 'weapon_skill', 'weaponSkill', 'Walka Wręcz']},
+    {label: 'US', keys: ['US', 'ballistic_skill', 'ballisticSkill', 'Umiejętności Strzeleckie']},
+    {label: 'K', keys: ['K', 'strength', 'Siła']},
+    {label: 'Odp', keys: ['Odp', 'toughness', 'Wytrzymałość']},
+    {label: 'Zr', keys: ['Zr', 'agility', 'Zwinność']},
+    {label: 'Int', keys: ['Int', 'intelligence', 'Inteligencja']},
+    {label: 'SW', keys: ['SW', 'willpower', 'Siła Woli']},
+    {label: 'Ogd', keys: ['Ogd', 'fellowship', 'Ogłada']}
 ]
 
 const secondaryProfileConfig = [
-    { label: 'A',   keys: ['A', 'attacks', 'Ataki'] },
-    { label: 'Żyw', keys: ['Żyw', 'wounds', 'Żywotność'] },
-    { label: 'S',   keys: ['S', 'strength_bonus'] },
-    { label: 'Wt',  keys: ['Wt', 'toughness_bonus'] },
-    { label: 'Sz',  keys: ['Sz', 'movement', 'Szybkość'] },
-    { label: 'Mag', keys: ['Mag', 'magic', 'Magia'] },
-    { label: 'PO',  keys: ['PO', 'insanity', 'Punkty Obłędu'] },
-    { label: 'PP',  keys: ['PP', 'fate', 'Punkty Przeznaczenia'] }
+    {label: 'A', keys: ['A', 'attacks', 'Ataki']},
+    {label: 'Żyw', keys: ['Żyw', 'wounds', 'Żywotność']},
+    {label: 'S', keys: ['S', 'strength_bonus']},
+    {label: 'Wt', keys: ['Wt', 'toughness_bonus']},
+    {label: 'Sz', keys: ['Sz', 'movement', 'Szybkość']},
+    {label: 'Mag', keys: ['Mag', 'magic', 'Magia']},
+    {label: 'PO', keys: ['PO', 'insanity', 'Punkty Obłędu']},
+    {label: 'PP', keys: ['PP', 'fate', 'Punkty Przeznaczenia']}
 ]
 
 // Funkcja szukająca wartości w obiekcie characteristics niezależnie od nazewnictwa klucza
@@ -981,6 +1162,8 @@ const getChoiceGroups = (groupedCollection: any) => {
 // Formatowanie nazwy umiejętności (Obsługa HasMany z modelem pośrednim)
 // Formatowanie nazwy umiejętności
 const formatSkillName = (item: any) => {
+    console.log('formatSkillName')
+    console.log(item)
     const name = item.skill?.name || 'Nieznana umiejętność';
     const additional = item.additional_name;
 
@@ -1003,14 +1186,18 @@ const formatItemName = (pivotItem: any) => {
 }
 const canProceed = computed(() => {
     switch (currentStep.value) {
-        case 1: return selectedRace.value !== null
-        case 2: return selectedProfession.value !== null
+        case 1:
+            return selectedRace.value !== null
+        case 2:
+            return selectedProfession.value !== null
         case 3:
             const mainStatsDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
             const secStatsDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
             return mainStatsDone && secStatsDone
-        case 4: return heroData.value.firstName.trim().length > 0
-        default: return false
+        case 4: return areAllChoicesMade.value // Nowa walidacja
+        case 5: return heroData.value.firstName.trim().length > 0
+        default:
+            return false
     }
 })
 
@@ -1058,6 +1245,16 @@ const previousStep = () => {
 }
 
 const finishCreation = () => {
+    const finalSkills = [
+        ...mandatorySkills.value.map(s => s.id),
+        ...Object.values(selectedChoices.value.skills)
+    ]
+
+    const finalTalents = [
+        ...mandatoryTalents.value.map(t => t.id),
+        ...Object.values(selectedChoices.value.talents)
+    ]
+
     const finalHeroData = {
         firstName: heroData.value.firstName,
         lastName: heroData.value.lastName,
@@ -1070,7 +1267,9 @@ const finishCreation = () => {
         secondaryCharacteristics: {
             wounds: secondaryStats.value.wounds.val,
             fate: secondaryStats.value.fate.val
-        }
+        },
+        skills: finalSkills,
+        talents: finalTalents
     }
     emit('hero-created', finalHeroData)
     isCreating.value = false
@@ -1083,6 +1282,10 @@ defineExpose({
 
 onMounted(() => {
     // Inicjalizacja jeśli potrzebna
+})
+watch(selectedProfession, () => {
+    selectedChoices.value.skills = {}
+    selectedChoices.value.talents = {}
 })
 </script>
 
@@ -1319,7 +1522,7 @@ onMounted(() => {
 .dice-roll-container {
     /* KLUCZOWA ZMIANA: */
     flex: 0 0 450px; /* 0: nie rośnij, 0: nie malej, 450px: bazowa szerokość */
-    width: 450px;    /* Sztywna szerokość */
+    width: 450px; /* Sztywna szerokość */
 
     background: #0a0a0a;
     border: 2px solid #444;
@@ -1331,9 +1534,10 @@ onMounted(() => {
     justify-content: center;
     min-height: 500px; /* Stała wysokość */
     overflow: hidden;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .fade-slide-enter-active,
 .fade-slide-leave-active {
     transition: all 0.5s ease;
@@ -1350,6 +1554,7 @@ onMounted(() => {
     margin: 0;
     padding: 0;
 }
+
 /* Canvas biblioteki */
 #dice-box-canvas {
     position: absolute;
@@ -1539,13 +1744,22 @@ onMounted(() => {
     padding-right: 1rem;
     /* Firefox scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: #d4af37 rgba(255,255,255,0.05);
+    scrollbar-color: #d4af37 rgba(255, 255, 255, 0.05);
 }
 
 /* Chrome/Safari Scrollbar */
-.profession-content-scroll::-webkit-scrollbar { width: 6px; }
-.profession-content-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-.profession-content-scroll::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
+.profession-content-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profession-content-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.profession-content-scroll::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 3px;
+}
 
 .profession-description {
     font-style: italic;
@@ -1598,8 +1812,17 @@ onMounted(() => {
     border-radius: 4px;
 }
 
-.char-name { font-size: 0.7rem; color: #888; font-weight: bold; }
-.char-bonus { font-size: 1rem; color: #d4af37; font-weight: bold; }
+.char-name {
+    font-size: 0.7rem;
+    color: #888;
+    font-weight: bold;
+}
+
+.char-bonus {
+    font-size: 1rem;
+    color: #d4af37;
+    font-weight: bold;
+}
 
 /* Umiejętności i Zdolności */
 .items-container {
@@ -1716,8 +1939,16 @@ onMounted(() => {
     margin: 2rem auto;
 }
 
-.input-group { margin-bottom: 1.5rem; }
-.input-label { display: block; color: #d4af37; margin-bottom: 0.5rem; font-weight: bold; }
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-label {
+    display: block;
+    color: #d4af37;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
 
 .fantasy-input {
     width: 100%;
@@ -1814,10 +2045,27 @@ onMounted(() => {
     border-color: #d4af37;
 }
 
-.step-indicators { display: flex; gap: 0.5rem; }
-.step-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; transition: 0.3s; }
-.step-dot.active { background: #d4af37; transform: scale(1.4); }
-.step-dot.completed { background: #888; }
+.step-indicators {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #444;
+    transition: 0.3s;
+}
+
+.step-dot.active {
+    background: #d4af37;
+    transform: scale(1.4);
+}
+
+.step-dot.completed {
+    background: #888;
+}
 
 .close-btn {
     position: absolute;
@@ -1842,8 +2090,14 @@ onMounted(() => {
    ========================================= */
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .slide-enter {
@@ -1876,10 +2130,26 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-    .hero-creation-overlay { padding: 0; align-items: flex-end; }
-    .creation-container { width: 100%; height: 100%; border-radius: 0; border: none; max-height: none; }
-    .race-selection-grid { gap: 1rem; }
-    .race-card { width: 100%; }
+    .hero-creation-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .creation-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        max-height: none;
+    }
+
+    .race-selection-grid {
+        gap: 1rem;
+    }
+
+    .race-card {
+        width: 100%;
+    }
 }
 
 .detail-section.full-width {
@@ -1959,6 +2229,7 @@ onMounted(() => {
         border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Linia pozioma */
     }
 }
+
 .attributes-section {
     display: flex;
     flex-direction: column;
@@ -2004,8 +2275,17 @@ onMounted(() => {
 }
 
 /* Kolumny tabeli */
-.col-name { flex: 2; display: flex; align-items: center; gap: 10px; }
-.col-base, .col-roll, .col-total, .col-action { flex: 1; text-align: center; }
+.col-name {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.col-base, .col-roll, .col-total, .col-action {
+    flex: 1;
+    text-align: center;
+}
 
 .attr-abbr {
     font-weight: bold;
@@ -2013,10 +2293,24 @@ onMounted(() => {
     width: 35px;
     display: inline-block;
 }
-.attr-full { color: #ccc; font-size: 0.9rem; }
 
-.col-base { color: #888; font-family: monospace; font-size: 1.1rem; }
-.roll-val { color: #fff; font-family: monospace; font-size: 1.1rem; }
+.attr-full {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.col-base {
+    color: #888;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+.roll-val {
+    color: #fff;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
 .total-val {
     color: #d4af37;
     font-weight: bold;
@@ -2034,6 +2328,7 @@ onMounted(() => {
     padding: 4px 8px;
     transition: 0.2s;
 }
+
 .sm-reroll-btn:hover {
     border-color: #d4af37;
     background: rgba(212, 175, 55, 0.1);
@@ -2044,8 +2339,18 @@ onMounted(() => {
     text-align: center;
 }
 
-.mercy-info { color: #ccc; font-style: italic; font-size: 0.9rem; }
-.mercy-used { color: #888; text-decoration: line-through; font-size: 0.9rem; }
+.mercy-info {
+    color: #ccc;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.mercy-used {
+    color: #888;
+    text-decoration: line-through;
+    font-size: 0.9rem;
+}
+
 .attributes-assignment-container {
     display: flex;
     gap: 2rem;
@@ -2055,6 +2360,7 @@ onMounted(() => {
     margin: 0 auto;
     padding-bottom: 2rem;
 }
+
 .stats-column {
     flex: 1;
     background: rgba(0, 0, 0, 0.6);
@@ -2076,8 +2382,16 @@ onMounted(() => {
     text-transform: uppercase;
     font-size: 0.8rem;
 }
-.col-lbl { flex: 1; text-align: center; }
-.col-lbl:first-child { flex: 2; text-align: left; }
+
+.col-lbl {
+    flex: 1;
+    text-align: center;
+}
+
+.col-lbl:first-child {
+    flex: 2;
+    text-align: left;
+}
 
 .stat-assignment-row {
     display: flex;
@@ -2097,23 +2411,61 @@ onMounted(() => {
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
     animation: pulseBorder 2s infinite;
 }
+
 .stat-assignment-row.ready-to-receive:hover {
     background: rgba(212, 175, 55, 0.1);
 }
 
 @keyframes pulseBorder {
-    0% { border-color: rgba(212, 175, 55, 0.3); }
-    50% { border-color: rgba(212, 175, 55, 0.8); }
-    100% { border-color: rgba(212, 175, 55, 0.3); }
+    0% {
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+    50% {
+        border-color: rgba(212, 175, 55, 0.8);
+    }
+    100% {
+        border-color: rgba(212, 175, 55, 0.3);
+    }
 }
 
-.stat-name-block { flex: 2; display: flex; align-items: center; gap: 10px; }
-.stat-abbr { font-weight: bold; color: #d4af37; font-size: 1rem; width: 40px; }
-.stat-full { color: #aaa; font-size: 0.85rem; }
+.stat-name-block {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-.stat-base-val { flex: 1; text-align: center; color: #666; font-family: monospace; font-size: 1.1rem; }
-.stat-total-val { flex: 1; text-align: center; color: #d4af37; font-weight: bold; font-size: 1.2rem; }
-.dimmed { color: #444; }
+.stat-abbr {
+    font-weight: bold;
+    color: #d4af37;
+    font-size: 1rem;
+    width: 40px;
+}
+
+.stat-full {
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+.stat-base-val {
+    flex: 1;
+    text-align: center;
+    color: #666;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+.stat-total-val {
+    flex: 1;
+    text-align: center;
+    color: #d4af37;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.dimmed {
+    color: #444;
+}
 
 /* Slot na przypisaną wartość */
 .stat-assigned-slot {
@@ -2152,7 +2504,10 @@ onMounted(() => {
     opacity: 0;
     transition: opacity 0.2s;
 }
-.stat-assignment-row:hover .remove-assign-btn { opacity: 1; }
+
+.stat-assignment-row:hover .remove-assign-btn {
+    opacity: 1;
+}
 
 
 /* --- PRAWA KOLUMNA (PULA) --- */
@@ -2189,7 +2544,7 @@ onMounted(() => {
     font-weight: bold;
     cursor: pointer;
     font-family: 'Cinzel', serif;
-    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
     white-space: nowrap;
 }
 
@@ -2276,17 +2631,43 @@ onMounted(() => {
     transition: 0.2s;
     font-size: 0.9rem;
 }
-.reroll-one-btn:hover { background: rgba(212, 175, 55, 0.1); }
 
-.instruction-text { font-size: 0.8rem; color: #888; font-style: italic; }
-.mercy-used-info { color: #666; font-size: 0.8rem; text-decoration: line-through; }
-.mercy-desc { margin: 0 0 0.5rem 0; font-size: 0.8rem; color: #aaa; }
+.reroll-one-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.instruction-text {
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+}
+
+.mercy-used-info {
+    color: #666;
+    font-size: 0.8rem;
+    text-decoration: line-through;
+}
+
+.mercy-desc {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.8rem;
+    color: #aaa;
+}
 
 /* Mobile */
 @media (max-width: 900px) {
-    .attributes-assignment-container { flex-direction: column-reverse; }
-    .pool-column { flex: none; width: 100%; }
-    .dice-area-small { height: 150px; }
+    .attributes-assignment-container {
+        flex-direction: column-reverse;
+    }
+
+    .pool-column {
+        flex: none;
+        width: 100%;
+    }
+
+    .dice-area-small {
+        height: 150px;
+    }
 }
 
 .section-label {
@@ -2299,10 +2680,13 @@ onMounted(() => {
     font-weight: bold;
     letter-spacing: 1px;
 }
-.mt-4 { margin-top: 1.5rem; }
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
 
 .secondary-stats-section {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 10px;
     border-radius: 6px;
 }
@@ -2310,18 +2694,37 @@ onMounted(() => {
 .secondary-row {
     display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     padding: 10px;
     margin-bottom: 5px;
     border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.sec-name { flex: 2; display: flex; gap: 10px; align-items: center; }
-.sec-val { flex: 1; text-align: center; font-size: 1.2rem; color: #fff; font-weight: bold; }
-.sec-action { flex: 1; text-align: right; }
+.sec-name {
+    flex: 2;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 
-.final-val { color: #d4af37; text-shadow: 0 0 5px rgba(212,175,55,0.5); }
+.sec-val {
+    flex: 1;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.sec-action {
+    flex: 1;
+    text-align: right;
+}
+
+.final-val {
+    color: #d4af37;
+    text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
 
 .mini-roll-btn {
     background: #d4af37;
@@ -2334,8 +2737,157 @@ onMounted(() => {
     font-size: 0.8rem;
     transition: 0.2s;
 }
-.mini-roll-btn:hover:not(:disabled) { background: #fff; }
-.mini-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; }
 
-.roll-info { font-size: 0.75rem; color: #888; font-style: italic; }
+.mini-roll-btn:hover:not(:disabled) {
+    background: #fff;
+}
+
+.mini-roll-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #555;
+}
+
+.roll-info {
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+}
+
+.skills-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.selection-section {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.section-title-deco {
+    color: #d4af37;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #d4af37;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+.label-small {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.label-small.highlight {
+    color: #d4af37;
+    font-weight: bold;
+    margin-top: 1.5rem;
+}
+
+/* Tagi obowiązkowe */
+.tags-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.static-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+}
+
+.check-icon {
+    color: #4caf50; /* Zielony ptaszek */
+    font-weight: bold;
+}
+
+/* Karty wyboru */
+.choice-row {
+    margin-bottom: 1.2rem;
+    border-left: 2px solid rgba(212, 175, 55, 0.3);
+    padding-left: 1rem;
+    background: linear-gradient(to right, rgba(212, 175, 55, 0.05), transparent);
+    padding: 1rem;
+    border-radius: 0 4px 4px 0;
+}
+
+.choice-options-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.choice-card {
+    flex: 1;
+    min-width: 200px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.choice-card:hover {
+    border-color: #888;
+    background: #252525;
+}
+
+.choice-card.selected {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+.radio-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #666;
+    position: relative;
+    transition: 0.2s;
+}
+
+.choice-card.selected .radio-circle {
+    border-color: #d4af37;
+    background: #d4af37;
+    box-shadow: inset 0 0 0 3px #1a1a1a; /* Efekt kropki w środku */
+}
+
+.choice-text {
+    color: #e4d8b4;
+    font-weight: 500;
+}
+
+/* Responsywność */
+@media (max-width: 600px) {
+    .choice-options-wrapper {
+        flex-direction: column;
+    }
+    .choice-card {
+        width: 100%;
+    }
+}
 </style>
