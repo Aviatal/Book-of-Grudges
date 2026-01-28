@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Profession;
+use App\Models\Race;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProfessionsRepository
 {
