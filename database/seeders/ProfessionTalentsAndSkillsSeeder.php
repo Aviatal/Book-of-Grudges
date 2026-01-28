@@ -1092,11 +1092,8 @@ class ProfessionTalentsAndSkillsSeeder extends Seeder
                         ['skill_id' => $skills['Plotkowanie'], 'additional_name' => null]
                     ],
                     [['skill_id' => $skills['Powożenie'], 'additional_name' => null]],
-                    // "Rzemiosło (dowolne dwa)"
-                    [
-                        ['skill_id' => $skills['Rzemiosło'], 'additional_name' => 'dowolne'],
-                        ['skill_id' => $skills['Rzemiosło'], 'additional_name' => 'dowolne']
-                    ],
+                    [['skill_id' => $skills['Rzemiosło'], 'additional_name' => 'dowolne']],
+                    [['skill_id' => $skills['Rzemiosło'], 'additional_name' => 'dowolne']],
                     [['skill_id' => $skills['Sekretny język'], 'additional_name' => 'gildii']],
                     [['skill_id' => $skills['Spostrzegawczość'], 'additional_name' => null]],
                     [['skill_id' => $skills['Targowanie'], 'additional_name' => null]],
