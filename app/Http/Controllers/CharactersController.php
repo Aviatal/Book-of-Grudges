@@ -392,4 +392,14 @@ class CharactersController extends Controller
             return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function getRaces(): JsonResponse
+    {
+        try {
+            return response()->json($this->createCharacterService->getRaces(), Response::HTTP_OK);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING RACES: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać rasy'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
