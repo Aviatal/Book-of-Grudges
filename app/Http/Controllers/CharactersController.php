@@ -10,7 +10,6 @@ use App\Models\Hero;
 use App\Models\HeroInventory;
 use App\Models\Talent;
 use App\Models\Weapon;
-use App\Repositories\ProfessionsRepository;
 use App\Services\CreateCharacterService;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
@@ -25,15 +24,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CharactersController extends Controller
 {
-    private HeroService $heroService;
-    private FortunePointSatisfactionService $fortunePointSatisfactionService;
-    private CreateCharacterService $createCharacterService;
-    public function __construct()
-    {
-        $this->heroService = new HeroService();
-        $this->fortunePointSatisfactionService = new FortunePointSatisfactionService();
-        $this->createCharacterService = new CreateCharacterService(new ProfessionsRepository());
-    }
+    public function __construct(
+        private HeroService $heroService,
+        private FortunePointSatisfactionService $fortunePointSatisfactionService,
+        private CreateCharacterService $createCharacterService
+    ) {}
 
     public function getHero(int $userId)
     {
