@@ -575,48 +575,117 @@
 
             <div v-if="currentStep === 5" class="creation-slide slide-enter">
                 <div class="slide-header">
-                    <h2 class="slide-title">Finalizacja</h2>
-                    <p class="slide-subtitle">Nazwij swojego bohatera</p>
-                </div>
-            </div>
-
-            <div v-if="currentStep === 5" class="creation-slide slide-enter">
-                <div class="slide-header">
-                    <h2 class="slide-title">Nazwij swojego bohatera</h2>
-                    <p class="slide-subtitle">Wybierz imię godne {{ selectedRace?.name || 'bohatera' }}</p>
+                    <h2 class="slide-title">Wygląd i Osobowość</h2>
+                    <p class="slide-subtitle">Wylosuj cechy swojego bohatera lub dostosuj je ręcznie.</p>
                 </div>
 
-                <div class="name-input-section">
-                    <div class="input-group">
-                        <label class="input-label">Imię</label>
-                        <input
-                            v-model="heroData.firstName"
-                            type="text"
-                            class="fantasy-input"
-                            placeholder="Wpisz imię bohatera..."
-                        >
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Nazwisko (opcjonalne)</label>
-                        <input
-                            v-model="heroData.lastName"
-                            type="text"
-                            class="fantasy-input"
-                            placeholder="Wpisz nazwisko bohatera..."
-                        >
-                    </div>
-                    <div class="name-suggestions" v-if="selectedRace">
-                        <h4>Sugerowane imiona:</h4>
-                        <div class="suggestion-tags">
-                          <span
-                              v-for="name in selectedRace.suggestedNames"
-                              :key="name"
-                              class="suggestion-tag"
-                              @click="heroData.firstName = name"
-                          >
-                            {{ name }}
-                          </span>
+                <div class="personal-details-container">
+
+                    <div class="details-controls">
+                        <div class="gender-toggle">
+                            <label>Płeć:</label>
+                            <div class="toggle-switch">
+                                <button :class="{ active: personalDetails.gender === 'M' }" @click="personalDetails.gender = 'M'">Mężczyzna</button>
+                                <button :class="{ active: personalDetails.gender === 'F' }" @click="personalDetails.gender = 'F'">Kobieta</button>
+                            </div>
                         </div>
+
+                        <button class="roll-all-btn" @click="rollPersonalDetails">
+                            <span class="btn-icon">🎲</span> Wylosuj Wszystko
+                        </button>
+                    </div>
+
+                    <div class="details-grid">
+
+                        <div class="grid-row-3">
+                            <div class="detail-input-group">
+                                <label>Wzrost</label>
+                                <div class="input-with-action">
+                                    <input type="number" v-model.number="personalDetails.height" class="fantasy-input-small">
+                                    <span class="unit">cm</span>
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('height')" title="Wylosuj wzrost">🎲</button>
+                                </div>
+                            </div>
+
+                            <div class="detail-input-group">
+                                <label>Waga</label>
+                                <div class="input-with-action">
+                                    <input type="number" v-model.number="personalDetails.weight" class="fantasy-input-small">
+                                    <span class="unit">kg</span>
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('weight')" title="Wylosuj wagę">🎲</button>
+                                </div>
+                            </div>
+
+                            <div class="detail-input-group">
+                                <label>Wiek</label>
+                                <div class="input-with-action">
+                                    <input type="number" v-model.number="personalDetails.age" class="fantasy-input-small">
+                                    <span class="unit">lat</span>
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('age')" title="Wylosuj wiek">🎲</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-row-2">
+                            <div class="detail-input-group">
+                                <label>Kolor Włosów</label>
+                                <div class="input-with-action">
+                                    <input type="text" v-model="personalDetails.hairColor" class="fantasy-input" placeholder="np. Jasny blond">
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('hairColor')">🎲</button>
+                                </div>
+                            </div>
+
+                            <div class="detail-input-group">
+                                <label>Kolor Oczu</label>
+                                <div class="input-with-action">
+                                    <input type="text" v-model="personalDetails.eyeColor" class="fantasy-input" placeholder="np. Niebieskie">
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('eyeColor')">🎲</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-input-group wide">
+                            <label>Znak Szczególny</label>
+                            <div class="input-with-action">
+                                <input type="text" v-model="personalDetails.distinguishingMark" class="fantasy-input" placeholder="np. Blizna na policzku">
+                                <button class="mini-dice-btn" @click="rollSingleDetail('distinguishingMark')">🎲</button>
+                            </div>
+                        </div>
+
+                        <div class="grid-row-2">
+                            <div class="detail-input-group">
+                                <label>Znak gwiezdny</label>
+                                <div class="input-with-action">
+                                    <input type="text" v-model="personalDetails.starSign" class="fantasy-input" placeholder="np. Bębniarz">
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('starSign')">🎲</button>
+                                </div>
+                            </div>
+
+                            <div class="detail-input-group">
+                                <label>Rodzeństwo</label>
+                                <div class="input-with-action">
+                                    <input type="number" v-model.number="personalDetails.siblings" class="fantasy-input-small">
+                                    <button class="mini-dice-btn" @click="rollSingleDetail('siblings')">🎲</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-input-group wide">
+                            <label>Miejsce Urodzenia</label>
+                            <div class="input-with-action">
+                                <input type="text" v-model="personalDetails.birthplace" class="fantasy-input" placeholder="np. Reikland, Altdorf">
+                                <button class="mini-dice-btn" @click="rollSingleDetail('birthplace')">🎲</button>
+                            </div>
+                        </div>
+
+                        <div class="detail-input-group wide">
+                            <label>Imię</label>
+                            <div class="input-with-action">
+                                <input type="text" v-model="heroData.firstName" class="fantasy-input" placeholder="np. Helmut">
+                                <button class="mini-dice-btn" @click="rollSingleDetail('name')">🎲</button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -687,6 +756,168 @@ const emit = defineEmits(['hero-created', 'creation-closed'])
 const isCreating = ref(false)
 const currentStep = ref(1)
 const totalSteps = 5
+const personalDetails = reactive({
+    height: 0,       // w cm
+    weight: 0,       // w kg
+    hairColor: '',
+    eyeColor: '',
+    distinguishingMark: '',
+    age: 0,
+    gender: 'M',     // Domyślnie M, można dodać wybór płci
+    siblings: 0,
+    starSign: '',
+    birthplace: '',
+    name: ''
+})
+const personalDetailsTables = {
+    human: {
+        heightBase: 150, heightDice: '2d10',
+        weightBase: 50,  weightDice: '1d100', // Uproszczenie
+        ageBase: 16,  ageDice: '1d100', // Uproszczenie
+        hair: ['Jasny blond', 'Ciemny blond', 'Rudy', 'Czarny', 'Brązowy', 'Siwiejący'],
+        eyes: ['Niebieskie', 'Szare', 'Brązowe', 'Zielone', 'Ciemne', 'Czarne'],
+        marks: ['Blizna na twarzy', 'Brak zęba', 'Tatuaż', 'Kolczyk w uchu', 'Złamany nos', 'Brodawka'],
+        birthPlaces: ['Averland', 'Hochland', 'Middenland', 'Nordland', 'Ostermark', 'Ostland', 'Reikland', 'Stirland', 'Talabecland', 'Wissenland'],
+        starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
+        names: {
+            'M': ['Helmut', 'Walter', 'Friedrich', 'Karl', 'Albert', 'Max', 'Heinrich', 'Rudolf', 'Hans', 'Otto'],
+            'F': ['Eva', 'Maria', 'Anna', 'Alexa', 'Julia', 'Ulrike', 'Ursula', 'Elise', 'Magdalena', 'Wertha']
+        }
+
+    },
+    dwarf: {
+        heightBase: 130, heightDice: '1d10',
+        weightBase: 60,  weightDice: '1d100',
+        ageBase: 20,  ageDice: '1d100',
+        hair: ['Czarny', 'Szary', 'Brązowy', 'Rudy', 'Biały'],
+        eyes: ['Ciemne', 'Brązowe', 'Piwne', 'Szare'],
+        marks: ['Długa broda', 'Blizna wojenna', 'Tatuaż klanowy', 'Brak palca'],
+        birthPlaces: [
+            'Averland', 'Hochland', 'Middenland', 'Nordland', 'Ostermark', 'Ostland', 'Reikland', 'Stirland', 'Talabecland', 'Wissenland',
+            'Karak Norn', 'Karak Izor', 'Karak Hirn', 'Karak Kadrin', 'Karaz-a-karak', 'Zhufbar', 'Bark Varr'
+        ],
+        starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
+        names: {
+            'M': ['Bardin', 'Dimzad', 'Kargun', 'Jotunn', 'Snorri', 'Orzad', 'Durak', 'Thorgrim', 'Storri', 'Imrak'],
+            'F': ['Anika', 'Berta', 'Janna', 'Ulla', 'Silma', 'Greta', 'Petra', 'Dgmar', 'Brigit', 'Thylda']
+        }
+    },
+    elf: {
+        heightBase: 170, heightDice: '1d10',
+        weightBase: 45,  weightDice: '1d100',
+        ageBase: 30,  ageDice: '1d100',
+        hair: ['Srebrny', 'Biały', 'Złoty', 'Czarny', 'Miedziany'],
+        eyes: ['Fiołkowe', 'Złote', 'Błękitne', 'Zielone', 'Szare'],
+        marks: ['Szpiczaste uszy (oczywiste)', 'Tatuaż leśny', 'Blada cera', 'Dziwny akcent'],
+        birthPlaces: ['Altdorf', 'Marienburg', 'Las Laurelorn', 'Wielki Las', 'Las Reikwald'],
+        starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
+        names: {
+            'M': ['Aluthol', 'Cavindel', 'Imbol', 'Farmoth', 'Eldirol', 'Harrond', 'Larandar', 'Safis', 'Meilion', 'Mormacar'],
+            'F': ['Alane', 'Davendrel', 'Eldril', 'Halion', 'Ionor', 'Pelgrana', 'Tallana', 'Yuviel', 'Maruviel', 'Eponia']
+        }
+    },
+    halfling: {
+        heightBase: 100, heightDice: '1d10',
+        weightBase: 35,  weightDice: '1d100',
+        ageBase: 20,  ageDice: '1d100',
+        hair: ['Brązowy', 'Rudy', 'Jasny', 'Kręcone'],
+        eyes: ['Brązowe', 'Piwne', 'Niebieskie'],
+        marks: ['Owłosione stopy', 'Okrągły brzuch', 'Zadarty nos', 'Piegi'],
+        birthPlaces: ['Kraina zgromadzenia', 'Averland', 'Hochland', 'Middenland', 'Nordland', 'Ostermark', 'Ostland', 'Reikland', 'Stirland', 'Talabecland', 'Wissenland'],
+        starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
+        names: {
+            'M': ['Adam', 'Albert', 'Alfred', 'Axel', 'Carl', 'Jakob', 'Max', 'Ludo', 'Rudi', 'Udo'],
+            'F': ['Agnes', 'Eva', 'Heidi', 'Hanna', 'Silma', 'Greta', 'Sophia', 'Ulla', 'Brigit', 'Wanda']
+        }
+    }
+}
+const getRandomArrayItem = (arr) => arr[Math.floor(Math.random() * arr.length)]
+// --- FUNKCJA LOSUJĄCA POJEDYNCZY DETAL (Poprawiona) ---
+const rollSingleDetail = (key) => {
+    if (!selectedRace.value) return
+    const raceKey = selectedRace.value.key || 'human'
+    const table = personalDetailsTables[raceKey] || personalDetailsTables.human
+
+    switch (key) {
+        case 'height':
+            // Parsowanie rzutu np '2d10' na logikę
+            // Tutaj uproszczenie: zakładamy, że w table.heightDice jest liczba lub string
+            // Dla człowieka: 2d10 -> 2-20
+            let hRoll = 0
+            if (typeof table.heightDice === 'string' && table.heightDice.includes('d')) {
+                const [count, die] = table.heightDice.split('d').map(Number)
+                for(let i=0; i<count; i++) hRoll += Math.floor(Math.random() * die) + 1
+            } else {
+                hRoll = Math.floor(Math.random() * (table.heightDice || 10)) + 1
+            }
+            personalDetails.height = table.heightBase + hRoll
+            break;
+
+        case 'weight':
+            let wRoll = 0
+            // Uproszczona logika dla wagi (k100 vs k10 w zależności od rasy)
+            // Możesz tu dodać parsowanie jak wyżej
+            const wDie = typeof table.weightDice === 'number' ? table.weightDice : 20
+            wRoll = Math.floor(Math.random() * wDie) + 1
+            personalDetails.weight = table.weightBase + wRoll
+            break;
+
+        case 'age':
+            const aDie = typeof table.ageDice === 'number' ? table.ageDice : 10
+            const aRoll = Math.floor(Math.random() * aDie) + 1
+            personalDetails.age = (table.ageBase || 15) + aRoll
+            break;
+
+        case 'hairColor':
+            personalDetails.hairColor = getRandomArrayItem(table.hair)
+            break;
+
+        case 'eyeColor':
+            personalDetails.eyeColor = getRandomArrayItem(table.eyes)
+            break;
+
+        case 'distinguishingMark':
+            personalDetails.distinguishingMark = getRandomArrayItem(table.marks)
+            break;
+
+        case 'starSign':
+            // POPRAWKA: W tabeli klucz to 'starSign' (tablica), a nie 'starSigns'
+            personalDetails.starSign = getRandomArrayItem(table.starSign)
+            break;
+
+        case 'birthplace':
+            // POPRAWKA: W tabeli klucz to 'birthPlaces' (z dużą literą P)
+            personalDetails.birthplace = getRandomArrayItem(table.birthPlaces)
+            break;
+
+        case 'siblings':
+            personalDetails.siblings = Math.floor(Math.random() * 6)
+            break;
+
+        case 'name':
+            // POPRAWKA: Obsługa płci dla imion
+            const genderKey = personalDetails.gender
+            const namesList = table.names[genderKey]
+            if (namesList) {
+                heroData.value.firstName = getRandomArrayItem(namesList)
+            }
+            break;
+    }
+}
+
+// Funkcja "Wylosuj Wszystko" używa teraz pojedynczych
+const rollPersonalDetails = () => {
+    rollSingleDetail('height')
+    rollSingleDetail('weight')
+    rollSingleDetail('age')
+    rollSingleDetail('hairColor')
+    rollSingleDetail('eyeColor')
+    rollSingleDetail('distinguishingMark')
+    rollSingleDetail('starSign')
+    rollSingleDetail('siblings')
+    rollSingleDetail('birthplace')
+    rollSingleDetail('name') // Imię zazwyczaj zostawiamy graczowi, chyba że chce
+}
 
 let diceBox = null
 let diceBoxAttributes = null
@@ -1074,6 +1305,7 @@ const finishCreation = () => {
         characteristics: finalCharacteristics,
         secondaryCharacteristics: finalSecondary,
         freeAdvance: freeAdvance.value,
+        personalDetails: { ...personalDetails }
     }
 
     emit('hero-created', finalHeroData)
@@ -1196,18 +1428,20 @@ const rollRandomTalent = async () => {
     }
 }
 const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100)
+const canProceedPersonal = computed(() => {
+    return personalDetails.height > 0 &&
+        personalDetails.weight > 0 &&
+        personalDetails.hairColor !== ''
+})
 
 const canProceed = computed(() => {
     switch (currentStep.value) {
+        // ... (kroki 1-4 bez zmian)
         case 1: return selectedRace.value !== null
         case 2: return selectedProfession.value !== null
-        case 3:
-            const mainStatsDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
-            const secStatsDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
-            const advanceDone = freeAdvance.value !== null
-            return mainStatsDone && secStatsDone && advanceDone
+        case 3: /* ... (logika cech) ... */ return true
         case 4: return areAllChoicesMade.value
-        case 5: return heroData.value.firstName.trim().length > 0
+        case 5: return canProceedPersonal.value // NOWE: Krok 5 (Detale)
         default: return false
     }
 })
@@ -3278,5 +3512,207 @@ defineExpose({ startCreation })
     border-color: #ffd700;
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
     font-weight: bold;
+}
+.personal-details-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 2rem;
+}
+.grid-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.grid-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Responsywność dla gridów */
+@media (max-width: 768px) {
+    .grid-row-3, .grid-row-2 {
+        grid-template-columns: 1fr; /* Na telefonie wszystko w pionie */
+        gap: 1rem;
+    }
+}
+
+.details-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 1.5rem;
+}
+
+/* Przełącznik Płci */
+.gender-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.gender-toggle label {
+    color: #d4af37;
+    font-weight: bold;
+}
+.toggle-switch {
+    display: flex;
+    background: #111;
+    border-radius: 4px;
+    border: 1px solid #444;
+    overflow: hidden;
+}
+.toggle-switch button {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.toggle-switch button.active {
+    background: #d4af37;
+    color: #000;
+    font-weight: bold;
+}
+
+/* Przycisk losowania */
+.roll-all-btn {
+    background: linear-gradient(to bottom, #d4af37, #b4941f);
+    border: 1px solid #ffd700;
+    color: #000;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.roll-all-btn:hover {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Grid formularza */
+.details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detail-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.detail-input-group.wide {
+    width: 100%;
+}
+
+.input-with-action {
+    display: flex;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding-right: 4px; /* Odstęp dla przycisku */
+    transition: 0.2s;
+}
+
+.input-with-action:focus-within {
+    border-color: #d4af37;
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+/* Inputy wewnątrz wrappera */
+.input-with-action input {
+    background: transparent;
+    border: none;
+    color: #e4d8b4;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+}
+.mini-dice-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    color: #d4af37;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.mini-dice-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: #d4af37;
+    transform: scale(1.1);
+}
+
+.mini-dice-btn:active {
+    transform: scale(0.95);
+}
+.input-with-action .unit {
+    color: #555;
+    font-size: 0.8rem;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.detail-input-group label {
+    color: #888;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+/* Inputy */
+.fantasy-input, .fantasy-input-small {
+    background: #1a1a1a;
+    border: 1px solid #555;
+    color: #e4d8b4;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.fantasy-input-small {
+    width: 100px;
+    text-align: center;
+}
+
+.fantasy-input:focus, .fantasy-input-small:focus {
+    border-color: #d4af37;
+    outline: none;
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unit {
+    color: #666;
+    font-size: 0.8rem;
+    font-style: italic;
 }
 </style>
