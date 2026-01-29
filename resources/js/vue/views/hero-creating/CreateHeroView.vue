@@ -257,12 +257,10 @@
             <div v-if="currentStep === 3" class="creation-slide slide-enter">
                 <div class="slide-header">
                     <h2 class="slide-title">Cechy Bohatera</h2>
-                    <p class="slide-subtitle">Najpierw rzuć na cechy główne i przypisz je, a następnie wylosuj Żywotność
-                        i Przeznaczenie.</p>
+                    <p class="slide-subtitle">Rzuć kośćmi, przypisz wyniki i wybierz <strong>jedno darmowe rozwinięcie</strong>.</p>
                 </div>
 
                 <div class="attributes-assignment-container">
-
                     <div class="stats-column">
 
                         <div class="section-label">Cechy Główne</div>
@@ -271,60 +269,60 @@
                             <span class="col-lbl">Baza</span>
                             <span class="col-lbl">Suma</span>
                             <span class="col-lbl action-col">Przypisz</span>
+                            <span class="col-lbl short">Rozw.</span>
                         </div>
 
-                        <div
-                            v-for="(char, key) in characteristics"
-                            :key="key"
-                            class="stat-assignment-row"
-                            :class="{
+                        <div v-for="(char, key) in characteristics" :key="key"
+                             class="stat-assignment-row"
+                             :class="{
                                 'ready-to-receive': selectedPoolIndex !== null && char.assignedValue === null,
-                                'filled': char.assignedValue !== null
-                            }"
-                            @click="assignSelectedToStat(key)"
-                        >
+                                'filled': char.assignedValue !== null,
+                                'advanced': freeAdvance?.key === key
+                             }"
+                             @click="assignSelectedToStat(key)">
+
                             <div class="stat-name-block">
-                                <span class="stat-abbr">{{
-                                        mainProfileConfig.find(c => c.keys.includes(key))?.label
-                                    }}</span>
+                                <span class="stat-abbr">{{ mainProfileConfig.find(c => c.keys.includes(key))?.label }}</span>
                                 <span class="stat-full">{{ char.name }}</span>
                             </div>
 
                             <div class="stat-base-val">{{ char.base }}</div>
 
                             <div class="stat-total-val">
-                                <span v-if="char.assignedValue !== null">{{ char.base + char.assignedValue }}</span>
+                                <span v-if="char.assignedValue !== null">
+                                    {{ char.base + char.assignedValue + (freeAdvance?.key === key ? 5 : 0) }}
+                                </span>
                                 <span v-else class="dimmed">-</span>
                             </div>
 
                             <div class="stat-assigned-slot">
-                                <span v-if="char.assignedValue !== null" class="assigned-val">
-                                    +{{ char.assignedValue }}
-                                </span>
-                                <span v-else class="empty-slot-marker">
-                                    {{ selectedPoolIndex !== null ? '↓' : '—' }}
-                                </span>
+                                <span v-if="char.assignedValue !== null" class="assigned-val">+{{ char.assignedValue }}</span>
+                                <span v-else class="empty-slot-marker">{{ selectedPoolIndex !== null ? '↓' : '—' }}</span>
+                                <button v-if="char.assignedValue !== null" class="remove-assign-btn" @click.stop="unassignStat(key)">✕</button>
+                            </div>
+
+                            <div class="stat-advance-slot" @click.stop>
                                 <button
-                                    v-if="char.assignedValue !== null"
-                                    class="remove-assign-btn"
-                                    @click.stop="unassignStat(key)"
-                                    title="Cofnij"
-                                >✕
+                                    v-if="canAdvanceStat(key)"
+                                    class="advance-btn"
+                                    :class="{ 'active': freeAdvance?.key === key }"
+                                    @click="selectFreeAdvance(key, false)"
+                                    title="Darmowe rozwinięcie (+5%)"
+                                >
+                                    +5
                                 </button>
+                                <span v-else class="dimmed-dot">·</span>
                             </div>
                         </div>
 
                         <div class="secondary-stats-section">
                             <div class="section-label mt-4">Cechy Drugorzędne (Rzut 1k10)</div>
-
                             <div class="secondary-row">
-                                <div class="sec-name">
-                                    <span class="stat-abbr">Żyw</span>
-                                    <span class="stat-full">Żywotność</span>
-                                </div>
+                                <div class="sec-name"><span class="stat-abbr">Żyw</span><span class="stat-full">Żywotność</span></div>
                                 <div class="sec-val">
-                                    <span v-if="secondaryStats.wounds.val"
-                                          class="final-val">{{ secondaryStats.wounds.val }}</span>
+                                    <span v-if="secondaryStats.wounds.val" class="final-val">
+                                        {{ secondaryStats.wounds.val + (freeAdvance?.key === 'Żyw' ? 1 : 0) }}
+                                    </span>
                                     <span v-else class="dimmed">-</span>
                                 </div>
                                 <div class="sec-action">
@@ -339,38 +337,41 @@
                                     <span v-else class="roll-info">
                                         (Rzut: {{ secondaryStats.wounds.roll }})
                                     </span>
+                                    <button v-if="!secondaryStats.wounds.val" class="mini-roll-btn" @click="rollSecondary('wounds')" :disabled="isRollingAny">🎲</button>
                                 </div>
                             </div>
-
                             <div class="secondary-row">
-                                <div class="sec-name">
-                                    <span class="stat-abbr">PP</span>
-                                    <span class="stat-full">Przeznaczenie</span>
-                                </div>
+                                <div class="sec-name"><span class="stat-abbr">PP</span><span class="stat-full">Przeznaczenie</span></div>
                                 <div class="sec-val">
-                                    <span v-if="secondaryStats.fate.val" class="final-val">{{
-                                            secondaryStats.fate.val
-                                        }}</span>
+                                    <span v-if="secondaryStats.fate.val" class="final-val">
+                                        {{ secondaryStats.fate.val + (freeAdvance?.key === 'PP' ? 1 : 0) }}
+                                    </span>
                                     <span v-else class="dimmed">-</span>
                                 </div>
                                 <div class="sec-action">
-                                    <button
-                                        v-if="!secondaryStats.fate.val"
-                                        class="mini-roll-btn"
-                                        @click="rollSecondary('fate')"
-                                        :disabled="isRollingAny"
-                                    >
-                                        🎲 Rzuć
-                                    </button>
-                                    <span v-else class="roll-info">
-                                        (Rzut: {{ secondaryStats.fate.roll }})
-                                    </span>
+                                    <button v-if="!secondaryStats.fate.val" class="mini-roll-btn" @click="rollSecondary('fate')" :disabled="isRollingAny">🎲</button>
                                 </div>
                             </div>
                         </div>
 
-                    </div>
+                        <div class="secondary-advances-section" v-if="availableSecondaryAdvances.length > 0">
+                            <div class="section-label mt-4">Dostępne Rozwinięcia (Cechy Drugorzędne)</div>
+                            <p class="hint-text" v-if="!freeAdvance">Możesz też wybrać darmowe rozwinięcie tutaj (+1):</p>
 
+                            <div class="advances-grid">
+                                <button
+                                    v-for="adv in availableSecondaryAdvances"
+                                    :key="adv.label"
+                                    class="sec-advance-btn"
+                                    :class="{ 'active': freeAdvance?.key === adv.label }"
+                                    @click="selectFreeAdvance(adv.label, true)"
+                                >
+                                    {{ adv.label }} (+1)
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
                     <div class="pool-column">
                         <div class="dice-area-small">
                             <div id="dice-box-attributes" class="dice-canvas"></div>
@@ -1023,7 +1024,31 @@ const finishCreation = () => {
         }
         return null
     }
+    const finalCharacteristics = {}
+    Object.entries(characteristics.value).forEach(([key, val]) => {
+        // Mapujemy klucze charakterystyk (np. WW) na to co jest w freeAdvance
+        // W characteristics kluczem jest np 'WW', a w freeAdvance.key też 'WW'
+        let total = val.base + (val.assignedValue || 0)
 
+        if (freeAdvance.value?.type === 'main' && freeAdvance.value?.key === key) {
+            total += freeAdvance.value.value
+        }
+        finalCharacteristics[key] = total
+    })
+
+    // Drugorzędne
+    const finalSecondary = {
+        wounds: secondaryStats.value.wounds.val,
+        fate: secondaryStats.value.fate.val,
+        // Tutaj można dodać inne drugorzędne, jeśli system je obsługuje
+        advances: freeAdvance.value?.type === 'secondary' ? { [freeAdvance.value.key]: 1 } : {}
+    }
+
+    // Jeśli darmowy awans był na Żywotność lub PP, dodajemy go do wyniku
+    if (freeAdvance.value?.type === 'secondary') {
+        if (freeAdvance.value.key === 'Żyw') finalSecondary.wounds += 1
+        if (freeAdvance.value.key === 'PP') finalSecondary.fate += 1
+    }
     // 1. Obowiązkowe (Mandatory)
     const mandatorySkillIds = aggregatedSkills.value.mandatory.map(i => i.skill?.id || i.id)
     const mandatoryTalentIds = aggregatedTalents.value.mandatory.map(i => i.talent?.id || i.id)
@@ -1044,15 +1069,11 @@ const finishCreation = () => {
         lastName: heroData.value.lastName,
         race: selectedRace.value,
         profession: selectedProfession.value,
-        characteristics: Object.fromEntries(
-            Object.entries(characteristics.value).map(([key, value]) => [key, value.base + (value.assignedValue || 0)])
-        ),
-        secondaryCharacteristics: {
-            wounds: secondaryStats.value.wounds.val,
-            fate: secondaryStats.value.fate.val
-        },
         skills: [...mandatorySkillIds, ...chosenSkillIds],
-        talents: [...mandatoryTalentIds, ...chosenTalentIds, ...randomTalentIds]
+        talents: [...mandatoryTalentIds, ...chosenTalentIds, ...randomTalentIds],
+        characteristics: finalCharacteristics,
+        secondaryCharacteristics: finalSecondary,
+        freeAdvance: freeAdvance.value,
     }
 
     emit('hero-created', finalHeroData)
@@ -1067,6 +1088,47 @@ const mercyUsed = ref(false)
 const isRollingSecondary = ref(false)
 const isRollingProfession = ref(false)
 const professionRoll = ref(0)
+const freeAdvance = ref(null);
+const canAdvanceStat = (statLabel) => {
+    if (!selectedProfession.value) return false
+    const val = getStatValue(selectedProfession.value.characteristics, statLabel)
+    return val && val > 0
+}
+const selectFreeAdvance = (statLabel, isSecondary = false) => {
+    // Jeśli klikamy w to samo, odznaczamy
+    if (freeAdvance.value?.key === statLabel) {
+        freeAdvance.value = null
+        return
+    }
+
+    const bonusValue = isSecondary ? 1 : 5
+
+    freeAdvance.value = {
+        key: statLabel,
+        value: bonusValue,
+        type: isSecondary ? 'secondary' : 'main'
+    }
+}
+const availableSecondaryAdvances = computed(() => {
+    if (!selectedProfession.value) return []
+
+    // Filtrujemy konfigurację drugorzędnych
+    return secondaryProfileConfig
+        .filter(conf => {
+            // Pomijamy Żywotność i PP, bo one mają swoją mechanikę rzutu (chyba że chcemy pozwolić podbić wylosowane)
+            // W WFRP darmowy awans można wziąć na Żyw, jeśli jest w schemacie. Zostawmy wszystkie.
+            return canAdvanceStat(conf.label)
+        })
+        .map(conf => ({
+            label: conf.label,
+            name: getSecondaryStatFullName(conf.label) // Helper do pełnej nazwy
+        }))
+})
+
+const getSecondaryStatFullName = (label) => {
+    const map = { 'A': 'Ataki', 'Żyw': 'Żywotność', 'S': 'Siła', 'Wt': 'Wytrzymałość', 'Sz': 'Szybkość', 'Mag': 'Magia', 'PO': 'Punkty Obłędu', 'PP': 'Punkty Przeznaczenia' }
+    return map[label] || label
+}
 
 const rolledRandomTalents = ref([])
 const isRollingRandomTalent = ref(false)
@@ -1140,9 +1202,10 @@ const canProceed = computed(() => {
         case 1: return selectedRace.value !== null
         case 2: return selectedProfession.value !== null
         case 3:
-            const mainDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
-            const secDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
-            return mainDone && secDone
+            const mainStatsDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
+            const secStatsDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
+            const advanceDone = freeAdvance.value !== null
+            return mainStatsDone && secStatsDone && advanceDone
         case 4: return areAllChoicesMade.value
         case 5: return heroData.value.firstName.trim().length > 0
         default: return false
@@ -3122,5 +3185,98 @@ defineExpose({ startCreation })
         max-width: 150px;
         font-size: 0.7rem;
     }
+}
+.col-lbl.short {
+    max-width: 50px;
+    text-align: center;
+}
+
+.stat-advance-slot {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Przycisk +5 */
+.advance-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #666;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.advance-btn:hover {
+    border-color: #d4af37;
+    color: #d4af37;
+}
+
+.advance-btn.active {
+    background: #d4af37;
+    color: #000;
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    font-weight: bold;
+}
+
+.dimmed-dot {
+    color: #333;
+    font-size: 1.5rem;
+    line-height: 0;
+}
+
+/* Wyróżnienie wiersza po rozwinięciu */
+.stat-assignment-row.advanced {
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
+    border-left: 2px solid #d4af37;
+}
+
+/* Sekcja Drugorzędnych Rozwinięć */
+.secondary-advances-section {
+    margin-top: 1rem;
+    background: rgba(0,0,0,0.2);
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px dashed #444;
+}
+
+.hint-text {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.advances-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sec-advance-btn {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.sec-advance-btn:hover {
+    border-color: #888;
+}
+
+.sec-advance-btn.active {
+    background: #d4af37;
+    color: #000;
+    border-color: #ffd700;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+    font-weight: bold;
 }
 </style>
