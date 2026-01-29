@@ -290,10 +290,10 @@
                                 <span class="stat-full">{{ char.name }}</span>
                             </div>
 
-                            <div class="stat-base-val">{{ char.base.value }}</div>
+                            <div class="stat-base-val">{{ char.base }}</div>
 
                             <div class="stat-total-val">
-                                <span v-if="char.assignedValue !== null">{{ char.base.value + char.assignedValue }}</span>
+                                <span v-if="char.assignedValue !== null">{{ char.base + char.assignedValue }}</span>
                                 <span v-else class="dimmed">-</span>
                             </div>
 
@@ -431,8 +431,10 @@
                         <div class="mandatory-list" v-if="aggregatedSkills.mandatory.length > 0">
                             <span class="label-small">Otrzymujesz automatycznie:</span>
                             <div class="tags-group">
-                                <span v-for="(item, i) in aggregatedSkills.mandatory" :key="'mand-s-'+i" class="static-tag">
-                                    {{ formatSkillName(item) }}
+                                <span v-for="(item, i) in aggregatedSkills.mandatory"
+                                      :key="'mand-s-'+i"
+                                      class="static-tag"
+                                      :title="item.skill?.description"> {{ formatSkillName(item) }}
                                     <span :class="['source-tag', item.source]">{{ item.source === 'race' ? 'Rasa' : 'Profesja' }}</span>
                                     <span class="check-icon">✓</span>
                                 </span>
@@ -448,7 +450,7 @@
                                 </div>
 
                                 <div class="choice-options-wrapper">
-                                    <div v-for="(item, sIndex) in group" :key="getUniqueKey(item)"
+                                    <div v-for="(item) in group" :key="getUniqueKey(item)"
                                          class="choice-card"
                                          :class="{
         'selected': selectedChoices.skills[gIndex] === getUniqueKey(item),
@@ -459,11 +461,15 @@
                                         <div class="radio-circle"></div>
 
                                         <div class="choice-content">
-                                            <span class="choice-text">{{ formatSkillName(item) }}</span>
+                                            <div class="choice-text-row">
+                                                <span class="choice-text">{{ formatSkillName(item) }}</span>
 
-                                            <span v-if="isSkillMandatory(item)" class="bonus-badge" title="Masz już tę umiejętność. Wybór da Ci bonus +10.">
-            +10
-        </span>
+                                                <span v-if="isSkillMandatory(item)" class="bonus-badge">+10</span>
+                                            </div>
+
+                                            <span class="choice-desc" v-if="item.skill?.description">
+                                                {{ item.skill?.description }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -474,27 +480,68 @@
                     <div class="selection-section">
                         <h3 class="section-title-deco">Zdolności</h3>
 
+                        <div class="random-talents-block" v-if="requiredRandomTalentsCount > 0">
+                            <div class="random-header">
+                                <span class="label-small highlight">
+                                    Losowe zdolności ({{ selectedRace?.name }}):
+                                </span>
+                                <span class="counter-badge">
+                                    {{ rolledRandomTalents.length }} / {{ requiredRandomTalentsCount }}
+                                </span>
+                            </div>
+
+                            <div class="random-talents-grid">
+                                <div v-for="(talent, index) in rolledRandomTalents" :key="'rnd-'+index" class="talent-card rolled">
+                                    <div class="talent-icon">🎲</div>
+                                    <div class="talent-info">
+                                        <span class="talent-name">{{ talent.name }}</span>
+                                        <span class="roll-value">Rzut: {{ talent.roll }}</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    v-if="rolledRandomTalents.length < requiredRandomTalentsCount"
+                                    class="roll-random-btn"
+                                    @click="rollRandomTalent"
+                                    :disabled="isRollingRandomTalent"
+                                >
+                                    <span class="btn-icon" :class="{ 'spinning': isRollingRandomTalent }">🎲</span>
+                                    {{ isRollingRandomTalent ? 'Losowanie...' : 'Wylosuj Zdolność' }}
+                                </button>
+                            </div>
+                            <div class="separator-line" style="margin: 1.5rem 0; border-bottom: 1px dashed #444;"></div>
+                        </div>
+
                         <div class="mandatory-list" v-if="aggregatedTalents.mandatory.length > 0">
                             <span class="label-small">Otrzymujesz automatycznie:</span>
                             <div class="tags-group">
-                                <span v-for="(item, i) in aggregatedTalents.mandatory" :key="'mand-t-'+i" class="static-tag">
+                                <span v-for="(item, i) in aggregatedTalents.mandatory"
+                                      :key="'mand-t-'+i"
+                                      class="static-tag"
+                                      :title="item.talent?.description || item.description || 'Brak opisu'">
+
                                     {{ formatTalentName(item) }}
-                                    <span :class="['source-tag', item.source]">{{ item.source === 'race' ? 'Rasa' : 'Profesja' }}</span>
+
+                                    <span :class="['source-tag', item.source]">
+                                        {{ item.source === 'race' ? 'Rasa' : 'Profesja' }}
+                                    </span>
                                     <span class="check-icon">✓</span>
                                 </span>
                             </div>
                         </div>
 
                         <div class="choices-list" v-if="aggregatedTalents.choices.length > 0">
-                            <span class="label-small highlight">Musisz wybrać:</span>
+                            <span class="label-small highlight">Musisz wybrać jedną z każdej grupy:</span>
 
                             <div v-for="(group, gIndex) in aggregatedTalents.choices" :key="'t-group-'+gIndex" class="choice-row">
                                 <div class="choice-origin-label">
-                                    Źródło: <span :class="['text-source', group[0].source]">{{ group[0].source === 'race' ? 'Rasa' : 'Profesja' }}</span>
+                                    Źródło: <span :class="['text-source', group[0].source]">
+                                        {{ group[0].source === 'race' ? 'Rasa' : 'Profesja' }}
+                                    </span>
                                 </div>
 
                                 <div class="choice-options-wrapper">
-                                    <div v-for="(item, tIndex) in group" :key="getUniqueKey(item)"
+                                    <div v-for="(item) in group" :key="getUniqueKey(item)"
                                          class="choice-card"
                                          :class="{ 'selected': selectedChoices.talents[gIndex] === getUniqueKey(item) }"
                                          @click="selectTalent(gIndex, item)">
@@ -502,11 +549,19 @@
                                         <div class="radio-circle"></div>
 
                                         <div class="choice-content">
-                                            <span class="choice-text">{{ formatTalentName(item) }}</span>
+                                            <div class="choice-text-row">
+                                                <span class="choice-text">{{ formatTalentName(item) }}</span>
 
-                                            <span v-if="isTalentMandatory(item)" class="owned-badge" title="Już posiadasz ten talent.">
-            Posiadasz
-        </span>
+                                                <span v-if="isTalentMandatory(item) || isTalentAlreadyOwned(item.talent?.id || item.id)"
+                                                      class="owned-badge"
+                                                      title="Już posiadasz ten talent.">
+                                                    Posiadasz
+                                                </span>
+                                            </div>
+
+                                            <span class="choice-desc" v-if="item.talent?.description || item.description">
+                                                {{ item.talent?.description || item.description }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -649,6 +704,74 @@ const selectedChoices = reactive({
     talents: {}
 })
 
+const randomTalentsTables = {
+    // Tabela dla Ludzi (2 rzuty)
+    human: [
+        { min: 1,  max: 4,   id: 23, name: 'Bardzo silny' },
+        { min: 5,  max: 9,  id: 24, name: 'Bardzo szybki' },
+        { min: 10, max: 13,  id: 28, name: 'Błyskotliwość' },
+        { min: 14, max: 18,  id: 32, name: 'Bystry wzrok' },
+        { min: 19, max: 22,  id: 33, name: 'Charyzmatyczny' },
+        { min: 23, max: 27,  id: 68, name: 'Czuły słuch' },
+        { min: 28, max: 31,  id: 71, name: 'Geniusz artmetyczny' },
+        { min: 32, max: 35,  id: 78, name: 'Krzepki' },
+        { min: 36, max: 40,  id: 16, name: 'Naśladowca' },
+        { min: 41, max: 44,  id: 19, name: 'Niezwykle odporny' },
+        { min: 45, max: 49,  id: 21, name: 'Oburęczność' },
+        { min: 50, max: 53,  id: 38, name: 'Odporność ma choroby' },
+        { min: 54, max: 57,  id: 39, name: 'Odporność ma magię' },
+        { min: 58, max: 61,  id: 40, name: 'Odporność ma trucizny' },
+        { min: 62, max: 66,  id: 41, name: 'Odporność psychiczna' },
+        { min: 67, max: 71,  id: 44, name: 'Opanowanie' },
+        { min: 72, max: 75,  id: 4, name: 'Strzelec wyborowy' },
+        { min: 76, max: 79,  id: 6, name: 'Szczęście' },
+        { min: 80, max: 83,  id: 7, name: 'Szósty zmysł' },
+        { min: 84, max: 87, id: 8, name: 'Szybki refleks' },
+        { min: 88, max: 91, id: 54, name: 'Twardziel' },
+        { min: 92, max: 95, id: 56, name: 'Urodzony wojownik' },
+        { min: 96, max: 100, id: 58, name: 'Widzenie w ciemności' },
+    ],
+    // Tabela dla Niziołków (1 rzut, specyficzna)
+    halfling: [
+        { min: 1,  max: 4,   id: 23, name: 'Bardzo silny' },
+        { min: 5,  max: 9,  id: 24, name: 'Bardzo szybki' },
+        { min: 10, max: 13,  id: 28, name: 'Błyskotliwość' },
+        { min: 14, max: 18,  id: 32, name: 'Bystry wzrok' },
+        { min: 19, max: 23,  id: 33, name: 'Charyzmatyczny' },
+        { min: 24, max: 28,  id: 68, name: 'Czuły słuch' },
+        { min: 29, max: 34,  id: 71, name: 'Geniusz artmetyczny' },
+        { min: 35, max: 39,  id: 78, name: 'Krzepki' },
+        { min: 40, max: 44,  id: 16, name: 'Naśladowca' },
+        { min: 45, max: 49,  id: 19, name: 'Niezwykle odporny' },
+        { min: 50, max: 53,  id: 21, name: 'Oburęczność' },
+        { min: 54, max: 58,  id: 38, name: 'Odporność ma choroby' },
+        { min: 59, max: 62,  id: 39, name: 'Odporność ma magię' },
+        { min: 63, max: 64,  id: 40, name: 'Odporność ma trucizny' },
+        { min: 65, max: 68,  id: 41, name: 'Odporność psychiczna' },
+        { min: 69, max: 73,  id: 44, name: 'Opanowanie' },
+        { min: 74, max: 78,  id: 4, name: 'Strzelec wyborowy' },
+        { min: 79, max: 82,  id: 6, name: 'Szczęście' },
+        { min: 83, max: 87,  id: 7, name: 'Szósty zmysł' },
+        { min: 88, max: 92, id: 8, name: 'Szybki refleks' },
+        { min: 93, max: 96, id: 54, name: 'Twardziel' },
+        { min: 96, max: 100, id: 56, name: 'Urodzony wojownik' },
+    ]
+}
+
+const isTalentAlreadyOwned = (talentId) => {
+    // 1. Sprawdź w już wylosowanych
+    if (rolledRandomTalents.value.some(t => t.id === talentId)) return true
+
+    // 2. Sprawdź w obowiązkowych (Rasa + Profesja)
+    if (aggregatedTalents.value.mandatory.some(t => (t.talent?.id || t.id) === talentId)) return true
+
+    // 3. Sprawdź w wybranych z listy (opcjonalne, ale warto)
+    const selectedIds = Object.values(selectedChoices.talents)
+    if (selectedIds.some(key => key.includes(`-${talentId}-`))) return true // Uproszczone sprawdzanie klucza
+
+    return false
+}
+
 // Wybór Umiejętności (Naprawiona literówka)
 const getUniqueKey = (item) => {
     // Preferujemy ID pivota (relacji), bo jest zawsze unikalne
@@ -788,7 +911,10 @@ const areAllChoicesMade = computed(() => {
     const skillsDone = Object.keys(selectedChoices.skills).length === skillsRequired
     const talentsDone = Object.keys(selectedChoices.talents).length === talentsRequired
 
-    return skillsDone && talentsDone
+    // Sprawdzamy czy wylosowano wymaganą liczbę talentów losowych
+    const randomTalentsDone = rolledRandomTalents.value.length === requiredRandomTalentsCount.value
+
+    return skillsDone && talentsDone && randomTalentsDone
 })
 
 // --- Zmienne referencyjne ---
@@ -911,6 +1037,8 @@ const finishCreation = () => {
         .map(key => resolveItemFromKey(key, aggregatedTalents.value.choices))
         .filter(id => id !== null)
 
+    const randomTalentIds = rolledRandomTalents.value.map(t => t.id)
+
     const finalHeroData = {
         firstName: heroData.value.firstName,
         lastName: heroData.value.lastName,
@@ -924,7 +1052,7 @@ const finishCreation = () => {
             fate: secondaryStats.value.fate.val
         },
         skills: [...mandatorySkillIds, ...chosenSkillIds],
-        talents: [...mandatoryTalentIds, ...chosenTalentIds]
+        talents: [...mandatoryTalentIds, ...chosenTalentIds, ...randomTalentIds]
     }
 
     emit('hero-created', finalHeroData)
@@ -940,8 +1068,71 @@ const isRollingSecondary = ref(false)
 const isRollingProfession = ref(false)
 const professionRoll = ref(0)
 
-const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
+const rolledRandomTalents = ref([])
+const isRollingRandomTalent = ref(false)
 
+const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
+const requiredRandomTalentsCount = computed(() => {
+    if (!selectedRace.value) return 0
+    // Klucze ras muszą się zgadzać z tymi w availableRaces
+    if (selectedRace.value.key === 'human') return 2
+    if (selectedRace.value.key === 'halfling') return 1
+    return 0
+})
+
+// 3. Funkcja losująca
+const rollRandomTalent = async () => {
+    if (rolledRandomTalents.value.length >= requiredRandomTalentsCount.value) return
+    if (isRollingRandomTalent.value) return
+
+    isRollingRandomTalent.value = true
+
+    try {
+        if (!diceBoxAttributes) await initDiceBoxAttributes()
+
+        let talent = null
+        let attempts = 0
+        const maxAttempts = 5 // Zabezpieczenie przed nieskończoną pętlą
+
+        // Pobieramy odpowiednią tabelę
+        const raceKey = selectedRace.value.key
+        const currentTable = randomTalentsTables[raceKey] || randomTalentsTables.human // Fallback do ludzkiej
+
+        // Pętla do obsługi duplikatów (auto-reroll)
+        do {
+            diceBoxAttributes.clear()
+            const result = await diceBoxAttributes.roll('1d100')
+            const rollValue = result[0].value
+
+            // Znajdź talent w zakresie
+            talent = currentTable.find(t => rollValue >= t.min && rollValue <= t.max)
+
+            if (talent) {
+                // Dodajemy wynik rzutu do obiektu talentu
+                talent = { ...talent, roll: rollValue }
+
+                // Jeśli już mamy ten talent, rzucamy jeszcze raz (o ile nie przekroczyliśmy limitu prób)
+                if (isTalentAlreadyOwned(talent.id)) {
+                    console.log(`Wylosowano duplikat: ${talent.name} (${rollValue}). Przerzucam...`)
+                    talent = null // Reset, pętla pójdzie dalej
+                    await new Promise(r => setTimeout(r, 800)) // Krótka pauza dla efektu
+                }
+            }
+            attempts++
+        } while (!talent && attempts < maxAttempts)
+
+        if (talent) {
+            rolledRandomTalents.value.push(talent)
+        } else {
+            console.warn("Nie udało się wylosować unikalnego talentu po wielu próbach.")
+        }
+
+    } catch (e) {
+        console.error(e)
+    } finally {
+        isRollingRandomTalent.value = false
+    }
+}
 const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100)
 
 const canProceed = computed(() => {
@@ -997,6 +1188,9 @@ watch(currentStep, async (newStep) => {
         await nextTick()
         await initDiceBoxAttributes()
     }
+})
+watch(selectedRace, () => {
+    rolledRandomTalents.value = []
 })
 
 // --- Funkcje Rzutów ---
@@ -2658,7 +2852,6 @@ defineExpose({ startCreation })
 .choice-row {
     margin-bottom: 1.2rem;
     border-left: 2px solid rgba(212, 175, 55, 0.3);
-    padding-left: 1rem;
     background: linear-gradient(to right, rgba(212, 175, 55, 0.05), transparent);
     padding: 1rem;
     border-radius: 0 4px 4px 0;
@@ -2670,25 +2863,28 @@ defineExpose({ startCreation })
     gap: 1rem;
 }
 
+/* Karta wyboru - pozwalamy jej rosnąć w pionie */
 .choice-card {
     flex: 1;
-    min-width: 200px;
+    min-width: 250px; /* Nieco szersza, żeby tekst się mieścił */
     background: #1a1a1a;
     border: 1px solid #444;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* ZMIANA: Wyrównanie do góry (start), nie do środka */
     transition: all 0.2s ease;
-    gap: 12px; /* Większy odstęp między kropką a treścią */
-    padding: 8px 12px;
+    gap: 12px;
+    padding: 12px; /* Nieco większy padding dla oddechu */
+    height: 100%; /* Żeby karty w jednym rzędzie (flex) miały tę samą wysokość */
 }
+
+/* Wnętrze karty */
 .choice-content {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column; /* Zmiana na kolumnę dla lepszej kontroli */
     width: 100%;
-    gap: 10px;
+    gap: 4px;
 }
 .bonus-badge {
     font-size: 0.7rem;
@@ -2700,6 +2896,9 @@ defineExpose({ startCreation })
     font-weight: bold;
     white-space: nowrap;
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.1);
+    align-self: flex-start; /* Badge trzyma się góry */
+    flex-shrink: 0;         /* Nie zgniatać */
+    margin-left: auto;      /* Popycha badge do prawej krawędzi */
 }
 
 /* Badge "Posiadasz" dla talentów */
@@ -2714,6 +2913,9 @@ defineExpose({ startCreation })
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+    align-self: flex-start; /* Badge trzyma się góry */
+    flex-shrink: 0;         /* Nie zgniatać */
+    margin-left: auto;      /* Popycha badge do prawej krawędzi */
 }
 
 /* Opcjonalnie: Delikatne wyróżnienie karty, która jest ulepszeniem */
@@ -2742,6 +2944,8 @@ defineExpose({ startCreation })
     border: 2px solid #666;
     position: relative;
     transition: 0.2s;
+    flex-shrink: 0; /* Ważne: zapobiega zgniataniu kółka */
+    margin-top: 3px; /* Dopasowanie do linii tekstu tytułu */
 }
 
 .choice-card.selected .radio-circle {
@@ -2805,5 +3009,118 @@ defineExpose({ startCreation })
 .text-source.profession {
     color: #d4af37;
     font-weight: bold;
+}
+.random-talents-block {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px dashed #d4af37;
+    border-radius: 6px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.random-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.choice-text-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+}
+
+.counter-badge {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #000;
+    background: #d4af37;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.random-talents-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.roll-random-btn {
+    background: linear-gradient(180deg, #d4af37 0%, #b4941f 100%);
+    border: 1px solid #ffd700;
+    color: #1a1a1a;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    transition: 0.2s;
+}
+
+.roll-random-btn:hover:not(:disabled) {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    transform: translateY(-1px);
+}
+
+.roll-random-btn:disabled {
+    filter: grayscale(1);
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.spinning {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.talent-card.rolled {
+    border: 1px solid #d4af37;
+    background: rgba(212, 175, 55, 0.1);
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    gap: 10px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.talent-name { font-weight: bold; color: #fff; }
+.roll-value { font-size: 0.75rem; color: #aaa; display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.text-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.choice-desc {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+    font-style: italic;
+    white-space: normal; /* ZMIANA: Pozwalamy na zawijanie tekstu */
+    line-height: 1.4;    /* Lepsza czytelność */
+    display: block;      /* Żeby zajmował nową linię */
+}
+
+.static-tag[title] {
+    cursor: help;
+}
+
+/* Responsywność dla opisów na małych ekranach */
+@media (max-width: 600px) {
+    .choice-desc {
+        max-width: 150px;
+        font-size: 0.7rem;
+    }
 }
 </style>
