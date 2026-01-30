@@ -891,7 +891,7 @@ const rollSingleDetail = (key) => {
             const genderKey = personalDetails.gender
             const namesList = table.names[genderKey]
             if (namesList) {
-                personalDetails.value.name = getRandomArrayItem(namesList)
+                personalDetails.name = getRandomArrayItem(namesList)
             }
             break;
     }
@@ -1244,6 +1244,17 @@ const finishCreation = () => {
         }
         return null
     }
+    const resolveItemObjectFromKey = (key, allChoicesGroups) => {
+        for (const group of allChoicesGroups) {
+            for (const item of group) {
+                if (getUniqueKey(item) === key) {
+                    return item // Zwracamy cały obiekt, nie tylko ID
+                }
+            }
+        }
+        return null
+    }
+
     const finalCharacteristics = {}
     Object.entries(characteristics.value).forEach(([key, val]) => {
         // Mapujemy klucze charakterystyk (np. WW) na to co jest w freeAdvance
@@ -1282,11 +1293,57 @@ const finishCreation = () => {
 
     const randomTalentIds = rolledRandomTalents.value.map(t => t.id)
 
+    const allSkills = [
+        ...aggregatedSkills.value.mandatory,
+        ...Object.values(selectedChoices.skills)
+            .map(key => resolveItemObjectFromKey(key, aggregatedSkills.value.choices))
+            .filter(item => item !== null)
+    ]
+    const skillGroups = {}
+
+    allSkills.forEach(item => {
+        const skillId = item.skill?.id || item.id
+        // Pobieramy specjalizację (może być w item.additional_name lub pivot)
+        const spec = item.additional_name || item.pivot?.additional_name || null
+
+        // Unikalny klucz dla grupy: "123|Górnictwo" lub "123|null"
+        const groupKey = `${skillId}|${spec || ''}`
+
+        if (!skillGroups[groupKey]) {
+            skillGroups[groupKey] = {
+                id: skillId,
+                specialization: spec,
+                count: 0
+            }
+        }
+        skillGroups[groupKey].count++
+    })
+    const finalSkillsData = Object.values(skillGroups).map(group => ({
+        id: group.id,
+        specialization: group.specialization, // Ważne: wysyłamy nazwę specjalizacji
+        advances: group.count // 1 = bazowa, 2 = +10, 3 = +20
+    }))
+    const allTalents = [
+        ...aggregatedTalents.value.mandatory,
+        ...Object.values(selectedChoices.talents)
+            .map(key => resolveItemObjectFromKey(key, aggregatedTalents.value.choices))
+            .filter(item => item !== null),
+        // Dodajemy wylosowane (musimy je sformatować tak samo jak resztę)
+        ...rolledRandomTalents.value
+    ]
+
+    // Prosta lista ID dla talentów zazwyczaj wystarcza, chyba że masz "Talent (Specjalizacja)"
+    // Jeśli tak, zrób analogicznie jak dla skilli. Tutaj zakładam prostą listę ID.
+    const finalTalentsData = allTalents.map(t => ({
+        id: t.talent?.id || t.id,
+        specialization: t.additional_name || t.pivot?.additional_name || null
+    }))
+
     const finalHeroData = {
         race: selectedRace.value.name,
         profession: selectedProfession.value.id,
-        skills: [...mandatorySkillIds, ...chosenSkillIds],
-        talents: [...mandatoryTalentIds, ...chosenTalentIds, ...randomTalentIds],
+        skills: finalSkillsData,   // Teraz to tablica obiektów {id, specialization, advances}
+        talents: finalTalentsData,
         characteristics: finalCharacteristics,
         secondaryCharacteristics: finalSecondary,
         freeAdvance: freeAdvance.value,
