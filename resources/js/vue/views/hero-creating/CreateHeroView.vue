@@ -673,7 +673,7 @@
                         <div class="detail-input-group wide">
                             <label>Imię</label>
                             <div class="input-with-action">
-                                <input type="text" v-model="heroData.firstName" class="fantasy-input" placeholder="np. Helmut">
+                                <input type="text" v-model="personalDetails.name" class="fantasy-input" placeholder="np. Helmut">
                                 <button class="mini-dice-btn" @click="rollSingleDetail('name')">🎲</button>
                             </div>
                         </div>
@@ -891,7 +891,7 @@ const rollSingleDetail = (key) => {
             const genderKey = personalDetails.gender
             const namesList = table.names[genderKey]
             if (namesList) {
-                heroData.value.firstName = getRandomArrayItem(namesList)
+                personalDetails.value.name = getRandomArrayItem(namesList)
             }
             break;
     }
@@ -916,8 +916,6 @@ let diceBoxAttributes = null
 
 // Dane bohatera
 const heroData = ref({
-    firstName: '',
-    lastName: '',
     race: null,
     characteristics: {}
 })
@@ -983,15 +981,14 @@ const randomTalentsTables = {
 }
 
 const isTalentAlreadyOwned = (talentId) => {
-    // 1. Sprawdź w już wylosowanych
+    // 1. Sprawdź w już wylosowanych (z tabeli losowej Rasy)
     if (rolledRandomTalents.value.some(t => t.id === talentId)) return true
 
-    // 2. Sprawdź w obowiązkowych (Rasa + Profesja)
+    // 2. Sprawdź w obowiązkowych (stałe z Rasy + stałe z Profesji)
     if (aggregatedTalents.value.mandatory.some(t => (t.talent?.id || t.id) === talentId)) return true
 
-    // 3. Sprawdź w wybranych z listy (opcjonalne, ale warto)
-    const selectedIds = Object.values(selectedChoices.talents)
-    if (selectedIds.some(key => key.includes(`-${talentId}-`))) return true // Uproszczone sprawdzanie klucza
+    // USUNIĘTO: 3. Sprawdź w wybranych z listy.
+    // To powodowało błąd, że po kliknięciu pojawiała się flaga "Posiadasz".
 
     return false
 }
@@ -1263,8 +1260,6 @@ const finishCreation = () => {
     const finalSecondary = {
         wounds: secondaryStats.value.wounds.val,
         fate: secondaryStats.value.fate.val,
-        // Tutaj można dodać inne drugorzędne, jeśli system je obsługuje
-        advances: freeAdvance.value?.type === 'secondary' ? { [freeAdvance.value.key]: 1 } : {}
     }
 
     // Jeśli darmowy awans był na Żywotność lub PP, dodajemy go do wyniku
@@ -1288,10 +1283,8 @@ const finishCreation = () => {
     const randomTalentIds = rolledRandomTalents.value.map(t => t.id)
 
     const finalHeroData = {
-        firstName: heroData.value.firstName,
-        lastName: heroData.value.lastName,
-        race: selectedRace.value,
-        profession: selectedProfession.value,
+        race: selectedRace.value.name,
+        profession: selectedProfession.value.id,
         skills: [...mandatorySkillIds, ...chosenSkillIds],
         talents: [...mandatoryTalentIds, ...chosenTalentIds, ...randomTalentIds],
         characteristics: finalCharacteristics,
@@ -1428,10 +1421,13 @@ const canProceedPersonal = computed(() => {
 
 const canProceed = computed(() => {
     switch (currentStep.value) {
-        // ... (kroki 1-4 bez zmian)
         case 1: return selectedRace.value !== null
         case 2: return selectedProfession.value !== null
-        case 3: /* ... (logika cech) ... */ return true
+        case 3:
+            const mainStatsDone = Object.values(characteristics.value).every(c => c.assignedValue !== null)
+            const secStatsDone = secondaryStats.value.wounds.val !== null && secondaryStats.value.fate.val !== null
+            const advanceDone = freeAdvance.value !== null
+            return mainStatsDone && secStatsDone && advanceDone
         case 4: return areAllChoicesMade.value
         case 5: return canProceedPersonal.value // NOWE: Krok 5 (Detale)
         default: return false
