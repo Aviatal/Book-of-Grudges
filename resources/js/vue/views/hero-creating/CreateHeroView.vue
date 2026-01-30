@@ -578,7 +578,7 @@
                             <label>Płeć:</label>
                             <div class="toggle-switch">
                                 <button :class="{ active: personalDetails.gender === 'M' }" @click="personalDetails.gender = 'M'">Mężczyzna</button>
-                                <button :class="{ active: personalDetails.gender === 'F' }" @click="personalDetails.gender = 'F'">Kobieta</button>
+                                <button :class="{ active: personalDetails.gender === 'K' }" @click="personalDetails.gender = 'K'">Kobieta</button>
                             </div>
                         </div>
 
@@ -773,7 +773,7 @@ const personalDetailsTables = {
         starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
         names: {
             'M': ['Helmut', 'Walter', 'Friedrich', 'Karl', 'Albert', 'Max', 'Heinrich', 'Rudolf', 'Hans', 'Otto'],
-            'F': ['Eva', 'Maria', 'Anna', 'Alexa', 'Julia', 'Ulrike', 'Ursula', 'Elise', 'Magdalena', 'Wertha']
+            'K': ['Eva', 'Maria', 'Anna', 'Alexa', 'Julia', 'Ulrike', 'Ursula', 'Elise', 'Magdalena', 'Wertha']
         }
 
     },
@@ -791,7 +791,7 @@ const personalDetailsTables = {
         starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
         names: {
             'M': ['Bardin', 'Dimzad', 'Kargun', 'Jotunn', 'Snorri', 'Orzad', 'Durak', 'Thorgrim', 'Storri', 'Imrak'],
-            'F': ['Anika', 'Berta', 'Janna', 'Ulla', 'Silma', 'Greta', 'Petra', 'Dgmar', 'Brigit', 'Thylda']
+            'K': ['Anika', 'Berta', 'Janna', 'Ulla', 'Silma', 'Greta', 'Petra', 'Dgmar', 'Brigit', 'Thylda']
         }
     },
     elf: {
@@ -805,7 +805,7 @@ const personalDetailsTables = {
         starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
         names: {
             'M': ['Aluthol', 'Cavindel', 'Imbol', 'Farmoth', 'Eldirol', 'Harrond', 'Larandar', 'Safis', 'Meilion', 'Mormacar'],
-            'F': ['Alane', 'Davendrel', 'Eldril', 'Halion', 'Ionor', 'Pelgrana', 'Tallana', 'Yuviel', 'Maruviel', 'Eponia']
+            'K': ['Alane', 'Davendrel', 'Eldril', 'Halion', 'Ionor', 'Pelgrana', 'Tallana', 'Yuviel', 'Maruviel', 'Eponia']
         }
     },
     halfling: {
@@ -819,7 +819,7 @@ const personalDetailsTables = {
         starSign: ['Bębniarz - znak zabawy i radości', 'Dudy - znak oszustwa', 'Dwa byki - znak płodności i rzemiosła'],
         names: {
             'M': ['Adam', 'Albert', 'Alfred', 'Axel', 'Carl', 'Jakob', 'Max', 'Ludo', 'Rudi', 'Udo'],
-            'F': ['Agnes', 'Eva', 'Heidi', 'Hanna', 'Silma', 'Greta', 'Sophia', 'Ulla', 'Brigit', 'Wanda']
+            'K': ['Agnes', 'Eva', 'Heidi', 'Hanna', 'Silma', 'Greta', 'Sophia', 'Ulla', 'Brigit', 'Wanda']
         }
     }
 }
