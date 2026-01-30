@@ -326,18 +326,10 @@
                                     <span v-else class="dimmed">-</span>
                                 </div>
                                 <div class="sec-action">
-                                    <button
-                                        v-if="!secondaryStats.wounds.val"
-                                        class="mini-roll-btn"
-                                        @click="rollSecondary('wounds')"
-                                        :disabled="isRollingAny"
-                                    >
-                                        🎲 Rzuć
-                                    </button>
+                                    <button v-if="!secondaryStats.wounds.val" class="mini-roll-btn" @click="rollSecondary('wounds')" :disabled="isRollingAny">🎲</button>
                                     <span v-else class="roll-info">
                                         (Rzut: {{ secondaryStats.wounds.roll }})
                                     </span>
-                                    <button v-if="!secondaryStats.wounds.val" class="mini-roll-btn" @click="rollSecondary('wounds')" :disabled="isRollingAny">🎲</button>
                                 </div>
                             </div>
                             <div class="secondary-row">
