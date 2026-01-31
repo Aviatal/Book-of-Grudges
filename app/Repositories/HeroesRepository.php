@@ -20,7 +20,7 @@ class HeroesRepository
             'skills', 'talents', 'inventory'
         ])
             ->where('user_id', $userId)
-            ->firstOrFail();
+            ->first();
     }
     public function getHeroes(array $select = ['*'], bool $onlyActive = true) :Collection
     {
