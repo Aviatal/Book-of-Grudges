@@ -862,36 +862,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch, reactive } from 'vue'
-import { rollProfession } from '../../../data/professions'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import axios from 'axios'
 import DiceBox from '@3d-dice/dice-box'
-import axios from 'axios' // Upewnij się, że masz import axios
+import { rollProfession } from '../../../data/professions'
 
-// Props i emits
-const emit = defineEmits(['hero-created', 'creation-closed'])
+// =========================================
+// 1. CONFIGURATION & STATIC DATA
+// =========================================
 
-// Stan komponentu
-const isCreating = ref(false)
-const currentStep = ref(1)
 const totalSteps = 5
-const personalDetails = reactive({
-    height: 0,       // w cm
-    weight: 0,       // w kg
-    hairColor: '',
-    eyeColor: '',
-    distinguishingMark: '',
-    age: 0,
-    gender: 'M',     // Domyślnie M, można dodać wybór płci
-    siblings: 0,
-    starSign: '',
-    birthplace: '',
-    name: ''
-})
+
+const mainProfileConfig = [
+    {label: 'WW', keys: ['WW']}, {label: 'US', keys: ['US']}, {label: 'K', keys: ['K']}, {label: 'Odp', keys: ['Odp']},
+    {label: 'Zr', keys: ['Zr']}, {label: 'Int', keys: ['Int']}, {label: 'SW', keys: ['SW']}, {label: 'Ogd', keys: ['Ogd']}
+]
+
+const secondaryProfileConfig = [
+    {label: 'A', keys: ['A']}, {label: 'Żyw', keys: ['Żyw']}, {label: 'S', keys: ['S']}, {label: 'Wt', keys: ['Wt']},
+    {label: 'Sz', keys: ['Sz']}, {label: 'Mag', keys: ['Mag']}, {label: 'PO', keys: ['PO']}, {label: 'PP', keys: ['PP']}
+]
+
 const personalDetailsTables = {
     human: {
         heightBase: 150, heightDice: '2d10',
-        weightBase: 50,  weightDice: '1d100', // Uproszczenie
-        ageBase: 16,  ageDice: '1d100', // Uproszczenie
+        weightBase: 50,  weightDice: '1d100',
+        ageBase: 16,  ageDice: '1d100',
         hair: ['Jasny blond', 'Ciemny blond', 'Rudy', 'Czarny', 'Brązowy', 'Siwiejący'],
         eyes: ['Niebieskie', 'Szare', 'Brązowe', 'Zielone', 'Ciemne', 'Czarne'],
         marks: ['Blizna na twarzy', 'Brak zęba', 'Tatuaż', 'Kolczyk w uchu', 'Złamany nos', 'Brodawka'],
@@ -901,7 +897,6 @@ const personalDetailsTables = {
             'M': ['Helmut', 'Walter', 'Friedrich', 'Karl', 'Albert', 'Max', 'Heinrich', 'Rudolf', 'Hans', 'Otto'],
             'K': ['Eva', 'Maria', 'Anna', 'Alexa', 'Julia', 'Ulrike', 'Ursula', 'Elise', 'Magdalena', 'Wertha']
         }
-
     },
     dwarf: {
         heightBase: 130, heightDice: '1d10',
@@ -949,112 +944,8 @@ const personalDetailsTables = {
         }
     }
 }
-const getRandomArrayItem = (arr) => arr[Math.floor(Math.random() * arr.length)]
-// --- FUNKCJA LOSUJĄCA POJEDYNCZY DETAL (Poprawiona) ---
-const rollSingleDetail = (key) => {
-    if (!selectedRace.value) return
-    const raceKey = selectedRace.value.key || 'human'
-    const table = personalDetailsTables[raceKey] || personalDetailsTables.human
-
-    switch (key) {
-        case 'height':
-            // Parsowanie rzutu np '2d10' na logikę
-            // Tutaj uproszczenie: zakładamy, że w table.heightDice jest liczba lub string
-            // Dla człowieka: 2d10 -> 2-20
-            let hRoll = 0
-            if (typeof table.heightDice === 'string' && table.heightDice.includes('d')) {
-                const [count, die] = table.heightDice.split('d').map(Number)
-                for(let i=0; i<count; i++) hRoll += Math.floor(Math.random() * die) + 1
-            } else {
-                hRoll = Math.floor(Math.random() * (table.heightDice || 10)) + 1
-            }
-            personalDetails.height = table.heightBase + hRoll
-            break;
-
-        case 'weight':
-            let wRoll = 0
-            // Uproszczona logika dla wagi (k100 vs k10 w zależności od rasy)
-            // Możesz tu dodać parsowanie jak wyżej
-            const wDie = typeof table.weightDice === 'number' ? table.weightDice : 20
-            wRoll = Math.floor(Math.random() * wDie) + 1
-            personalDetails.weight = table.weightBase + wRoll
-            break;
-
-        case 'age':
-            const aDie = typeof table.ageDice === 'number' ? table.ageDice : 10
-            const aRoll = Math.floor(Math.random() * aDie) + 1
-            personalDetails.age = (table.ageBase || 15) + aRoll
-            break;
-
-        case 'hairColor':
-            personalDetails.hairColor = getRandomArrayItem(table.hair)
-            break;
-
-        case 'eyeColor':
-            personalDetails.eyeColor = getRandomArrayItem(table.eyes)
-            break;
-
-        case 'distinguishingMark':
-            personalDetails.distinguishingMark = getRandomArrayItem(table.marks)
-            break;
-
-        case 'starSign':
-            // POPRAWKA: W tabeli klucz to 'starSign' (tablica), a nie 'starSigns'
-            personalDetails.starSign = getRandomArrayItem(table.starSign)
-            break;
-
-        case 'birthplace':
-            // POPRAWKA: W tabeli klucz to 'birthPlaces' (z dużą literą P)
-            personalDetails.birthplace = getRandomArrayItem(table.birthPlaces)
-            break;
-
-        case 'siblings':
-            personalDetails.siblings = Math.floor(Math.random() * 6)
-            break;
-
-        case 'name':
-            // POPRAWKA: Obsługa płci dla imion
-            const genderKey = personalDetails.gender
-            const namesList = table.names[genderKey]
-            if (namesList) {
-                personalDetails.name = getRandomArrayItem(namesList)
-            }
-            break;
-    }
-}
-
-// Funkcja "Wylosuj Wszystko" używa teraz pojedynczych
-const rollPersonalDetails = () => {
-    rollSingleDetail('height')
-    rollSingleDetail('weight')
-    rollSingleDetail('age')
-    rollSingleDetail('hairColor')
-    rollSingleDetail('eyeColor')
-    rollSingleDetail('distinguishingMark')
-    rollSingleDetail('starSign')
-    rollSingleDetail('siblings')
-    rollSingleDetail('birthplace')
-    rollSingleDetail('name') // Imię zazwyczaj zostawiamy graczowi, chyba że chce
-}
-
-let diceBox = null
-let diceBoxAttributes = null
-
-// Dane bohatera
-const heroData = ref({
-    race: null,
-    characteristics: {}
-})
-
-// RECTIVE do przechowywania wyborów
-const selectedChoices = reactive({
-    skills: {},
-    talents: {},
-    equipments: {}
-})
 
 const randomTalentsTables = {
-    // Tabela dla Ludzi (2 rzuty)
     human: [
         { min: 1,  max: 4,   id: 23, name: 'Bardzo silny' },
         { min: 5,  max: 9,  id: 24, name: 'Bardzo szybki' },
@@ -1080,7 +971,6 @@ const randomTalentsTables = {
         { min: 92, max: 95, id: 56, name: 'Urodzony wojownik' },
         { min: 96, max: 100, id: 58, name: 'Widzenie w ciemności' },
     ],
-    // Tabela dla Niziołków (1 rzut, specyficzna)
     halfling: [
         { min: 1,  max: 4,   id: 23, name: 'Bardzo silny' },
         { min: 5,  max: 9,  id: 24, name: 'Bardzo szybki' },
@@ -1107,135 +997,118 @@ const randomTalentsTables = {
     ]
 }
 
-const selectEquipment = (groupIndex, item) => {
-    selectedChoices.equipments[groupIndex] = getUniqueKey(item)
-}
+// =========================================
+// 2. PROPS & EMITS
+// =========================================
 
-const aggregatedEquipments = computed(() => {
-    // Zazwyczaj ekwipunek pochodzi tylko z profesji, rasy dają go rzadko w tej strukturze,
-    // ale dla spójności sprawdzimy oba źródła (choć w Twoim API rasy mogą nie mieć pola 'equipments')
-    const race = selectedRace.value
-    const prof = selectedProfession.value
+const emit = defineEmits(['hero-created', 'creation-closed'])
 
-    const raceMandatory = race?.equipments ? getMandatoryItems(race.equipments) : []
-    const profMandatory = prof?.equipments ? getMandatoryItems(prof.equipments) : []
+// =========================================
+// 3. STATE MANAGEMENT
+// =========================================
 
-    const raceChoices = race?.equipments ? getChoiceGroups(race.equipments) : []
-    const profChoices = prof?.equipments ? getChoiceGroups(prof.equipments) : []
+// --- UI State ---
+const isCreating = ref(false)
+const currentStep = ref(1)
+const isSelectingProfession = ref(false)
+const isRollingProfession = ref(false)
+const isRollingAttributes = ref(false)
+const isRollingSecondary = ref(false)
+const isRollingRandomTalent = ref(false)
+const isRollingMoney = ref(false)
 
-    return {
-        mandatory: [
-            ...tagSource(raceMandatory, 'race'),
-            ...tagSource(profMandatory, 'profession')
-        ],
-        choices: [
-            ...tagSourceGroup(raceChoices, 'race'),
-            ...tagSourceGroup(profChoices, 'profession')
-        ]
-    }
+// --- Dice Box Instances ---
+let diceBox = null
+let diceBoxAttributes = null
+
+// --- Data & Selection ---
+const availableRaces = ref([])
+const availableProfessionsList = ref([])
+const selectedRace = ref(null)
+const selectedProfession = ref(null)
+
+const heroData = ref({
+    race: null,
+    characteristics: {}
 })
 
-const isTalentAlreadyOwned = (talentId) => {
-    // 1. Sprawdź w już wylosowanych (z tabeli losowej Rasy)
-    if (rolledRandomTalents.value.some(t => t.id === talentId)) return true
+const characteristics = ref({
+    WW: {name: 'Walka Wręcz', base: 0, assignedValue: null},
+    US: {name: 'Um. Strzeleckie', base: 0, assignedValue: null},
+    K: {name: 'Krzepa', base: 0, assignedValue: null},
+    Odp: {name: 'Odporność', base: 0, assignedValue: null},
+    Zr: {name: 'Zręczność', base: 0, assignedValue: null},
+    Int: {name: 'Inteligencja', base: 0, assignedValue: null},
+    SW: {name: 'Siła Woli', base: 0, assignedValue: null},
+    Ogd: {name: 'Ogłada', base: 0, assignedValue: null}
+})
 
-    // 2. Sprawdź w obowiązkowych (stałe z Rasy + stałe z Profesji)
-    if (aggregatedTalents.value.mandatory.some(t => (t.talent?.id || t.id) === talentId)) return true
+const secondaryStats = ref({
+    wounds: {val: null, roll: null},
+    fate: {val: null, roll: null}
+})
 
-    // USUNIĘTO: 3. Sprawdź w wybranych z listy.
-    // To powodowało błąd, że po kliknięciu pojawiała się flaga "Posiadasz".
+const rollPool = ref([])
+const selectedPoolIndex = ref(null)
+const mercyUsed = ref(false)
+const professionRoll = ref(0)
+const freeAdvance = ref(null)
 
-    return false
-}
+const rolledRandomTalents = ref([])
 
-// Wybór Umiejętności (Naprawiona literówka)
-const getUniqueKey = (item) => {
-    // Preferujemy ID pivota (relacji), bo jest zawsze unikalne
-    if (item.pivot?.id) return `pivot-${item.pivot.id}`
+const selectedChoices = reactive({
+    skills: {},
+    talents: {},
+    equipments: {}
+})
 
-    // Jeśli nie ma pivota (np. z rasy z API), tworzymy klucz z ID i dodatkowej nazwy
-    const itemId = item.skill?.id || item.talent?.id || item.id
-    const addName = item.additional_name || item.pivot?.additional_name || ''
+const personalDetails = reactive({
+    height: 0,
+    weight: 0,
+    hairColor: '',
+    eyeColor: '',
+    distinguishingMark: '',
+    age: 0,
+    gender: 'M',
+    siblings: 0,
+    starSign: '',
+    birthplace: '',
+    name: ''
+})
 
-    if (itemId) {
-        return `item-${itemId}-${addName}`
-    }
+const money = reactive({
+    gc: null,
+    ss: null,
+    bp: null
+})
 
-    // Ostateczny fallback
-    return `rand-${Math.random()}`
-}
-const isSkillMandatory = (item) => {
-    const itemId = item.skill?.id || item.id
-    // Przeszukujemy listę mandatory
-    return aggregatedSkills.value.mandatory.some(m => {
-        const mId = m.skill?.id || m.id
-        // Sprawdzamy ID ORAZ czy nazwy dodatkowe (np. rodzaj rzemiosła) są takie same
-        // Jeśli nazwy dodatkowe są różne (np. Rzemiosło (Kowal) vs (Krawiec)), to NIE jest ta sama umiejętność
-        const itemAdd = item.additional_name || item.pivot?.additional_name
-        const mAdd = m.additional_name || m.pivot?.additional_name
+// =========================================
+// 4. COMPUTED PROPERTIES
+// =========================================
 
-        return mId === itemId && itemAdd === mAdd
-    })
-}
-const isTalentMandatory = (item) => {
-    const itemId = item.talent?.id || item.id
-    return aggregatedTalents.value.mandatory.some(m => {
-        const mId = m.talent?.id || m.id
-        return mId === itemId
-    })
-}
+const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100)
 
-// Zaktualizowane funkcje wyboru (używają klucza zamiast ID)
-const selectSkill = (groupIndex, item) => {
-    selectedChoices.skills[groupIndex] = getUniqueKey(item)
-}
+const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
 
-const selectTalent = (groupIndex, item) => {
-    selectedChoices.talents[groupIndex] = getUniqueKey(item)
-}
-// --- Helpers do Źródeł (Rasa vs Profesja) ---
-const tagSource = (items, sourceName) => {
-    if (!items) return []
-    return items.map(item => ({ ...item, source: sourceName }))
-}
+const requiredRandomTalentsCount = computed(() => {
+    if (!selectedRace.value) return 0
+    if (selectedRace.value.key === 'human') return 2
+    if (selectedRace.value.key === 'halfling') return 1
+    return 0
+})
 
-const tagSourceGroup = (groups, sourceName) => {
-    if (!groups) return []
-    return groups.map(group => group.map(item => ({ ...item, source: sourceName })))
-}
+const availableSecondaryAdvances = computed(() => {
+    if (!selectedProfession.value) return []
+    return secondaryProfileConfig
+        .filter(conf => canAdvanceStat(conf.label))
+        .map(conf => ({
+            label: conf.label,
+            name: getSecondaryStatFullName(conf.label)
+        }))
+})
 
-// --- Helpers do wyciągania list (Group 0 vs Group > 0) ---
-const getMandatoryItems = (groupedCollection) => {
-    if (!groupedCollection) return [];
-    // Obsługa struktury tablicowej (API) lub obiektowej (JSON)
-    const values = Array.isArray(groupedCollection) ? groupedCollection : Object.values(groupedCollection);
+// --- Aggregated Data (Race + Profession) ---
 
-    // Szukamy grupy '0' (obowiązkowe) lub tablic o długości 1 (jeśli logika tak zakłada)
-    // W twoim JSON z API rasy pewnie przychodzą jako obiekt { '0': [...], '1': [...] }
-    if (!Array.isArray(groupedCollection)) {
-        return groupedCollection['0'] || [];
-    }
-
-    // Fallback dla innej struktury
-    return values.filter((group: any) => Array.isArray(group) && group.length === 1).flat();
-}
-
-const getChoiceGroups = (groupedCollection) => {
-    if (!groupedCollection) return [];
-
-    // Jeśli to obiekt (klucze '1', '2' itd.)
-    if (!Array.isArray(groupedCollection)) {
-        return Object.keys(groupedCollection)
-            .filter(key => key !== '0') // Wszystko co nie jest 0
-            .map(key => groupedCollection[key]);
-    }
-
-    // Fallback
-    return Object.values(groupedCollection)
-        .filter((group: any) => Array.isArray(group) && group.length > 1);
-}
-
-// --- AGREGACJA (Rasa + Profesja) ---
 const aggregatedSkills = computed(() => {
     const race = selectedRace.value
     const prof = selectedProfession.value
@@ -1280,6 +1153,30 @@ const aggregatedTalents = computed(() => {
     }
 })
 
+const aggregatedEquipments = computed(() => {
+    const race = selectedRace.value
+    const prof = selectedProfession.value
+
+    const raceMandatory = race?.equipments ? getMandatoryItems(race.equipments) : []
+    const profMandatory = prof?.equipments ? getMandatoryItems(prof.equipments) : []
+
+    const raceChoices = race?.equipments ? getChoiceGroups(race.equipments) : []
+    const profChoices = prof?.equipments ? getChoiceGroups(prof.equipments) : []
+
+    return {
+        mandatory: [
+            ...tagSource(raceMandatory, 'race'),
+            ...tagSource(profMandatory, 'profession')
+        ],
+        choices: [
+            ...tagSourceGroup(raceChoices, 'race'),
+            ...tagSourceGroup(profChoices, 'profession')
+        ]
+    }
+})
+
+// --- Validation ---
+
 const areAllChoicesMade = computed(() => {
     const skillsRequired = aggregatedSkills.value.choices.length
     const talentsRequired = aggregatedTalents.value.choices.length
@@ -1290,422 +1187,11 @@ const areAllChoicesMade = computed(() => {
     const equipmentsDone = Object.keys(selectedChoices.equipments).length === equipmentsRequired
 
     const randomTalentsDone = rolledRandomTalents.value.length === requiredRandomTalentsCount.value
-
-    // NOWE: Pieniądze muszą być wylosowane
     const moneyDone = money.gc !== null
 
     return skillsDone && talentsDone && equipmentsDone && randomTalentsDone && moneyDone
 })
-// --- Zmienne referencyjne ---
-const selectedRace = ref(null)
-const selectedProfession = ref(null)
-const availableRaces = ref([])
 
-// --- Logika Cech ---
-const characteristics = ref({
-    WW: {name: 'Walka Wręcz', base: 0, assignedValue: null},
-    US: {name: 'Um. Strzeleckie', base: 0, assignedValue: null},
-    K: {name: 'Krzepa', base: 0, assignedValue: null},
-    Odp: {name: 'Odporność', base: 0, assignedValue: null},
-    Zr: {name: 'Zręczność', base: 0, assignedValue: null},
-    Int: {name: 'Inteligencja', base: 0, assignedValue: null},
-    SW: {name: 'Siła Woli', base: 0, assignedValue: null},
-    Ogd: {name: 'Ogłada', base: 0, assignedValue: null}
-})
-const secondaryStats = ref({
-    wounds: {val: null, roll: null},
-    fate: {val: null, roll: null}
-})
-
-// --- Watchers i Init ---
-watch(currentStep, async (newStep) => {
-    if (newStep === 2 && !diceBox) {
-        await nextTick()
-        const el = document.querySelector('#dice-box-canvas')
-        if (el) await initializeDiceBox()
-    }
-    // Jeśli wchodzimy w krok 4, czyścimy wybory, jeśli zmieniła się profesja/rasa
-    // (Można to dopracować, ale reset jest bezpieczny)
-})
-
-watch(selectedProfession, () => {
-    // Reset wyborów przy zmianie profesji
-    for (const key in selectedChoices.skills) delete selectedChoices.skills[key]
-    for (const key in selectedChoices.talents) delete selectedChoices.talents[key]
-})
-
-// Fetch Ras
-const fetchRaces = () => {
-    axios.get('/create-character/get-races')
-        .then(response => {
-            availableRaces.value = response.data;
-        })
-        .catch(error => {
-            console.error('Error fetching races:', error);
-        });
-}
-
-onMounted(() => {
-    fetchRaces();
-})
-
-// Wybór Rasy
-const selectRace = (race) => {
-    selectedRace.value = race
-    heroData.value.race = race
-
-    // Reset i ustawienie bazowych cech
-    // UWAGA: Sprawdź czy `base_stats` z API to tablica czy obiekt. Kod zakłada tablicę obiektów.
-    Object.keys(characteristics.value).forEach(key => {
-        // Znajdź odpowiednią cechę w tablicy z API
-        const statData = race.base_stats?.find(s => s.characteristic?.short_name === key || s.short_name === key);
-        characteristics.value[key].base = statData ? statData.value : 20; // Domyślnie 20 jeśli błąd
-        characteristics.value[key].assignedValue = null
-    })
-
-    // Reset drugorzędnych
-    secondaryStats.value.wounds = {val: null, roll: null}
-    secondaryStats.value.fate = {val: null, roll: null}
-}
-
-// --- Helpers formatowania ---
-const formatSkillName = (item) => {
-    // item może być z API (zagnieżdżony w item.skill) lub płaski
-    // item może być też pivotem
-    const skillObj = item.skill || item;
-    const name = skillObj.name || 'Nieznana';
-    const additional = item.additional_name || item.pivot?.additional_name;
-
-    return additional ? `${name} (${additional})` : name;
-}
-
-const formatTalentName = (item) => {
-    const talentObj = item.talent || item;
-    const name = talentObj.name || 'Nieznany';
-    const additional = item.additional_name || item.pivot?.additional_name;
-
-    return additional ? `${name} (${additional})` : name;
-}
-const isSelectingProfession = ref(false) // Czy otwarte okno wyboru
-const availableProfessionsList = ref([])
-const openProfessionSelection = async () => {
-    if (!selectedRace.value) return
-
-    // Pobierz profesje dla rasy (jeśli jeszcze ich nie masz)
-    // Zakładam, że masz endpoint lub dane w `selectedRace`
-    // Jeśli nie, musisz dodać zapytanie API
-    try {
-        const response = await axios.get(`/create-character/get-professions/${selectedRace.value.key}`)
-        availableProfessionsList.value = response.data
-        isSelectingProfession.value = true
-    } catch (e) {
-        console.error('Błąd pobierania profesji', e)
-        // Fallback: mock lub komunikat
-    }
-}
-
-// Funkcja zatwierdzająca wybór z listy
-const selectManualProfession = (profession) => {
-    selectedProfession.value = profession
-    professionRoll.value = 0 // Oznaczamy, że nie było rzutu (lub 0)
-    isSelectingProfession.value = false // Zamykamy modal
-}
-// --- Finish Creation ---
-const finishCreation = () => {
-    // Funkcja pomocnicza: Znajdź obiekt źródłowy na podstawie wybranego klucza string
-    const resolveItemFromKey = (key, allChoicesGroups) => {
-        for (const group of allChoicesGroups) {
-            for (const item of group) {
-                if (getUniqueKey(item) === key) {
-                    // Zwracamy obiekt w formacie gotowym do zapisu (np. { id: 5, optional: 'Kowalstwo' })
-                    // Tutaj upraszczamy do samego ID, ale można łatwo rozszerzyć
-                    return item.skill?.id || item.talent?.id || item.id
-                }
-            }
-        }
-        return null
-    }
-    const resolveItemObjectFromKey = (key, allChoicesGroups) => {
-        for (const group of allChoicesGroups) {
-            for (const item of group) {
-                if (getUniqueKey(item) === key) {
-                    return item // Zwracamy cały obiekt, nie tylko ID
-                }
-            }
-        }
-        return null
-    }
-
-    const finalCharacteristics = {}
-    Object.entries(characteristics.value).forEach(([key, val]) => {
-        // Mapujemy klucze charakterystyk (np. WW) na to co jest w freeAdvance
-        // W characteristics kluczem jest np 'WW', a w freeAdvance.key też 'WW'
-        let total = val.base + (val.assignedValue || 0)
-
-        if (freeAdvance.value?.type === 'main' && freeAdvance.value?.key === key) {
-            total += freeAdvance.value.value
-        }
-        finalCharacteristics[key] = total
-    })
-
-    // Drugorzędne
-    const finalSecondary = {
-        wounds: secondaryStats.value.wounds.val,
-        fate: secondaryStats.value.fate.val,
-    }
-
-    // Jeśli darmowy awans był na Żywotność lub PP, dodajemy go do wyniku
-    if (freeAdvance.value?.type === 'secondary') {
-        if (freeAdvance.value.key === 'Żyw') finalSecondary.wounds += 1
-        if (freeAdvance.value.key === 'PP') finalSecondary.fate += 1
-    }
-    // 1. Obowiązkowe (Mandatory)
-    const mandatorySkillIds = aggregatedSkills.value.mandatory.map(i => i.skill?.id || i.id)
-    const mandatoryTalentIds = aggregatedTalents.value.mandatory.map(i => i.talent?.id || i.id)
-
-    // 2. Wybrane (Choices) - Odzyskujemy ID z kluczy
-    const chosenSkillIds = Object.values(selectedChoices.skills)
-        .map(key => resolveItemFromKey(key, aggregatedSkills.value.choices))
-        .filter(id => id !== null)
-
-    const chosenTalentIds = Object.values(selectedChoices.talents)
-        .map(key => resolveItemFromKey(key, aggregatedTalents.value.choices))
-        .filter(id => id !== null)
-
-    const randomTalentIds = rolledRandomTalents.value.map(t => t.id)
-
-    const allSkills = [
-        ...aggregatedSkills.value.mandatory,
-        ...Object.values(selectedChoices.skills)
-            .map(key => resolveItemObjectFromKey(key, aggregatedSkills.value.choices))
-            .filter(item => item !== null)
-    ]
-    const skillGroups = {}
-
-    allSkills.forEach(item => {
-        const skillId = item.skill?.id || item.id
-        // Pobieramy specjalizację (może być w item.additional_name lub pivot)
-        const spec = item.additional_name || item.pivot?.additional_name || null
-
-        // Unikalny klucz dla grupy: "123|Górnictwo" lub "123|null"
-        const groupKey = `${skillId}|${spec || ''}`
-
-        if (!skillGroups[groupKey]) {
-            skillGroups[groupKey] = {
-                id: skillId,
-                specialization: spec,
-                count: 0
-            }
-        }
-        skillGroups[groupKey].count++
-    })
-    const finalSkillsData = Object.values(skillGroups).map(group => ({
-        id: group.id,
-        specialization: group.specialization, // Ważne: wysyłamy nazwę specjalizacji
-        advances: group.count // 1 = bazowa, 2 = +10, 3 = +20
-    }))
-    const allTalents = [
-        ...aggregatedTalents.value.mandatory,
-        ...Object.values(selectedChoices.talents)
-            .map(key => resolveItemObjectFromKey(key, aggregatedTalents.value.choices))
-            .filter(item => item !== null),
-        // Dodajemy wylosowane (musimy je sformatować tak samo jak resztę)
-        ...rolledRandomTalents.value
-    ]
-
-    // Prosta lista ID dla talentów zazwyczaj wystarcza, chyba że masz "Talent (Specjalizacja)"
-    // Jeśli tak, zrób analogicznie jak dla skilli. Tutaj zakładam prostą listę ID.
-    const finalTalentsData = allTalents.map(t => ({
-        id: t.talent?.id || t.id,
-        specialization: t.additional_name || t.pivot?.additional_name || null
-    }))
-
-    const allEquipments = [
-        ...aggregatedEquipments.value.mandatory,
-        ...Object.values(selectedChoices.equipments)
-            .map(key => resolveItemObjectFromKey(key, aggregatedEquipments.value.choices))
-            .filter(item => item !== null)
-    ]
-    const finalEquipmentsData = [
-        ...aggregatedEquipments.value.mandatory,
-        ...Object.values(selectedChoices.equipments)
-            .map(key => resolveItemObjectFromKey(key, aggregatedEquipments.value.choices))
-            .filter(item => item !== null)
-    ]
-
-    const finalHeroData = {
-        race: selectedRace.value.name,
-        profession: selectedProfession.value.id,
-        equipments: finalEquipmentsData,
-        skills: finalSkillsData,
-        talents: finalTalentsData,
-        characteristics: finalCharacteristics,
-        secondaryCharacteristics: finalSecondary,
-        freeAdvance: freeAdvance.value,
-        personalDetails: { ...personalDetails },
-        money: { ...money }
-    }
-
-    emit('hero-created', finalHeroData)
-    isCreating.value = false
-}
-
-const money = reactive({
-    gc: null, // Gold Crowns (Złote Korony)
-    ss: null, // Silver Shillings (Srebrne Szylingi)
-    bp: null  // Brass Pennies (Miedziane Pensy)
-})
-const isRollingMoney = ref(false)
-const rollMoney = async () => {
-    if (money.gc !== null) return;
-
-    isRollingMoney.value = true // Start animacji
-
-    try {
-        if (!diceBoxAttributes) await initDiceBoxAttributes()
-
-        // Czyścimy poprzedni rzut
-        diceBoxAttributes.clear()
-
-        // Rzucamy kostkami (wizualnie)
-        const result = await diceBoxAttributes.roll('3d10')
-
-        // Czekamy chwilę, żeby użytkownik zobaczył wynik na kostkach
-        // (DiceBox zwykle zwraca Promise po zakończeniu animacji, ale małe opóźnienie nie zaszkodzi)
-        await new Promise(r => setTimeout(r, 500))
-
-        money.gc = result[0].value
-        money.ss = result[1].value
-        money.bp = result[2].value
-
-    } catch (e) {
-        console.error(e)
-        // Fallback z animacją
-        await new Promise(r => setTimeout(r, 1000))
-        money.gc = Math.floor(Math.random() * 10) + 1
-        money.ss = Math.floor(Math.random() * 10) + 1
-        money.bp = Math.floor(Math.random() * 10) + 1
-    } finally {
-        isRollingMoney.value = false // Stop animacji
-    }
-}
-
-// --- Pozostałe zmienne i funkcje (DiceBox, Configi, Navigation) ---
-const rollPool = ref([])
-const selectedPoolIndex = ref(null)
-const isRollingAttributes = ref(false)
-const mercyUsed = ref(false)
-const isRollingSecondary = ref(false)
-const isRollingProfession = ref(false)
-const professionRoll = ref(0)
-const freeAdvance = ref(null);
-const canAdvanceStat = (statLabel) => {
-    if (!selectedProfession.value) return false
-    const val = getStatValue(selectedProfession.value.characteristics, statLabel)
-    return val && val > 0
-}
-const selectFreeAdvance = (statLabel, isSecondary = false) => {
-    // Jeśli klikamy w to samo, odznaczamy
-    if (freeAdvance.value?.key === statLabel) {
-        freeAdvance.value = null
-        return
-    }
-
-    const bonusValue = isSecondary ? 1 : 5
-
-    freeAdvance.value = {
-        key: statLabel,
-        value: bonusValue,
-        type: isSecondary ? 'secondary' : 'main'
-    }
-}
-const availableSecondaryAdvances = computed(() => {
-    if (!selectedProfession.value) return []
-
-    // Filtrujemy konfigurację drugorzędnych
-    return secondaryProfileConfig
-        .filter(conf => {
-            // Pomijamy Żywotność i PP, bo one mają swoją mechanikę rzutu (chyba że chcemy pozwolić podbić wylosowane)
-            // W WFRP darmowy awans można wziąć na Żyw, jeśli jest w schemacie. Zostawmy wszystkie.
-            return canAdvanceStat(conf.label)
-        })
-        .map(conf => ({
-            label: conf.label,
-            name: getSecondaryStatFullName(conf.label) // Helper do pełnej nazwy
-        }))
-})
-
-const getSecondaryStatFullName = (label) => {
-    const map = { 'A': 'Ataki', 'Żyw': 'Żywotność', 'S': 'Siła', 'Wt': 'Wytrzymałość', 'Sz': 'Szybkość', 'Mag': 'Magia', 'PO': 'Punkty Obłędu', 'PP': 'Punkty Przeznaczenia' }
-    return map[label] || label
-}
-
-const rolledRandomTalents = ref([])
-const isRollingRandomTalent = ref(false)
-
-const isRollingAny = computed(() => isRollingAttributes.value || isRollingSecondary.value)
-const requiredRandomTalentsCount = computed(() => {
-    if (!selectedRace.value) return 0
-    // Klucze ras muszą się zgadzać z tymi w availableRaces
-    if (selectedRace.value.key === 'human') return 2
-    if (selectedRace.value.key === 'halfling') return 1
-    return 0
-})
-
-// 3. Funkcja losująca
-const rollRandomTalent = async () => {
-    if (rolledRandomTalents.value.length >= requiredRandomTalentsCount.value) return
-    if (isRollingRandomTalent.value) return
-
-    isRollingRandomTalent.value = true
-
-    try {
-        if (!diceBoxAttributes) await initDiceBoxAttributes()
-
-        let talent = null
-        let attempts = 0
-        const maxAttempts = 5 // Zabezpieczenie przed nieskończoną pętlą
-
-        // Pobieramy odpowiednią tabelę
-        const raceKey = selectedRace.value.key
-        const currentTable = randomTalentsTables[raceKey] || randomTalentsTables.human // Fallback do ludzkiej
-
-        // Pętla do obsługi duplikatów (auto-reroll)
-        do {
-            diceBoxAttributes.clear()
-            const result = await diceBoxAttributes.roll('1d100')
-            const rollValue = result[0].value
-
-            // Znajdź talent w zakresie
-            talent = currentTable.find(t => rollValue >= t.min && rollValue <= t.max)
-
-            if (talent) {
-                // Dodajemy wynik rzutu do obiektu talentu
-                talent = { ...talent, roll: rollValue }
-
-                // Jeśli już mamy ten talent, rzucamy jeszcze raz (o ile nie przekroczyliśmy limitu prób)
-                if (isTalentAlreadyOwned(talent.id)) {
-                    console.log(`Wylosowano duplikat: ${talent.name} (${rollValue}). Przerzucam...`)
-                    talent = null // Reset, pętla pójdzie dalej
-                    await new Promise(r => setTimeout(r, 800)) // Krótka pauza dla efektu
-                }
-            }
-            attempts++
-        } while (!talent && attempts < maxAttempts)
-
-        if (talent) {
-            rolledRandomTalents.value.push(talent)
-        } else {
-            console.warn("Nie udało się wylosować unikalnego talentu po wielu próbach.")
-        }
-
-    } catch (e) {
-        console.error(e)
-    } finally {
-        isRollingRandomTalent.value = false
-    }
-}
-const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100)
 const canProceedPersonal = computed(() => {
     return personalDetails.height > 0 &&
         personalDetails.weight > 0 &&
@@ -1722,12 +1208,57 @@ const canProceed = computed(() => {
             const advanceDone = freeAdvance.value !== null
             return mainStatsDone && secStatsDone && advanceDone
         case 4: return areAllChoicesMade.value
-        case 5: return canProceedPersonal.value // NOWE: Krok 5 (Detale)
+        case 5: return canProceedPersonal.value
         default: return false
     }
 })
 
-// --- Inicjalizacja DiceBox ---
+// =========================================
+// 5. LIFECYCLE & WATCHERS
+// =========================================
+
+onMounted(() => {
+    fetchRaces()
+})
+
+watch(currentStep, async (newStep) => {
+    if (newStep === 2 && !diceBox) {
+        await nextTick()
+        const el = document.querySelector('#dice-box-canvas')
+        if (el) await initializeDiceBox()
+    }
+    if (newStep === 3 && !diceBoxAttributes) {
+        await nextTick()
+        await initDiceBoxAttributes()
+    }
+})
+
+watch(selectedProfession, () => {
+    // Reset wyborów przy zmianie profesji
+    for (const key in selectedChoices.skills) delete selectedChoices.skills[key]
+    for (const key in selectedChoices.talents) delete selectedChoices.talents[key]
+})
+
+watch(selectedRace, () => {
+    rolledRandomTalents.value = []
+})
+
+// =========================================
+// 6. METHODS
+// =========================================
+
+// --- Initialization & API ---
+
+const fetchRaces = () => {
+    axios.get('/create-character/get-races')
+        .then(response => {
+            availableRaces.value = response.data;
+        })
+        .catch(error => {
+            console.error('Error fetching races:', error);
+        });
+}
+
 const initializeDiceBox = async () => {
     const container = document.querySelector('#dice-box-canvas')
     if (!container) return
@@ -1760,18 +1291,105 @@ const initDiceBoxAttributes = async () => {
     if (canvas) { canvas.style.width = '100%'; canvas.style.height = '100%' }
 }
 
-// Watcher dla kroku 3 (Cechy) - osobny dicebox
-watch(currentStep, async (newStep) => {
-    if (newStep === 3 && !diceBoxAttributes) {
-        await nextTick()
-        await initDiceBoxAttributes()
-    }
-})
-watch(selectedRace, () => {
-    rolledRandomTalents.value = []
-})
+// --- Navigation ---
 
-// --- Funkcje Rzutów ---
+const startCreation = () => { isCreating.value = true; currentStep.value = 1 }
+
+const closeCreation = () => {
+    if(diceBox) { diceBox.clear(); diceBox = null }
+    if(diceBoxAttributes) { diceBoxAttributes.clear(); diceBoxAttributes = null }
+    isCreating.value = false
+    emit('creation-closed')
+}
+
+const nextStep = () => { if(canProceed.value && currentStep.value < totalSteps) currentStep.value++ }
+const previousStep = () => { if(currentStep.value > 1) currentStep.value-- }
+
+// --- Selection Logic ---
+
+const selectRace = (race) => {
+    selectedRace.value = race
+    heroData.value.race = race
+
+    // Reset i ustawienie bazowych cech
+    Object.keys(characteristics.value).forEach(key => {
+        const statData = race.base_stats?.find(s => s.characteristic?.short_name === key || s.short_name === key);
+        characteristics.value[key].base = statData ? statData.value : 20;
+        characteristics.value[key].assignedValue = null
+    })
+
+    secondaryStats.value.wounds = {val: null, roll: null}
+    secondaryStats.value.fate = {val: null, roll: null}
+}
+
+const openProfessionSelection = async () => {
+    if (!selectedRace.value) return
+    try {
+        const response = await axios.get(`/create-character/get-professions/${selectedRace.value.key}`)
+        availableProfessionsList.value = response.data
+        isSelectingProfession.value = true
+    } catch (e) {
+        console.error('Błąd pobierania profesji', e)
+    }
+}
+
+const selectManualProfession = (profession) => {
+    selectedProfession.value = profession
+    professionRoll.value = 0
+    isSelectingProfession.value = false
+}
+
+const selectPoolItem = (idx) => {
+    if(!rollPool.value[idx].isUsed) selectedPoolIndex.value = (selectedPoolIndex.value === idx ? null : idx)
+}
+
+const assignSelectedToStat = (key) => {
+    if (selectedPoolIndex.value === null) return
+    const poolItem = rollPool.value[selectedPoolIndex.value]
+    const stat = characteristics.value[key]
+
+    if (stat.assignedValue !== null) unassignStat(key)
+
+    stat.assignedValue = poolItem.value
+    rollPool.value[selectedPoolIndex.value].isUsed = true
+    selectedPoolIndex.value = null
+}
+
+const unassignStat = (key) => {
+    const stat = characteristics.value[key]
+    if (stat.assignedValue === null) return
+    const idx = rollPool.value.findIndex(p => p.value === stat.assignedValue && p.isUsed)
+    if(idx !== -1) rollPool.value[idx].isUsed = false
+    stat.assignedValue = null
+}
+
+const selectFreeAdvance = (statLabel, isSecondary = false) => {
+    if (freeAdvance.value?.key === statLabel) {
+        freeAdvance.value = null
+        return
+    }
+    const bonusValue = isSecondary ? 1 : 5
+    freeAdvance.value = {
+        key: statLabel,
+        value: bonusValue,
+        type: isSecondary ? 'secondary' : 'main'
+    }
+}
+
+const selectSkill = (groupIndex, item) => {
+    selectedChoices.skills[groupIndex] = getUniqueKey(item)
+}
+
+const selectTalent = (groupIndex, item) => {
+    selectedChoices.talents[groupIndex] = getUniqueKey(item)
+}
+
+const selectEquipment = (groupIndex, item) => {
+    selectedChoices.equipments[groupIndex] = getUniqueKey(item)
+}
+
+// --- Dice Rolling Logic ---
+
 const rollForProfession = async () => {
     if (!selectedRace.value || isRollingProfession.value) return
     if (!diceBox) await initializeDiceBox()
@@ -1800,9 +1418,8 @@ const rollAttributesPool = async () => {
     try {
         if(!diceBoxAttributes) await initDiceBoxAttributes()
         diceBoxAttributes.clear()
-        await diceBoxAttributes.roll('8d10') // Wizualnie
+        await diceBoxAttributes.roll('8d10')
 
-        // Logika 2k10 x 8
         const newPool = []
         for(let i=0; i<8; i++) {
             const val = Math.floor(Math.random()*10)+1 + Math.floor(Math.random()*10)+1
@@ -1810,155 +1427,6 @@ const rollAttributesPool = async () => {
         }
         setTimeout(() => { rollPool.value = newPool; isRollingAttributes.value = false }, 1000)
     } catch(e) { console.error(e); isRollingAttributes.value = false }
-}
-
-const rollSecondary = async (type) => {
-    if (isRollingAny.value) return
-    isRollingSecondary.value = true
-    try {
-        if(!diceBoxAttributes) await initDiceBoxAttributes()
-        diceBoxAttributes.clear()
-        await diceBoxAttributes.roll('1d10')
-
-        const roll = Math.floor(Math.random()*10)+1
-        if (type === 'wounds') {
-            if (roll <=3 ) {
-                if (type === 'wounds') {
-                    switch (selectedRace.value.key) {
-                        case 'human':
-                            secondaryStats.value[type] = { val: 10, roll: roll }
-                            break;
-                        case 'elf':
-                            secondaryStats.value[type] = { val: 9, roll: roll }
-                            break;
-                        case 'dwarf':
-                            secondaryStats.value[type] = { val: 11, roll: roll }
-                            break;
-                        case 'halfling':
-                            secondaryStats.value[type] = { val: 8, roll: roll }
-                            break;
-                    }
-                }
-
-            } else if (roll > 3 && roll <= 6) {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 11, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 10, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 12, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 9, roll: roll }
-                        break;
-                }
-            } else if (roll > 6 && roll <= 9) {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 12, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 11, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 13, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 10, roll: roll }
-                        break;
-                }
-            } else {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 13, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 12, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 14, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 11, roll: roll }
-                        break;
-                }
-            }
-        } else {
-            if (roll <=4 ) {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 1, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 1, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                }
-
-            } else if (roll > 4 && roll <= 7) {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 3, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                }
-            } else {
-                switch (selectedRace.value.key) {
-                    case 'human':
-                        secondaryStats.value[type] = { val: 3, roll: roll }
-                        break;
-                    case 'elf':
-                        secondaryStats.value[type] = { val: 2, roll: roll }
-                        break;
-                    case 'dwarf':
-                        secondaryStats.value[type] = { val: 3, roll: roll }
-                        break;
-                    case 'halfling':
-                        secondaryStats.value[type] = { val: 3, roll: roll }
-                        break;
-                }
-            }
-        }
-    } catch(e) { console.error(e) }
-    finally { isRollingSecondary.value = false }
-}
-
-const selectPoolItem = (idx) => { if(!rollPool.value[idx].isUsed) selectedPoolIndex.value = (selectedPoolIndex.value === idx ? null : idx) }
-
-const assignSelectedToStat = (key) => {
-    if (selectedPoolIndex.value === null) return
-    const poolItem = rollPool.value[selectedPoolIndex.value]
-    const stat = characteristics.value[key]
-
-    if (stat.assignedValue !== null) unassignStat(key)
-
-    stat.assignedValue = poolItem.value
-    rollPool.value[selectedPoolIndex.value].isUsed = true
-    selectedPoolIndex.value = null
-}
-
-const unassignStat = (key) => {
-    const stat = characteristics.value[key]
-    if (stat.assignedValue === null) return
-    const idx = rollPool.value.findIndex(p => p.value === stat.assignedValue && p.isUsed)
-    if(idx !== -1) rollPool.value[idx].isUsed = false
-    stat.assignedValue = null
 }
 
 const rerollSelectedPoolItem = async () => {
@@ -1972,33 +1440,399 @@ const rerollSelectedPoolItem = async () => {
     } catch(e){} finally { isRollingAttributes.value = false }
 }
 
-const nextStep = () => { if(canProceed.value && currentStep.value < totalSteps) currentStep.value++ }
-const previousStep = () => { if(currentStep.value > 1) currentStep.value-- }
-const startCreation = () => { isCreating.value = true; currentStep.value = 1 }
-const closeCreation = () => {
-    if(diceBox) { diceBox.clear(); diceBox = null }
-    if(diceBoxAttributes) { diceBoxAttributes.clear(); diceBoxAttributes = null }
-    isCreating.value = false
-    emit('creation-closed')
+const rollSecondary = async (type) => {
+    if (isRollingAny.value) return
+    isRollingSecondary.value = true
+    try {
+        if(!diceBoxAttributes) await initDiceBoxAttributes()
+        diceBoxAttributes.clear()
+        await diceBoxAttributes.roll('1d10')
+
+        const roll = Math.floor(Math.random()*10)+1
+        // Logika rzutów na drugorzędne (uproszczona dla czytelności, zachowana logika z oryginału)
+        let val = 0
+        if (type === 'wounds') {
+            // Logika dla Żywotności
+            const raceKey = selectedRace.value.key
+            if (roll <= 3) {
+                if (raceKey === 'human') val = 10
+                else if (raceKey === 'elf') val = 9
+                else if (raceKey === 'dwarf') val = 11
+                else if (raceKey === 'halfling') val = 8
+            } else if (roll <= 6) {
+                if (raceKey === 'human') val = 11
+                else if (raceKey === 'elf') val = 10
+                else if (raceKey === 'dwarf') val = 12
+                else if (raceKey === 'halfling') val = 9
+            } else if (roll <= 9) {
+                if (raceKey === 'human') val = 12
+                else if (raceKey === 'elf') val = 11
+                else if (raceKey === 'dwarf') val = 13
+                else if (raceKey === 'halfling') val = 10
+            } else {
+                if (raceKey === 'human') val = 13
+                else if (raceKey === 'elf') val = 12
+                else if (raceKey === 'dwarf') val = 14
+                else if (raceKey === 'halfling') val = 11
+            }
+        } else {
+            // Logika dla Przeznaczenia
+            const raceKey = selectedRace.value.key
+            if (roll <= 4) {
+                if (raceKey === 'human') val = 2
+                else if (raceKey === 'elf') val = 1
+                else if (raceKey === 'dwarf') val = 1
+                else if (raceKey === 'halfling') val = 2
+            } else if (roll <= 7) {
+                if (raceKey === 'human') val = 3
+                else if (raceKey === 'elf') val = 2
+                else if (raceKey === 'dwarf') val = 2
+                else if (raceKey === 'halfling') val = 2
+            } else {
+                if (raceKey === 'human') val = 3
+                else if (raceKey === 'elf') val = 2
+                else if (raceKey === 'dwarf') val = 3
+                else if (raceKey === 'halfling') val = 3
+            }
+        }
+        secondaryStats.value[type] = { val, roll }
+    } catch(e) { console.error(e) }
+    finally { isRollingSecondary.value = false }
 }
 
-// Configi do wyświetlania
-const mainProfileConfig = [
-    {label: 'WW', keys: ['WW']}, {label: 'US', keys: ['US']}, {label: 'K', keys: ['K']}, {label: 'Odp', keys: ['Odp']},
-    {label: 'Zr', keys: ['Zr']}, {label: 'Int', keys: ['Int']}, {label: 'SW', keys: ['SW']}, {label: 'Ogd', keys: ['Ogd']}
-]
-const secondaryProfileConfig = [
-    {label: 'A', keys: ['A']}, {label: 'Żyw', keys: ['Żyw']}, {label: 'S', keys: ['S']}, {label: 'Wt', keys: ['Wt']},
-    {label: 'Sz', keys: ['Sz']}, {label: 'Mag', keys: ['Mag']}, {label: 'PO', keys: ['PO']}, {label: 'PP', keys: ['PP']}
-]
+const rollRandomTalent = async () => {
+    if (rolledRandomTalents.value.length >= requiredRandomTalentsCount.value) return
+    if (isRollingRandomTalent.value) return
+
+    isRollingRandomTalent.value = true
+
+    try {
+        if (!diceBoxAttributes) await initDiceBoxAttributes()
+
+        let talent = null
+        let attempts = 0
+        const maxAttempts = 5
+        const raceKey = selectedRace.value.key
+        const currentTable = randomTalentsTables[raceKey] || randomTalentsTables.human
+
+        do {
+            diceBoxAttributes.clear()
+            const result = await diceBoxAttributes.roll('1d100')
+            const rollValue = result[0].value
+
+            talent = currentTable.find(t => rollValue >= t.min && rollValue <= t.max)
+
+            if (talent) {
+                talent = { ...talent, roll: rollValue }
+                if (isTalentAlreadyOwned(talent.id)) {
+                    console.log(`Wylosowano duplikat: ${talent.name} (${rollValue}). Przerzucam...`)
+                    talent = null
+                    await new Promise(r => setTimeout(r, 800))
+                }
+            }
+            attempts++
+        } while (!talent && attempts < maxAttempts)
+
+        if (talent) {
+            rolledRandomTalents.value.push(talent)
+        } else {
+            console.warn("Nie udało się wylosować unikalnego talentu po wielu próbach.")
+        }
+
+    } catch (e) {
+        console.error(e)
+    } finally {
+        isRollingRandomTalent.value = false
+    }
+}
+
+const rollMoney = async () => {
+    if (money.gc !== null) return;
+    isRollingMoney.value = true
+    try {
+        if (!diceBoxAttributes) await initDiceBoxAttributes()
+        diceBoxAttributes.clear()
+        const result = await diceBoxAttributes.roll('3d10')
+        await new Promise(r => setTimeout(r, 500))
+        money.gc = result[0].value
+        money.ss = result[1].value
+        money.bp = result[2].value
+    } catch (e) {
+        console.error(e)
+        await new Promise(r => setTimeout(r, 1000))
+        money.gc = Math.floor(Math.random() * 10) + 1
+        money.ss = Math.floor(Math.random() * 10) + 1
+        money.bp = Math.floor(Math.random() * 10) + 1
+    } finally {
+        isRollingMoney.value = false
+    }
+}
+
+const rollSingleDetail = (key) => {
+    if (!selectedRace.value) return
+    const raceKey = selectedRace.value.key || 'human'
+    const table = personalDetailsTables[raceKey] || personalDetailsTables.human
+
+    switch (key) {
+        case 'height':
+            let hRoll = 0
+            if (typeof table.heightDice === 'string' && table.heightDice.includes('d')) {
+                const [count, die] = table.heightDice.split('d').map(Number)
+                for(let i=0; i<count; i++) hRoll += Math.floor(Math.random() * die) + 1
+            } else {
+                hRoll = Math.floor(Math.random() * (table.heightDice || 10)) + 1
+            }
+            personalDetails.height = table.heightBase + hRoll
+            break;
+        case 'weight':
+            let wRoll = 0
+            const wDie = typeof table.weightDice === 'number' ? table.weightDice : 20
+            wRoll = Math.floor(Math.random() * wDie) + 1
+            personalDetails.weight = table.weightBase + wRoll
+            break;
+        case 'age':
+            const aDie = typeof table.ageDice === 'number' ? table.ageDice : 10
+            const aRoll = Math.floor(Math.random() * aDie) + 1
+            personalDetails.age = (table.ageBase || 15) + aRoll
+            break;
+        case 'hairColor':
+            personalDetails.hairColor = getRandomArrayItem(table.hair)
+            break;
+        case 'eyeColor':
+            personalDetails.eyeColor = getRandomArrayItem(table.eyes)
+            break;
+        case 'distinguishingMark':
+            personalDetails.distinguishingMark = getRandomArrayItem(table.marks)
+            break;
+        case 'starSign':
+            personalDetails.starSign = getRandomArrayItem(table.starSign)
+            break;
+        case 'birthplace':
+            personalDetails.birthplace = getRandomArrayItem(table.birthPlaces)
+            break;
+        case 'siblings':
+            personalDetails.siblings = Math.floor(Math.random() * 6)
+            break;
+        case 'name':
+            const genderKey = personalDetails.gender
+            const namesList = table.names[genderKey]
+            if (namesList) {
+                personalDetails.name = getRandomArrayItem(namesList)
+            }
+            break;
+    }
+}
+
+const rollPersonalDetails = () => {
+    rollSingleDetail('height')
+    rollSingleDetail('weight')
+    rollSingleDetail('age')
+    rollSingleDetail('hairColor')
+    rollSingleDetail('eyeColor')
+    rollSingleDetail('distinguishingMark')
+    rollSingleDetail('starSign')
+    rollSingleDetail('siblings')
+    rollSingleDetail('birthplace')
+    rollSingleDetail('name')
+}
+
+// --- Helpers ---
+
+const getRandomArrayItem = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
+const getUniqueKey = (item) => {
+    if (item.pivot?.id) return `pivot-${item.pivot.id}`
+    const itemId = item.skill?.id || item.talent?.id || item.id
+    const addName = item.additional_name || item.pivot?.additional_name || ''
+    if (itemId) return `item-${itemId}-${addName}`
+    return `rand-${Math.random()}`
+}
+
+const isSkillMandatory = (item) => {
+    const itemId = item.skill?.id || item.id
+    return aggregatedSkills.value.mandatory.some(m => {
+        const mId = m.skill?.id || m.id
+        const itemAdd = item.additional_name || item.pivot?.additional_name
+        const mAdd = m.additional_name || m.pivot?.additional_name
+        return mId === itemId && itemAdd === mAdd
+    })
+}
+
+const isTalentMandatory = (item) => {
+    const itemId = item.talent?.id || item.id
+    return aggregatedTalents.value.mandatory.some(m => {
+        const mId = m.talent?.id || m.id
+        return mId === itemId
+    })
+}
+
+const isTalentAlreadyOwned = (talentId) => {
+    if (rolledRandomTalents.value.some(t => t.id === talentId)) return true
+    if (aggregatedTalents.value.mandatory.some(t => (t.talent?.id || t.id) === talentId)) return true
+    return false
+}
+
+const tagSource = (items, sourceName) => {
+    if (!items) return []
+    return items.map(item => ({ ...item, source: sourceName }))
+}
+
+const tagSourceGroup = (groups, sourceName) => {
+    if (!groups) return []
+    return groups.map(group => group.map(item => ({ ...item, source: sourceName })))
+}
+
+const getMandatoryItems = (groupedCollection) => {
+    if (!groupedCollection) return [];
+    const values = Array.isArray(groupedCollection) ? groupedCollection : Object.values(groupedCollection);
+    if (!Array.isArray(groupedCollection)) {
+        return groupedCollection['0'] || [];
+    }
+    return values.filter((group: any) => Array.isArray(group) && group.length === 1).flat();
+}
+
+const getChoiceGroups = (groupedCollection) => {
+    if (!groupedCollection) return [];
+    if (!Array.isArray(groupedCollection)) {
+        return Object.keys(groupedCollection)
+            .filter(key => key !== '0')
+            .map(key => groupedCollection[key]);
+    }
+    return Object.values(groupedCollection)
+        .filter((group: any) => Array.isArray(group) && group.length > 1);
+}
+
+const canAdvanceStat = (statLabel) => {
+    if (!selectedProfession.value) return false
+    const val = getStatValue(selectedProfession.value.characteristics, statLabel)
+    return val && val > 0
+}
+
+const getSecondaryStatFullName = (label) => {
+    const map = { 'A': 'Ataki', 'Żyw': 'Żywotność', 'S': 'Siła', 'Wt': 'Wytrzymałość', 'Sz': 'Szybkość', 'Mag': 'Magia', 'PO': 'Punkty Obłędu', 'PP': 'Punkty Przeznaczenia' }
+    return map[label] || label
+}
+
+const formatSkillName = (item) => {
+    const skillObj = item.skill || item;
+    const name = skillObj.name || 'Nieznana';
+    const additional = item.additional_name || item.pivot?.additional_name;
+    return additional ? `${name} (${additional})` : name;
+}
+
+const formatTalentName = (item) => {
+    const talentObj = item.talent || item;
+    const name = talentObj.name || 'Nieznany';
+    const additional = item.additional_name || item.pivot?.additional_name;
+    return additional ? `${name} (${additional})` : name;
+}
+
+const formatItemName = (i) => i.item_name || i.item?.tradeable?.name || 'Przedmiot'
+
 const getStatValue = (chars, label) => {
     if(Array.isArray(chars)) {
         return chars.find(c => c.characteristic?.short_name === label)?.available_advancement
     }
     return chars?.[label]
 }
+
 const formatStatBonus = (val) => val ? `+${val}` : '—'
-const formatItemName = (i) => i.item_name || i.item?.tradeable?.name || 'Przedmiot'
+
+// --- Finish Creation ---
+
+const finishCreation = () => {
+    const resolveItemObjectFromKey = (key, allChoicesGroups) => {
+        for (const group of allChoicesGroups) {
+            for (const item of group) {
+                if (getUniqueKey(item) === key) return item
+            }
+        }
+        return null
+    }
+
+    const finalCharacteristics = {}
+    Object.entries(characteristics.value).forEach(([key, val]) => {
+        let total = val.base + (val.assignedValue || 0)
+        if (freeAdvance.value?.type === 'main' && freeAdvance.value?.key === key) {
+            total += freeAdvance.value.value
+        }
+        finalCharacteristics[key] = total
+    })
+
+    const finalSecondary = {
+        wounds: secondaryStats.value.wounds.val,
+        fate: secondaryStats.value.fate.val,
+    }
+
+    if (freeAdvance.value?.type === 'secondary') {
+        if (freeAdvance.value.key === 'Żyw') finalSecondary.wounds += 1
+        if (freeAdvance.value.key === 'PP') finalSecondary.fate += 1
+    }
+
+    const allSkills = [
+        ...aggregatedSkills.value.mandatory,
+        ...Object.values(selectedChoices.skills)
+            .map(key => resolveItemObjectFromKey(key, aggregatedSkills.value.choices))
+            .filter(item => item !== null)
+    ]
+    const skillGroups = {}
+
+    allSkills.forEach(item => {
+        const skillId = item.skill?.id || item.id
+        const spec = item.additional_name || item.pivot?.additional_name || null
+        const groupKey = `${skillId}|${spec || ''}`
+
+        if (!skillGroups[groupKey]) {
+            skillGroups[groupKey] = {
+                id: skillId,
+                specialization: spec,
+                count: 0
+            }
+        }
+        skillGroups[groupKey].count++
+    })
+    const finalSkillsData = Object.values(skillGroups).map(group => ({
+        id: group.id,
+        specialization: group.specialization,
+        advances: group.count
+    }))
+
+    const allTalents = [
+        ...aggregatedTalents.value.mandatory,
+        ...Object.values(selectedChoices.talents)
+            .map(key => resolveItemObjectFromKey(key, aggregatedTalents.value.choices))
+            .filter(item => item !== null),
+        ...rolledRandomTalents.value
+    ]
+
+    const finalTalentsData = allTalents.map(t => ({
+        id: t.talent?.id || t.id,
+        specialization: t.additional_name || t.pivot?.additional_name || null
+    }))
+
+    const finalEquipmentsData = [
+        ...aggregatedEquipments.value.mandatory,
+        ...Object.values(selectedChoices.equipments)
+            .map(key => resolveItemObjectFromKey(key, aggregatedEquipments.value.choices))
+            .filter(item => item !== null)
+    ]
+
+    const finalHeroData = {
+        race: selectedRace.value.name,
+        profession: selectedProfession.value.id,
+        equipments: finalEquipmentsData,
+        skills: finalSkillsData,
+        talents: finalTalentsData,
+        characteristics: finalCharacteristics,
+        secondaryCharacteristics: finalSecondary,
+        freeAdvance: freeAdvance.value,
+        personalDetails: { ...personalDetails },
+        money: { ...money }
+    }
+
+    emit('hero-created', finalHeroData)
+    isCreating.value = false
+}
 
 defineExpose({ startCreation })
 </script>
