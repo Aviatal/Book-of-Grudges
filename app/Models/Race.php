@@ -8,6 +8,13 @@ class Race extends Model
 {
     public $timestamps = false;
 
+    public const array SPEED_VALUES = [
+        'Człowiek' => 4,
+        'Elf' => 5,
+        'Krasnolud' => 3,
+        'Niziołek' => 4,
+    ];
+
     public function bonuses(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(RaceBonus::class);

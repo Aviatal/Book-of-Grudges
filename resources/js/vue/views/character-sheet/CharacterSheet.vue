@@ -131,14 +131,14 @@ const startHeroCreation = () => {
     heroCreationRef.value?.startCreation()
 }
 
-const handleHeroCreated = async (heroData) => {
-    console.log('Nowy bohater:', heroData)
-    try {
-        toast.success('Bohater został utworzony!')
-    } catch (error) {
-        console.error(error)
-        toast.error('Błąd podczas tworzenia bohatera!')
-    }
+const handleHeroCreated = (heroData: any) => {
+    axios.post('create-character', heroData)
+        .then(response => {
+            hero.value = response.data;
+        })
+        .catch(error => {
+            toast.error(error.response.data.message)
+        })
 }
 
 const handleCreationClosed = () => {

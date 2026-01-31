@@ -342,6 +342,9 @@
                                 </div>
                                 <div class="sec-action">
                                     <button v-if="!secondaryStats.fate.val" class="mini-roll-btn" @click="rollSecondary('fate')" :disabled="isRollingAny">🎲</button>
+                                    <span v-else class="roll-info">
+                                        (Rzut: {{ secondaryStats.wounds.roll }})
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -397,7 +400,7 @@
                             <div class="pool-actions">
                                 <div
                                     v-if="!mercyUsed && selectedPoolIndex !== null && !rollPool[selectedPoolIndex].isUsed">
-                                    <button class="reroll-one-btn" @click="rerollSelectedPoolItem">
+                                    <button class="reroll-one-btn" :disabled=isRollingAny @click="rerollSelectedPoolItem">
                                         ✨ Łaska Shallyi (Przerzut)
                                     </button>
                                 </div>
@@ -562,6 +565,94 @@
                         </div>
                     </div>
 
+                    <div class="selection-section">
+                        <h3 class="section-title-deco">Wyposażenie</h3>
+
+                        <div class="mandatory-list" v-if="aggregatedEquipments.mandatory.length > 0">
+                            <span class="label-small">Otrzymujesz automatycznie:</span>
+                            <div class="tags-group">
+                                <span v-for="(item, i) in aggregatedEquipments.mandatory"
+                                      :key="'mand-eq-'+i"
+                                      class="static-tag"
+                                      :title="item.description || 'Przedmiot'">
+
+                                    {{ formatItemName(item) }}
+
+                                    <span :class="['source-tag', item.source]">
+                                        {{ item.source === 'race' ? 'Rasa' : 'Profesja' }}
+                                    </span>
+                                    <span class="check-icon">✓</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="choices-list" v-if="aggregatedEquipments.choices.length > 0">
+                            <span class="label-small highlight">Musisz wybrać jeden przedmiot z każdej grupy:</span>
+
+                            <div v-for="(group, gIndex) in aggregatedEquipments.choices" :key="'eq-group-'+gIndex" class="choice-row">
+                                <div class="choice-origin-label">
+                                    Źródło: <span :class="['text-source', group[0].source]">
+                                        {{ group[0].source === 'race' ? 'Rasa' : 'Profesja' }}
+                                    </span>
+                                </div>
+
+                                <div class="choice-options-wrapper">
+                                    <div v-for="(item) in group" :key="getUniqueKey(item)"
+                                         class="choice-card"
+                                         :class="{ 'selected': selectedChoices.equipments[gIndex] === getUniqueKey(item) }"
+                                         @click="selectEquipment(gIndex, item)">
+
+                                        <div class="radio-circle"></div>
+
+                                        <div class="choice-content">
+                                            <div class="choice-text-row">
+                                                <span class="choice-text">{{ formatItemName(item) }}</span>
+                                            </div>
+
+                                            <span class="choice-desc" v-if="item.description">
+                                                {{ item.description }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="aggregatedEquipments.mandatory.length === 0 && aggregatedEquipments.choices.length === 0" class="empty-state">
+                            <span class="dimmed-text">Brak dodatkowego wyposażenia startowego.</span>
+                        </div>
+
+                        <div class="money-section">
+                            <h4 class="detail-subtitle">Sakiewka (Rzut 3k10)</h4>
+
+                            <div class="money-container">
+                                <div class="coin-slot gold">
+                                    <div class="coin-icon">zk</div>
+                                    <span class="coin-value" v-if="money.gc !== null">{{ money.gc }}</span>
+                                    <span class="coin-placeholder" v-else>-</span>
+                                </div>
+
+                                <div class="coin-slot silver">
+                                    <div class="coin-icon">s</div>
+                                    <span class="coin-value" v-if="money.ss !== null">{{ money.ss }}</span>
+                                    <span class="coin-placeholder" v-else>-</span>
+                                </div>
+
+                                <div class="coin-slot brass">
+                                    <div class="coin-icon">p</div>
+                                    <span class="coin-value" v-if="money.bp !== null">{{ money.bp }}</span>
+                                    <span class="coin-placeholder" v-else>-</span>
+                                </div>
+
+                                <button class="roll-money-btn" @click="rollMoney" :disabled="money.gc !== null || isRollingMoney">
+                                    <span class="btn-icon" :class="{ 'spinning': isRollingMoney }">🎲</span>
+                                    <span v-if="isRollingMoney">Rzucam...</span>
+                                    <span v-else-if="money.gc === null">Rzuć na kasę</span>
+                                    <span v-else>Wylosowano ✓</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -923,7 +1014,8 @@ const heroData = ref({
 // RECTIVE do przechowywania wyborów
 const selectedChoices = reactive({
     skills: {},
-    talents: {}
+    talents: {},
+    equipments: {}
 })
 
 const randomTalentsTables = {
@@ -979,6 +1071,34 @@ const randomTalentsTables = {
         { min: 96, max: 100, id: 56, name: 'Urodzony wojownik' },
     ]
 }
+
+const selectEquipment = (groupIndex, item) => {
+    selectedChoices.equipments[groupIndex] = getUniqueKey(item)
+}
+
+const aggregatedEquipments = computed(() => {
+    // Zazwyczaj ekwipunek pochodzi tylko z profesji, rasy dają go rzadko w tej strukturze,
+    // ale dla spójności sprawdzimy oba źródła (choć w Twoim API rasy mogą nie mieć pola 'equipments')
+    const race = selectedRace.value
+    const prof = selectedProfession.value
+
+    const raceMandatory = race?.equipments ? getMandatoryItems(race.equipments) : []
+    const profMandatory = prof?.equipments ? getMandatoryItems(prof.equipments) : []
+
+    const raceChoices = race?.equipments ? getChoiceGroups(race.equipments) : []
+    const profChoices = prof?.equipments ? getChoiceGroups(prof.equipments) : []
+
+    return {
+        mandatory: [
+            ...tagSource(raceMandatory, 'race'),
+            ...tagSource(profMandatory, 'profession')
+        ],
+        choices: [
+            ...tagSourceGroup(raceChoices, 'race'),
+            ...tagSourceGroup(profChoices, 'profession')
+        ]
+    }
+})
 
 const isTalentAlreadyOwned = (talentId) => {
     // 1. Sprawdź w już wylosowanych (z tabeli losowej Rasy)
@@ -1128,16 +1248,19 @@ const aggregatedTalents = computed(() => {
 const areAllChoicesMade = computed(() => {
     const skillsRequired = aggregatedSkills.value.choices.length
     const talentsRequired = aggregatedTalents.value.choices.length
+    const equipmentsRequired = aggregatedEquipments.value.choices.length
 
     const skillsDone = Object.keys(selectedChoices.skills).length === skillsRequired
     const talentsDone = Object.keys(selectedChoices.talents).length === talentsRequired
+    const equipmentsDone = Object.keys(selectedChoices.equipments).length === equipmentsRequired
 
-    // Sprawdzamy czy wylosowano wymaganą liczbę talentów losowych
     const randomTalentsDone = rolledRandomTalents.value.length === requiredRandomTalentsCount.value
 
-    return skillsDone && talentsDone && randomTalentsDone
-})
+    // NOWE: Pieniądze muszą być wylosowane
+    const moneyDone = money.gc !== null
 
+    return skillsDone && talentsDone && equipmentsDone && randomTalentsDone && moneyDone
+})
 // --- Zmienne referencyjne ---
 const selectedRace = ref(null)
 const selectedProfession = ref(null)
@@ -1339,19 +1462,74 @@ const finishCreation = () => {
         specialization: t.additional_name || t.pivot?.additional_name || null
     }))
 
+    const allEquipments = [
+        ...aggregatedEquipments.value.mandatory,
+        ...Object.values(selectedChoices.equipments)
+            .map(key => resolveItemObjectFromKey(key, aggregatedEquipments.value.choices))
+            .filter(item => item !== null)
+    ]
+    const finalEquipmentsData = [
+        ...aggregatedEquipments.value.mandatory,
+        ...Object.values(selectedChoices.equipments)
+            .map(key => resolveItemObjectFromKey(key, aggregatedEquipments.value.choices))
+            .filter(item => item !== null)
+    ]
+
     const finalHeroData = {
         race: selectedRace.value.name,
         profession: selectedProfession.value.id,
-        skills: finalSkillsData,   // Teraz to tablica obiektów {id, specialization, advances}
+        equipments: finalEquipmentsData,
+        skills: finalSkillsData,
         talents: finalTalentsData,
         characteristics: finalCharacteristics,
         secondaryCharacteristics: finalSecondary,
         freeAdvance: freeAdvance.value,
-        personalDetails: { ...personalDetails }
+        personalDetails: { ...personalDetails },
+        money: { ...money }
     }
 
     emit('hero-created', finalHeroData)
     isCreating.value = false
+}
+
+const money = reactive({
+    gc: null, // Gold Crowns (Złote Korony)
+    ss: null, // Silver Shillings (Srebrne Szylingi)
+    bp: null  // Brass Pennies (Miedziane Pensy)
+})
+const isRollingMoney = ref(false)
+const rollMoney = async () => {
+    if (money.gc !== null) return;
+
+    isRollingMoney.value = true // Start animacji
+
+    try {
+        if (!diceBoxAttributes) await initDiceBoxAttributes()
+
+        // Czyścimy poprzedni rzut
+        diceBoxAttributes.clear()
+
+        // Rzucamy kostkami (wizualnie)
+        const result = await diceBoxAttributes.roll('3d10')
+
+        // Czekamy chwilę, żeby użytkownik zobaczył wynik na kostkach
+        // (DiceBox zwykle zwraca Promise po zakończeniu animacji, ale małe opóźnienie nie zaszkodzi)
+        await new Promise(r => setTimeout(r, 500))
+
+        money.gc = result[0].value
+        money.ss = result[1].value
+        money.bp = result[2].value
+
+    } catch (e) {
+        console.error(e)
+        // Fallback z animacją
+        await new Promise(r => setTimeout(r, 1000))
+        money.gc = Math.floor(Math.random() * 10) + 1
+        money.ss = Math.floor(Math.random() * 10) + 1
+        money.bp = Math.floor(Math.random() * 10) + 1
+    } finally {
+        isRollingMoney.value = false // Stop animacji
+    }
 }
 
 // --- Pozostałe zmienne i funkcje (DiceBox, Configi, Navigation) ---
@@ -1585,12 +1763,120 @@ const rollSecondary = async (type) => {
         await diceBoxAttributes.roll('1d10')
 
         const roll = Math.floor(Math.random()*10)+1
-        // Logika tabelkowa (skopiowana z poprzedniego kodu, tutaj skrótowo wywołana)
-        // ... (Tu wklej funkcję calculateSecondaryStats z poprzedniej odpowiedzi) ...
-        // Używam mocka dla zwięzłości:
-        const val = (roll > 5) ? 12 : 10;
+        if (type === 'wounds') {
+            if (roll <=3 ) {
+                if (type === 'wounds') {
+                    switch (selectedRace.value.key) {
+                        case 'human':
+                            secondaryStats.value[type] = { val: 10, roll: roll }
+                            break;
+                        case 'elf':
+                            secondaryStats.value[type] = { val: 9, roll: roll }
+                            break;
+                        case 'dwarf':
+                            secondaryStats.value[type] = { val: 11, roll: roll }
+                            break;
+                        case 'halfling':
+                            secondaryStats.value[type] = { val: 8, roll: roll }
+                            break;
+                    }
+                }
 
-        secondaryStats.value[type] = { val: val, roll: roll }
+            } else if (roll > 3 && roll <= 6) {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 11, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 10, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 12, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 9, roll: roll }
+                        break;
+                }
+            } else if (roll > 6 && roll <= 9) {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 12, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 11, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 13, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 10, roll: roll }
+                        break;
+                }
+            } else {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 13, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 12, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 14, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 11, roll: roll }
+                        break;
+                }
+            }
+        } else {
+            if (roll <=4 ) {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 1, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 1, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                }
+
+            } else if (roll > 4 && roll <= 7) {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 3, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                }
+            } else {
+                switch (selectedRace.value.key) {
+                    case 'human':
+                        secondaryStats.value[type] = { val: 3, roll: roll }
+                        break;
+                    case 'elf':
+                        secondaryStats.value[type] = { val: 2, roll: roll }
+                        break;
+                    case 'dwarf':
+                        secondaryStats.value[type] = { val: 3, roll: roll }
+                        break;
+                    case 'halfling':
+                        secondaryStats.value[type] = { val: 3, roll: roll }
+                        break;
+                }
+            }
+        }
     } catch(e) { console.error(e) }
     finally { isRollingSecondary.value = false }
 }
@@ -3759,5 +4045,113 @@ defineExpose({ startCreation })
     color: #666;
     font-size: 0.8rem;
     font-style: italic;
+}
+
+.money-section {
+    margin-top: 1.5rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+}
+.detail-subtitle {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+}
+
+.money-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.coin-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1a1a1a;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.coin-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #000;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+.coin-slot.gold .coin-icon {
+    background: radial-gradient(circle, #ffd700, #b8860b);
+    border: 1px solid #ffd700;
+}
+
+.coin-slot.silver .coin-icon {
+    background: radial-gradient(circle, #c0c0c0, #7f7f7f);
+    border: 1px solid #c0c0c0;
+}
+
+.coin-slot.brass .coin-icon {
+    background: radial-gradient(circle, #cd7f32, #8b4513);
+    border: 1px solid #cd7f32;
+}
+
+.coin-value {
+    font-family: monospace;
+    font-size: 1.2rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.coin-placeholder {
+    color: #555;
+}
+
+.roll-money-btn {
+    margin-left: auto;
+    background: linear-gradient(to bottom, #d4af37, #b4941f);
+    border: 1px solid #ffd700;
+    color: #000;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    /* Flexbox do wyrównania ikony i tekstu */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.roll-money-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    /* Jeśli wylosowano (sukces), zmień tło na ciemne/zielone */
+    background: #2d2a25;
+    color: #4caf50;
+    border-color: #4caf50;
+}
+.spinning {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.roll-money-btn:hover:not(:disabled) {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
 </style>

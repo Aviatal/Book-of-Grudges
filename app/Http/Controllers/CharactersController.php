@@ -16,6 +16,7 @@ use App\Services\HeroService;
 use App\Services\TransactionsService;
 use Auth;
 use DB;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -395,6 +396,25 @@ class CharactersController extends Controller
         } catch (\Throwable $exception) {
             \Log::error('ERROR DURING GETTING RACES: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się pobrać rasy'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function createCharacter(Request $request)
+    {
+        try {
+            return response()->json($this->createCharacterService->createHero($request->all()), Response::HTTP_CREATED);
+        } catch (\InvalidArgumentException $exception) {
+            \Log::error('WOUNDS OR/AND FATE NOT FOUND IN REQUEST');
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (BadRequestException $exception) {
+            \Log::error('BAD REQUEST DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nieprawidłowe dane'], Response::HTTP_BAD_REQUEST);
+        } catch (AuthorizationException $exception) {
+            \Log::error('BAD REQUEST DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie jesteś zalogowany lub nastąpiło wylogowanie. Niestety musisz stworzyć postać ponownie'], Response::HTTP_FORBIDDEN);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się utworzyć postaci'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
