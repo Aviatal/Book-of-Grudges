@@ -17,12 +17,13 @@ class ProfessionsRepository
             ->when(!$rolledValue, function (Builder $query) use ($race,) {
                 $query->whereHas('startingProfessionRolls', function ($query) use ($race) {
                     $query->where('race', $race);
-                });
+                })
+                    ->orderBy('name');
             });
         if ($rolledValue) {
             return $professions->firstOrFail();
         }
-        return $professions->get();;
+        return $professions->get();
     }
 }
 
