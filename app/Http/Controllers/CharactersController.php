@@ -10,6 +10,7 @@ use App\Models\Hero;
 use App\Models\HeroInventory;
 use App\Models\Talent;
 use App\Models\Weapon;
+use App\Repositories\HeroesRepository;
 use App\Services\CreateCharacterService;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
@@ -26,26 +27,19 @@ use Symfony\Component\HttpFoundation\Response;
 class CharactersController extends Controller
 {
     public function __construct(
-        private HeroService $heroService,
-        private FortunePointSatisfactionService $fortunePointSatisfactionService,
-        private CreateCharacterService $createCharacterService
+        private readonly HeroService                     $heroService,
+        private readonly FortunePointSatisfactionService $fortunePointSatisfactionService,
+        private readonly CreateCharacterService          $createCharacterService,
+        private readonly HeroesRepository                $heroesRepository
     ) {}
 
-    public function getHero(int $userId)
+    public function getHero(int $userId): JsonResponse
     {
-        if ($userId !== Auth::user()->getAuthIdentifier()) {
-            abort(404);
+        try {
+            return response()->json($this->heroesRepository->getHero($userId));
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => 'Wystąpił błąd podczs pobierania bohatera'], 500);
         }
-
-        return response()->json(
-            Hero::with(
-                'previousProfession', 'currentProfession', 'description',
-                'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-                'skills', 'talents', 'inventory'
-            )
-                ->where('user_id', $userId)
-                ->first()
-        );
     }
 
     public function index(Request $request, int $id)
@@ -383,6 +377,16 @@ class CharactersController extends Controller
         } catch (ModelNotFoundException $exception) {
             \Log::error('PROFESSION NOT FOUND. Request data:' . print_r($request->all(), true) . $exception->getMessage());
             return response()->json(['message' => 'Nie znaleziono profesji tego wyniku rzutu.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING ROLLED PROFESSION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getRaceProfessions(string $race): JsonResponse
+    {
+        try {
+            return response()->json($this->createCharacterService->getFormatedRolledProfession($race), Response::HTTP_OK);
         } catch (\Throwable $exception) {
             \Log::error('ERROR DURING GETTING ROLLED PROFESSION: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);

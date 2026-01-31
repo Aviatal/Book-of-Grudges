@@ -63,11 +63,9 @@
 
                 <div class="profession-rolling-section">
                     <div class="dice-roll-container">
-                        <!-- Kontener DiceBox -->
                         <div id="dice-box-canvas" class="dice-canvas"></div>
 
-                        <!-- Wyniki rzutu -->
-                        <div class="dice-result-display" v-if="professionRoll > 0 && !isRollingProfession">
+                        <div class="dice-result-display" v-if="professionRoll > 0 && !isRollingProfession && !isSelectingProfession">
                             <div class="total-result">
                                 <span class="total-label">Wynik:</span>
                                 <span class="total-value">{{ professionRoll }}</span>
@@ -82,7 +80,15 @@
                                 :disabled="isRollingProfession"
                             >
                                 <span class="btn-icon">🎲</span>
-                                {{ isRollingProfession ? 'Rzucam kostkami...' : 'Rzuć kostkami' }}
+                                {{ isRollingProfession ? 'Rzucam...' : 'Wylosuj (Rzut 1k100)' }}
+                            </button>
+
+                            <button
+                                v-if="!selectedProfession && !isRollingProfession"
+                                class="manual-select-btn"
+                                @click="openProfessionSelection"
+                            >
+                                Lub wybierz z listy
                             </button>
 
                             <button
@@ -91,8 +97,37 @@
                                 v-if="selectedProfession && !isRollingProfession"
                             >
                                 <span class="btn-icon">🔄</span>
-                                Przerzuć
+                                Przerzuć (Losuj)
                             </button>
+
+                            <button
+                                v-if="selectedProfession && !isRollingProfession"
+                                class="manual-select-link"
+                                @click="openProfessionSelection"
+                            >
+                                Zmień (Wybierz z listy)
+                            </button>
+                        </div>
+
+                        <div v-if="isSelectingProfession" class="profession-selector-overlay">
+                            <div class="profession-selector-modal">
+                                <div class="modal-header">
+                                    <h3>Wybierz profesję</h3>
+                                    <button class="close-modal-btn" @click="isSelectingProfession = false">✕</button>
+                                </div>
+
+                                <div class="professions-list">
+                                    <div
+                                        v-for="prof in availableProfessionsList"
+                                        :key="prof.id"
+                                        class="prof-item"
+                                        @click="selectManualProfession(prof)"
+                                    >
+                                        <span class="prof-name">{{ prof.name }}</span>
+                                        <span class="prof-class">{{ prof.class }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <transition name="fade-slide">
@@ -1351,7 +1386,30 @@ const formatTalentName = (item) => {
 
     return additional ? `${name} (${additional})` : name;
 }
+const isSelectingProfession = ref(false) // Czy otwarte okno wyboru
+const availableProfessionsList = ref([])
+const openProfessionSelection = async () => {
+    if (!selectedRace.value) return
 
+    // Pobierz profesje dla rasy (jeśli jeszcze ich nie masz)
+    // Zakładam, że masz endpoint lub dane w `selectedRace`
+    // Jeśli nie, musisz dodać zapytanie API
+    try {
+        const response = await axios.get(`/create-character/get-professions/${selectedRace.value.key}`)
+        availableProfessionsList.value = response.data
+        isSelectingProfession.value = true
+    } catch (e) {
+        console.error('Błąd pobierania profesji', e)
+        // Fallback: mock lub komunikat
+    }
+}
+
+// Funkcja zatwierdzająca wybór z listy
+const selectManualProfession = (profession) => {
+    selectedProfession.value = profession
+    professionRoll.value = 0 // Oznaczamy, że nie było rzutu (lub 0)
+    isSelectingProfession.value = false // Zamykamy modal
+}
 // --- Finish Creation ---
 const finishCreation = () => {
     // Funkcja pomocnicza: Znajdź obiekt źródłowy na podstawie wybranego klucza string
@@ -2265,36 +2323,37 @@ defineExpose({ startCreation })
 .roll-controls {
     position: relative;
     z-index: 10;
-    margin-top: auto;
+    margin-top: auto; /* Pcha przyciski na sam dół */
     padding-bottom: 2rem;
     display: flex;
-    gap: 1rem;
-    width: 100%;
-    justify-content: center;
+    flex-direction: column; /* Ważne: przyciski jeden pod drugim */
+    align-items: center;    /* Centrowanie */
+    gap: 10px;              /* Odstępy między przyciskami */
+    width: 80%;             /* Ograniczenie szerokości */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .roll-profession-btn {
+    width: 100%;
     background: linear-gradient(to bottom, #d4af37, #b4941f);
     border: 1px solid #ffd700;
     color: #1a1a1a;
-    padding: 12px 30px;
+    padding: 12px;
     font-weight: bold;
     font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     border-radius: 4px;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
     transition: 0.2s;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
-.roll-profession-btn:hover:not(:disabled) {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-}
+.roll-profession-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); }
 
 .roll-profession-btn:disabled {
     filter: grayscale(1);
@@ -2303,22 +2362,20 @@ defineExpose({ startCreation })
 }
 
 .reroll-btn {
-    background: rgba(0, 0, 0, 0.7);
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
     border: 1px solid #d4af37;
     color: #d4af37;
-    padding: 10px 20px;
+    padding: 10px;
     font-weight: bold;
     cursor: pointer;
     border-radius: 4px;
-    transition: 0.2s;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 }
-
-.reroll-btn:hover {
-    background: rgba(212, 175, 55, 0.2);
-}
+.reroll-btn:hover { background: rgba(212, 175, 55, 0.2); }
 
 /* --- PRAWA KOLUMNA: OPIS PROFESJI --- */
 .profession-display-container {
@@ -4154,4 +4211,88 @@ defineExpose({ startCreation })
 .roll-money-btn:hover:not(:disabled) {
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
+.manual-select-btn {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.2s;
+}
+.manual-select-btn:hover { border-color: #d4af37; color: #d4af37; background: rgba(212, 175, 55, 0.1); }
+
+.manual-select-link {
+    background: none;
+    border: none;
+    color: #888;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+.manual-select-link:hover { color: #d4af37; }
+
+/* MODAL */
+.profession-selector-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); /* Ciemniejsze tło */
+    z-index: 50; /* Wyżej niż kostki */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    border-radius: 12px; /* Zaokrąglenie takie jak kontener */
+}
+
+.profession-selector-modal {
+    background: #151515;
+    border: 1px solid #d4af37;
+    width: 90%;
+    max-height: 80%;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(0,0,0,1);
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.modal-header h3 { margin: 0; color: #d4af37; font-size: 1rem; }
+.close-modal-btn { background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; }
+.close-modal-btn:hover { color: #fff; }
+
+.professions-list {
+    overflow-y: auto;
+    padding: 0.5rem;
+    /* Pasek przewijania */
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #222;
+}
+
+.prof-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+}
+.prof-item:last-child { border-bottom: none; }
+.prof-item:hover { background: rgba(212, 175, 55, 0.15); }
+
+.prof-name { font-weight: bold; color: #e4d8b4; font-size: 0.9rem; }
+.prof-class { font-size: 0.7rem; color: #666; text-transform: uppercase; }
 </style>

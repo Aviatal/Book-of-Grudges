@@ -3,16 +3,26 @@
 namespace App\Repositories;
 
 use App\Models\Profession;
-use App\Models\Race;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ProfessionsRepository
 {
-    public function getRolledProfession(string $race, int $rolledValue): Profession
+    public function getRolledProfession(string $race, ?int $rolledValue): Profession|Collection
     {
-        return Profession::with(['skills.skill', 'talents.talent', 'startingProfessionRolls', 'characteristics.characteristic', 'equipments.item.tradeable'])
-            ->rolledProfession($race, $rolledValue)
-            ->firstOrFail();
+        $professions = Profession::with(['skills.skill', 'talents.talent', 'startingProfessionRolls', 'characteristics.characteristic', 'equipments.item.tradeable'])
+            ->when($rolledValue, function (Builder $query) use ($race, $rolledValue) {
+                $query->rolledProfession($race, $rolledValue);
+            })
+            ->when(!$rolledValue, function (Builder $query) use ($race,) {
+                $query->whereHas('startingProfessionRolls', function ($query) use ($race) {
+                    $query->where('race', $race);
+                });
+            });
+        if ($rolledValue) {
+            return $professions->firstOrFail();
+        }
+        return $professions->get();;
     }
 }
 
