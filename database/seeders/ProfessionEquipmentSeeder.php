@@ -39,10 +39,10 @@ class ProfessionEquipmentSeeder extends Seeder
                     ['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null]
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']
                 ],
                 [
                     ['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']
@@ -149,8 +149,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Goniec' => [
                 [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $commonItems['Mikstura lecznicza']->marketplaceItem->id, 'item_name' => null]],
                 [['item_id' => $commonItems['Talizman szczęścia']->marketplaceItem->id, 'item_name' => null]],
@@ -185,8 +185,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Kozak kislevski' => [
                 [['item_id' => $weapons['Łuk']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
                 [['item_id' => $weapons['Broń dwuręczna']->marketplaceItem->id, 'item_name' => 'Dwuręczny topór']],
                 [['item_id' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kolczuga']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
@@ -199,8 +199,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Łowca' => [
                 [['item_id' => $weapons['Długi łuk']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
                 [
                     ['item_id' => $commonItems['Potrzask']->marketplaceItem->id, 'item_name' => null],
                     ['item_id' => $commonItems['Wnyki']->marketplaceItem->id, 'item_name' => null]
@@ -208,8 +208,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Łowca nagród' => [
                 [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
                 [['item_id' => $weapons['Sieć']->marketplaceItem->id, 'item_name' => null]],
                 [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany Kaftan']],
                 [['item_id' => $armors['Hełm-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana hełm']],
@@ -223,8 +223,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Mytnik' => [
                 [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
                 [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
                 [['item_id' => $armors['Kaftan-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzany kaftan']],
                 [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
@@ -232,8 +232,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Najemnik' => [
                 [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
                 [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
@@ -310,12 +310,12 @@ class ProfessionEquipmentSeeder extends Seeder
                     ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
-                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał'],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
-                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał'],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']
                 ],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
                 [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
@@ -330,8 +330,8 @@ class ProfessionEquipmentSeeder extends Seeder
                     ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
                 ],
                 [
-                    ['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null],
-                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => 'Amunicja na 10 strzałów'],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']
                 ],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana Kurta']],
             ],
@@ -386,8 +386,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Strażnik dróg' => [
                 [['item_id' => $weapons['Pistolet']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Proch strzelniczy']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => 'Amunicja na 10 strzałów']],
+                [['item_id' => $ammunition['Proch strzelniczy']->marketplaceItem->id, 'item_name' => 'Zapas prochu na 10 kul']],
                 [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $weapons['Tarcza']->marketplaceItem->id, 'item_name' => null]],
@@ -449,8 +449,8 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Tarczownik' => [
                 [['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
+                [['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']],
                 [['item_id' => $armors['Kolczuga-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kolczuga']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $armors['Nogawice-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzane nogawice']],
@@ -479,13 +479,13 @@ class ProfessionEquipmentSeeder extends Seeder
             ],
             'Wojownik klanowy' => [
                 [['item_id' => $weapons['Elfi łuk']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
+                [['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
             ],
             'Woźnica' => [
                 [['item_id' => $weapons['Garłacz']->marketplaceItem->id, 'item_name' => null]],
-                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => null]],
+                [['item_id' => $ammunition['Kule do broni palnej']->marketplaceItem->id, 'item_name' => 'Amunicja na 10 strzałów']],
                 [['item_id' => $armors['Kaftan-KOLCZA']->marketplaceItem->id, 'item_name' => 'Kaftan kolczy']],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $commonItems['Instrument muzyczny']->marketplaceItem->id, 'item_name' => 'Róg woźnicy']],
@@ -536,12 +536,12 @@ class ProfessionEquipmentSeeder extends Seeder
                     ['item_id' => $weapons['Kusza']->marketplaceItem->id, 'item_name' => null]
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
-                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał'],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']
                 ],
                 [
-                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => null],
-                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => null]
+                    ['item_id' => $ammunition['Strzały']->marketplaceItem->id, 'item_name' => '5 strzał'],
+                    ['item_id' => $ammunition['Bełty']->marketplaceItem->id, 'item_name' => '5 bełtów']
                 ],
                 [['item_id' => $armors['Kurta-SKÓRZANA']->marketplaceItem->id, 'item_name' => 'Skórzana kurta']],
                 [['item_id' => $commonItems['Lina']->marketplaceItem->id, 'item_name' => null]],
