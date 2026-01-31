@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hero extends Model
 {
-    use HasFactory, HasManyKeyBy, BelongsToManyKeyBy;
+    use HasFactory, HasManyKeyBy, BelongsToManyKeyBy, SoftDeletes;
     protected $guarded = ['id'];
     const int GOLD_CROWS_TO_BRASS_ENCOUNTER = 240;
     const int SILVER_SHILLINGS_TO_BRASS_ENCOUNTER = 12;

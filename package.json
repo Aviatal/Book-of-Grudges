@@ -19,6 +19,7 @@
         "vite-svg-loader": "^5.1.0"
     },
     "dependencies": {
+        "@3d-dice/dice-box": "^1.1.4",
         "@laravel/echo-vue": "^2.2.6",
         "@vitejs/plugin-vue": "^5.2.1",
         "mitt": "^3.0.1",

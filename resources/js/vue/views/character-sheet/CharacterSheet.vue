@@ -40,6 +40,9 @@
                 :inventory-data="hero.inventory"
                 @get-hero="getHero"
             ></hero-inventory-section>
+            <hero-options-section
+                :hero-id="hero.id"
+            ></hero-options-section>
             <hero-watcher
                 :hero-id="hero.id"
                 @add-new-item="handleNewItem"
@@ -47,12 +50,29 @@
                 @fortune-points-changed="handleAddFortunePoints"
             ></hero-watcher>
         </template>
-        <template v-else>
+        <template v-else-if="isLoading">
             <div class="text-center py-8">
                 <v-progress-circular indeterminate color="amber"></v-progress-circular>
                 <p class="mt-4 text-amber-400">Ładowanie danych bohatera...</p>
             </div>
         </template>
+        <template v-else>
+            <div class="text-center py-8">
+                <button
+                    class="create-hero-btn"
+                    @click="startHeroCreation"
+                >
+                    <span class="btn-icon">⚔️</span>
+                    Stwórz bohatera
+                </button>
+            </div>
+        </template>
+
+        <create-hero-view
+            ref="heroCreationRef"
+            @hero-created="handleHeroCreated"
+            @creation-closed="handleCreationClosed"
+        />
     </div>
 </template>
 
@@ -65,6 +85,7 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
+import HeroOptionsSection from "./sections/HeroOptionsSection.vue";
 import HeroWatcher from "../../components/HeroWatcher.vue";
 import {CharacteristicPivot, Hero} from "../../../types/Hero";
 import {onMounted, ref} from "vue";
@@ -74,6 +95,7 @@ import { emitter } from '../../../emitter'
 import {MarketplaceItem} from "../../../types/MarketplaceItem";
 import {Weapon} from "../../../types/Weapon";
 import {Armor} from "../../../types/Armor";
+import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 
 
 const props = defineProps({
@@ -89,12 +111,16 @@ interface wealthUpdateObject {
 const isLoading = ref<boolean>(true);
 const hero = ref<Hero | null>(null);
 const toast = useToast();
+const heroCreationRef = ref(null)
 
 const getHero = async(): Promise<void> => {
     isLoading.value = true;
     axios.get('karta-postaci/' + props.userId + '/get-hero')
         .then(response => {
             hero.value = response.data;
+            if (Object.keys(hero.value).length === 0) {
+                hero.value = null;
+            }
         })
         .catch(error => {
             console.log(error);
@@ -104,6 +130,25 @@ const getHero = async(): Promise<void> => {
             isLoading.value = false;
         })
 }
+
+const startHeroCreation = () => {
+    heroCreationRef.value?.startCreation()
+}
+
+const handleHeroCreated = (heroData: any) => {
+    axios.post('create-character', heroData)
+        .then(response => {
+            hero.value = response.data;
+        })
+        .catch(error => {
+            toast.error(error.response.data.message)
+        })
+}
+
+const handleCreationClosed = () => {
+    console.log('Tworzenie bohatera anulowane')
+}
+
 const handleAddCharacteristic = (characteristicName: string, characteristic: CharacteristicPivot, changeCurrentWounds: number, spentExperience: number) => {
     if (!hero.value) {
         return;
@@ -177,3 +222,31 @@ onMounted(() => {
     })
 })
 </script>
+
+<style scoped>
+.create-hero-btn {
+    background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
+    color: #2a2926;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: 'Cinzel', serif;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.create-hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+}
+
+.btn-icon {
+    font-size: 1.3rem;
+}
+</style>

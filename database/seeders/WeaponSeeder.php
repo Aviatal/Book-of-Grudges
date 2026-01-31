@@ -12,6 +12,7 @@ class WeaponSeeder extends Seeder
      */
     public function run(): void
     {
+        Weapon::truncate();
         Weapon::insert([
                 [
                     'is_ranged' => 0,
@@ -19,11 +20,12 @@ class WeaponSeeder extends Seeder
                     'price' => null,
                     'loading' => null,
                     'category' => 'zwykła',
-                    'power' => 'S-4',
+                    'power' => -4,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => null
+                    'availability' => null,
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -31,11 +33,12 @@ class WeaponSeeder extends Seeder
                     'price' => 20 * 240,
                     'loading' => 200,
                     'category' => 'zwykła',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 0,
@@ -43,11 +46,12 @@ class WeaponSeeder extends Seeder
                     'price' => null,
                     'loading' => 35,
                     'category' => 'zwykła',
-                    'power' => 'S-4',
+                    'power' => -4,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => null
+                    'availability' => null,
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -55,11 +59,12 @@ class WeaponSeeder extends Seeder
                     'price' => 10 * 240,
                     'loading' => 50,
                     'category' => 'zwykła',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 0,
@@ -67,11 +72,12 @@ class WeaponSeeder extends Seeder
                     'price' => 15 * 240,
                     'loading' => 175,
                     'category' => 'dwuręczna',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 0,
@@ -79,11 +85,12 @@ class WeaponSeeder extends Seeder
                     'price' => 3 * 12,
                     'loading' => 50,
                     'category' => 'zwykła',
-                    'power' => 'S-2',
+                    'power' => -2,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'duża'
+                    'availability' => 'duża',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -91,11 +98,12 @@ class WeaponSeeder extends Seeder
                     'price' => 15 * 240,
                     'loading' => 100,
                     'category' => 'kawaleryjska',
-                    'power' => 'S+1',
+                    'power' => '1',
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'rzadka'
+                    'availability' => 'rzadka',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -103,11 +111,12 @@ class WeaponSeeder extends Seeder
                     'price' => 15 * 240,
                     'loading' => 95,
                     'category' => 'korbacz',
-                    'power' => 'S+1',
+                    'power' => '1',
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -115,11 +124,12 @@ class WeaponSeeder extends Seeder
                     'price' => 20 * 240,
                     'loading' => 75,
                     'category' => 'kawaleryjska',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 0,
@@ -127,11 +137,12 @@ class WeaponSeeder extends Seeder
                     'price' => 2 * 240,
                     'loading' => 10,
                     'category' => 'parująca',
-                    'power' => 'S-4',
+                    'power' => -4,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -139,11 +150,12 @@ class WeaponSeeder extends Seeder
                     'price' => 5 * 240,
                     'loading' => 40,
                     'category' => 'parująca',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -151,11 +163,12 @@ class WeaponSeeder extends Seeder
                     'price' => 15 * 240,
                     'loading' => 60,
                     'category' => 'korbacz',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 0,
@@ -163,11 +176,12 @@ class WeaponSeeder extends Seeder
                     'price' => 4 * 240,
                     'loading' => 15,
                     'category' => 'parująca',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -175,23 +189,38 @@ class WeaponSeeder extends Seeder
                     'price' => 18 * 240,
                     'loading' => 40,
                     'category' => 'szermiercza',
-                    'power' => 'S-1',
+                    'power' => -1,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
-                    'name' => 'Rękawica/kastet',
+                    'name' => 'Rękawica',
                     'price' => 1 * 240,
                     'loading' => 1,
                     'category' => 'zwykła',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przecietna'
+                    'availability' => 'przecietna',
+                    'add_hero_power' => true
+                ],
+                [
+                    'is_ranged' => 0,
+                    'name' => 'Kastet',
+                    'price' => 1 * 240,
+                    'loading' => 1,
+                    'category' => 'zwykła',
+                    'power' => -3,
+                    'short_range' => null,
+                    'long_range' => null,
+                    'reload_time' => null,
+                    'availability' => 'przecietna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -199,11 +228,12 @@ class WeaponSeeder extends Seeder
                     'price' => 18 * 240,
                     'loading' => 40,
                     'category' => 'szermiercza',
-                    'power' => 'S-2',
+                    'power' => -2,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'rzadka'
+                    'availability' => 'rzadka',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -211,11 +241,12 @@ class WeaponSeeder extends Seeder
                     'price' => 1 * 240,
                     'loading' => 10,
                     'category' => 'zwykła',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -223,11 +254,12 @@ class WeaponSeeder extends Seeder
                     'price' => 10 * 240,
                     'loading' => 50,
                     'category' => 'zwykła',
-                    'power' => 'S-2',
+                    'power' => -2,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 0,
@@ -235,11 +267,12 @@ class WeaponSeeder extends Seeder
                     'price' => 10 * 240,
                     'loading' => 50,
                     'category' => 'zwykła',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => null,
                     'long_range' => null,
                     'reload_time' => null,
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -251,7 +284,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 8,
                     'long_range' => null,
                     'reload_time' => 'Akcja',
-                    'availability' => 'duża'
+                    'availability' => 'duża',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -259,11 +293,12 @@ class WeaponSeeder extends Seeder
                     'price' => 2 * 240,
                     'loading' => 40,
                     'category' => 'unieruchamiająca',
-                    'power' => 'S-4',
+                    'power' => -4,
                     'short_range' => 6,
                     'long_range' => null,
                     'reload_time' => 'Akcja',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -271,11 +306,12 @@ class WeaponSeeder extends Seeder
                     'price' => 7 * 12,
                     'loading' => 20,
                     'category' => 'unieruchamiająca',
-                    'power' => 'S-1',
+                    'power' => -1,
                     'short_range' => 8,
                     'long_range' => 16,
                     'reload_time' => 'Akcja',
-                    'availability' => 'sporadyczna'
+                    'availability' => 'sporadyczna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -287,7 +323,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 30,
                     'long_range' => 60,
                     'reload_time' => 'Akcja',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -299,7 +336,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 36,
                     'long_range' => 72,
                     'reload_time' => 'Akcja',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -311,7 +349,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 32,
                     'long_range' => null,
                     'reload_time' => '3 Rundy',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -319,11 +358,12 @@ class WeaponSeeder extends Seeder
                     'price' => null,
                     'loading' => 10,
                     'category' => 'zwykła',
-                    'power' => 'S-4',
+                    'power' => -4,
                     'short_range' => 6,
                     'long_range' => null,
                     'reload_time' => 'Akcja',
-                    'availability' => null
+                    'availability' => null,
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -335,7 +375,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 16,
                     'long_range' => 32,
                     'reload_time' => 'Akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -347,7 +388,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 8,
                     'long_range' => 16,
                     'reload_time' => 'Runda',
-                    'availability' => 'rzadka'
+                    'availability' => 'rzadka',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -359,7 +401,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 16,
                     'long_range' => 32,
                     'reload_time' => 'natychmiastowa',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -371,7 +414,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 30,
                     'long_range' => 60,
                     'reload_time' => 'runda',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -383,7 +427,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 24,
                     'long_range' => 48,
                     'reload_time' => 'akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -395,7 +440,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 48,
                     'long_range' => 96,
                     'reload_time' => '2 rundy',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -403,11 +449,12 @@ class WeaponSeeder extends Seeder
                     'price' => 3 * 240,
                     'loading' => 10,
                     'category' => 'rzucana',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => 6,
                     'long_range' => 12,
                     'reload_time' => 'akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -415,11 +462,12 @@ class WeaponSeeder extends Seeder
                     'price' => 3 * 240,
                     'loading' => 10,
                     'category' => 'rzucana',
-                    'power' => 'S-3',
+                    'power' => -3,
                     'short_range' => 6,
                     'long_range' => 12,
                     'reload_time' => 'akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -427,11 +475,12 @@ class WeaponSeeder extends Seeder
                     'price' => 10 * 240,
                     'loading' => 50,
                     'category' => 'zwykła',
-                    'power' => 'S',
+                    'power' => 0,
                     'short_range' => 8,
                     'long_range' => null,
                     'reload_time' => 'akcja',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -443,7 +492,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 8,
                     'long_range' => 16,
                     'reload_time' => '2 rundy',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -455,7 +505,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 8,
                     'long_range' => 16,
                     'reload_time' => 'natychmiastowa',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -467,7 +518,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 16,
                     'long_range' => 32,
                     'reload_time' => 'akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -479,7 +531,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 24,
                     'long_range' => 48,
                     'reload_time' => 'akcja',
-                    'availability' => 'rzadka'
+                    'availability' => 'rzadka',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -491,7 +544,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 24,
                     'long_range' => 48,
                     'reload_time' => '2 rundy',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -503,7 +557,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 4,
                     'long_range' => 8,
                     'reload_time' => 'runda',
-                    'availability' => 'duża'
+                    'availability' => 'duża',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -515,7 +570,8 @@ class WeaponSeeder extends Seeder
                     'short_range' => 24,
                     'long_range' => 48,
                     'reload_time' => 'natychmiastowa',
-                    'availability' => 'znikoma'
+                    'availability' => 'znikoma',
+                    'add_hero_power' => false
                 ],
                 [
                     'is_ranged' => 1,
@@ -523,11 +579,25 @@ class WeaponSeeder extends Seeder
                     'price' => 5 * 240,
                     'loading' => 40,
                     'category' => 'rzucana',
-                    'power' => 'S-2',
+                    'power' => -2,
                     'short_range' => 8,
                     'long_range' => null,
                     'reload_time' => 'akcja',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => true
+                ],
+                [
+                    'is_ranged' => 1,
+                    'name' => 'Nóż do rzucania',
+                    'price' => 5 * 240,
+                    'loading' => 40,
+                    'category' => 'rzucana',
+                    'power' => -2,
+                    'short_range' => 8,
+                    'long_range' => null,
+                    'reload_time' => 'akcja',
+                    'availability' => 'mała',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -535,11 +605,12 @@ class WeaponSeeder extends Seeder
                     'price' => 5 * 240,
                     'loading' => 40,
                     'category' => 'rzucana',
-                    'power' => 'S-2',
+                    'power' => -2,
                     'short_range' => 8,
                     'long_range' => null,
                     'reload_time' => 'akcja',
-                    'availability' => 'mała'
+                    'availability' => 'mała',
+                    'add_hero_power' => true
                 ],
                 [
                     'is_ranged' => 1,
@@ -547,11 +618,12 @@ class WeaponSeeder extends Seeder
                     'price' => 25 * 12,
                     'loading' => 30,
                     'category' => 'zwykła',
-                    'power' => 'S-1',
+                    'power' => -1,
                     'short_range' => 8,
                     'long_range' => 16,
                     'reload_time' => 'akcja',
-                    'availability' => 'przeciętna'
+                    'availability' => 'przeciętna',
+                    'add_hero_power' => true
                 ],
             ]
         );

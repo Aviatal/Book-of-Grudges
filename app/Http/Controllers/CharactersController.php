@@ -10,40 +10,36 @@ use App\Models\Hero;
 use App\Models\HeroInventory;
 use App\Models\Talent;
 use App\Models\Weapon;
+use App\Repositories\HeroesRepository;
+use App\Services\CreateCharacterService;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
 use App\Services\TransactionsService;
 use Auth;
 use DB;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
 
 class CharactersController extends Controller
 {
-    private HeroService $heroService;
-    private FortunePointSatisfactionService $fortunePointSatisfactionService;
-    public function __construct()
-    {
-        $this->heroService = new HeroService();
-        $this->fortunePointSatisfactionService = new FortunePointSatisfactionService();
-    }
+    public function __construct(
+        private readonly HeroService                     $heroService,
+        private readonly FortunePointSatisfactionService $fortunePointSatisfactionService,
+        private readonly CreateCharacterService          $createCharacterService,
+        private readonly HeroesRepository                $heroesRepository
+    ) {}
 
-    public function getHero(int $userId)
+    public function getHero(int $userId): JsonResponse
     {
-        if ($userId !== Auth::user()->getAuthIdentifier()) {
-            abort(404);
+        try {
+            return response()->json($this->heroesRepository->getHero($userId));
+        } catch (\Throwable $exception) {
+            return response()->json(['message' => 'Wystąpił błąd podczas pobierania bohatera'], 500);
         }
-
-        return response()->json(
-            Hero::with(
-                'previousProfession', 'currentProfession', 'description',
-                'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-                'skills', 'talents', 'inventory'
-            )
-                ->where('user_id', $userId)
-                ->first()
-        );
     }
 
     public function index(Request $request, int $id)
@@ -110,7 +106,7 @@ class CharactersController extends Controller
             ]);
             $changeCurrentWounds = 0;
             if (
-                $characteristic['short_name'] === 'Zyw' &&
+                $characteristic['short_name'] === 'Żyw' &&
                 $hero->getRelation('characteristic')[$characteristic['short_name']]->pivot->current_value === $hero->current_wounds
             ) {
                 $hero->update(['current_wounds' => $characteristic['pivot']['current_value']]);
@@ -374,6 +370,78 @@ class CharactersController extends Controller
         } catch (\Throwable $exception) {
             \Log::error('ERROR LOGGING FORTUNE POINTS SATISFACTION: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się zapisać oceny punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getRolledProfession(Request $request): JsonResponse
+    {
+        try {
+            if (!$request->query('race') || !$request->query('rolledValue')) {
+                throw new BadRequestException('Nie przesłano wymaganych danych');
+            }
+            return response()->json($this->createCharacterService->getFormatedRolledProfession($request->query('race'), $request->query('rolledValue')), Response::HTTP_OK);
+        } catch (ModelNotFoundException $exception) {
+            \Log::error('PROFESSION NOT FOUND. Request data:' . print_r($request->all(), true) . $exception->getMessage());
+            return response()->json(['message' => 'Nie znaleziono profesji tego wyniku rzutu.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING ROLLED PROFESSION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getRaceProfessions(string $race): JsonResponse
+    {
+        try {
+            return response()->json($this->createCharacterService->getFormatedRolledProfession($race), Response::HTTP_OK);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING ROLLED PROFESSION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać profesji'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getRaces(): JsonResponse
+    {
+        try {
+            return response()->json($this->createCharacterService->getRaces(), Response::HTTP_OK);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DURING GETTING RACES: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się pobrać rasy'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function createCharacter(Request $request)
+    {
+        try {
+            return response()->json($this->createCharacterService->createHero($request->all()), Response::HTTP_CREATED);
+        } catch (\InvalidArgumentException $exception) {
+            \Log::error('WOUNDS OR/AND FATE NOT FOUND IN REQUEST');
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (BadRequestException $exception) {
+            \Log::error('BAD REQUEST DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nieprawidłowe dane'], Response::HTTP_BAD_REQUEST);
+        } catch (AuthorizationException $exception) {
+            \Log::error('BAD REQUEST DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie jesteś zalogowany lub nastąpiło wylogowanie. Niestety musisz stworzyć postać ponownie'], Response::HTTP_FORBIDDEN);
+        } catch (\Throwable $exception) {
+            dd($exception);
+            \Log::error('ERROR DURING CHARACTER CREATION: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się utworzyć postaci'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function deleteHero(Hero $hero): JsonResponse
+    {
+        try {
+            if ($hero->user_id !== Auth::id()) {
+                throw new AuthorizationException('Nie masz uprawnień do usunięcia tego bohatera');
+            }
+            $hero->delete();
+            return response()->json(['message' => 'Bohater został usunięty'], Response::HTTP_OK);
+        } catch (AuthorizationException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_FORBIDDEN);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DELETING HERO: ' . $exception->getMessage());
+            return response()->json(['message' => 'Wystąpił błąd podczas usuwania bohatera'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

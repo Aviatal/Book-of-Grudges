@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             ArmorsSeeder::class,
             SkillsSeeder::class,
             TalentsSeeder::class,
+            StartingProfessionRollSeeder::class,
+            ProfessionEquipmentSeeder::class,
         ]);
     }
 }

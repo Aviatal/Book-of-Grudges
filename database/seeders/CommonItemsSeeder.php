@@ -43,7 +43,17 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 25
             ],
             [
+                'name' => 'Szaty kapłańskie',
+                'price' => 3600,
+                'loading' => 25
+            ],
+            [
                 'name' => 'Kostium',
+                'price' => 1200,
+                'loading' => 10
+            ],
+            [
+                'name' => 'Kostium (cyrkowca)',
                 'price' => 1200,
                 'loading' => 10
             ],
@@ -53,7 +63,17 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 15
             ],
             [
+                'name' => 'Mundur',
+                'price' => 3600,
+                'loading' => 15
+            ],
+            [
                 'name' => 'Strój szlachecki',
+                'price' => 12000,
+                'loading' => 30
+            ],
+            [
+                'name' => 'Liberia',
                 'price' => 12000,
                 'loading' => 30
             ],
@@ -155,6 +175,11 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 5
             ],
             [
+                'name' => 'Butelka spirytusu',
+                'price' => 10,
+                'loading' => 5
+            ],
+            [
                 'name' => 'Wino pospolite',
                 'price' => 12,
                 'loading' => 5
@@ -243,6 +268,11 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 20
             ],
             [
+                'name' => 'Latarnia na drągu',
+                'price' => 1800,
+                'loading' => 30
+            ],
+            [
                 'name' => 'Latarnia sztormowa',
                 'price' => 2880,
                 'loading' => 30
@@ -298,6 +328,11 @@ class CommonItemsSeeder extends Seeder
                 'name' => 'Kłódka dobrej jakości',
                 'price' => 2400,
                 'loading' => 5
+            ],
+            [
+                'name' => 'Zamykana na kłódkę skrzynia',
+                'price' => 4800,
+                'loading' => 20
             ],
             [
                 'name' => 'Kłódka zwykłej jakości',
@@ -466,6 +501,21 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 50
             ],
             [
+                'name' => 'Narzędzia (rzemieślnika)',
+                'price' => 12000,
+                'loading' => 50
+            ],
+            [
+                'name' => 'Narzędzia (kuglarza)',
+                'price' => 12000,
+                'loading' => 50
+            ],
+            [
+                'name' => 'Narzędzia (cyrulika)',
+                'price' => 12000,
+                'loading' => 50
+            ],
+            [
                 'name' => 'Potrzask',
                 'price' => 12,
                 'loading' => 2
@@ -476,9 +526,19 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 5
             ],
             [
+                'name' => 'Wosk do pieczęci',
+                'price' => 2400,
+                'loading' => 5
+            ],
+            [
                 'name' => 'Sztaba metalu',
                 'price' => 300,
                 'loading' => 20
+            ],
+            [
+                'name' => 'Pułapka na szczury',
+                'price' => 200,
+                'loading' => 5
             ],
             [
                 'name' => 'Wnyki',
@@ -743,7 +803,12 @@ class CommonItemsSeeder extends Seeder
                 'loading' => 0
             ],
             [
-                'name' => 'Koń pociągowy lub muł',
+                'name' => 'Koń pociągowy',
+                'price' => 6000,
+                'loading' => 0
+            ],
+            [
+                'name' => 'Muł',
                 'price' => 6000,
                 'loading' => 0
             ],
@@ -770,6 +835,11 @@ class CommonItemsSeeder extends Seeder
             [
                 'name' => 'Owca',
                 'price' => 480,
+                'loading' => 0
+            ],
+            [
+                'name' => 'Pies',
+                'price' => 350,
                 'loading' => 0
             ],
             [
@@ -855,6 +925,11 @@ class CommonItemsSeeder extends Seeder
             [
                 'name' => 'Księga wiedzy tajemnej',
                 'price' => 120000,
+                'loading' => 0
+            ],
+            [
+                'name' => 'Ilustrowana księga',
+                'price' => 50000,
                 'loading' => 0
             ],
             [

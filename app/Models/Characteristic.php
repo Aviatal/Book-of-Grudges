@@ -15,4 +15,25 @@ class Characteristic extends Model
         'BASIC' => 100,
         'OUTSIDE_SCHEMA' => 200
     ];
+
+    const array PRIMARY_CHARACTERISTICS = [
+        'WW',
+        'US',
+        'K',
+        'ODP',
+        'ZR',
+        'INT',
+        'SW',
+        'OGD'
+    ];
+    const array SECONDARY_CHARACTERISTICS = [
+        'A',
+        'Żyw',
+        'S',
+        'Wt',
+        'Sz',
+        'Mag',
+        'PO',
+        'PP'
+    ];
 }
