@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class HeroesRepository
 {
-    public function getHero(int $userId): Hero
+    public function getHero(int $userId): ?Hero
     {
         if ($userId !== Auth::user()->getAuthIdentifier()) {
             abort(404);
