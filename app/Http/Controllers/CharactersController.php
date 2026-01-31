@@ -38,7 +38,7 @@ class CharactersController extends Controller
         try {
             return response()->json($this->heroesRepository->getHero($userId));
         } catch (\Throwable $exception) {
-            return response()->json(['message' => 'Wystąpił błąd podczs pobierania bohatera'], 500);
+            return response()->json(['message' => 'Wystąpił błąd podczas pobierania bohatera'], 500);
         }
     }
 
@@ -417,6 +417,7 @@ class CharactersController extends Controller
             \Log::error('BAD REQUEST DURING CHARACTER CREATION: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie jesteś zalogowany lub nastąpiło wylogowanie. Niestety musisz stworzyć postać ponownie'], Response::HTTP_FORBIDDEN);
         } catch (\Throwable $exception) {
+            dd($exception);
             \Log::error('ERROR DURING CHARACTER CREATION: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się utworzyć postaci'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

@@ -100,6 +100,15 @@ class CreateHeroRepository
             $attachData[$talent['id']] = [
                 'additional_talent_name' => $talent['specialization'],
             ];
+            if($bonus = \DB::table('talent_initial_bonuses')->where('talent_id', $talent['id'])->first()) {
+                $characteristic = $hero->characteristic()->where('characteristics.id', $bonus->characteristic_id)->firstOrFail();
+                $hero->characteristic()->syncWithoutDetaching([
+                    $bonus->characteristic_id => [
+                        'start_value' => $characteristic->pivot->start_value + $bonus->bonus,
+                        'advancement' => $characteristic->pivot->advancement
+                    ]
+                ]);
+            }
         }
         $hero->talents()->attach($attachData);
     }
