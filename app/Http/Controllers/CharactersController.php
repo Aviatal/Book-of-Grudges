@@ -417,4 +417,20 @@ class CharactersController extends Controller
             return response()->json(['message' => 'Nie udało się utworzyć postaci'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function deleteHero(Hero $hero): JsonResponse
+    {
+        try {
+            if ($hero->user_id !== Auth::id()) {
+                throw new AuthorizationException('Nie masz uprawnień do usunięcia tego bohatera');
+            }
+            $hero->delete();
+            return response()->json(['message' => 'Bohater został usunięty'], Response::HTTP_OK);
+        } catch (AuthorizationException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_FORBIDDEN);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR DELETING HERO: ' . $exception->getMessage());
+            return response()->json(['message' => 'Wystąpił błąd podczas usuwania bohatera'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function (){
 
         Route::patch('/{hero}/spend-fortune-point', [CharactersController::class, 'spendFortunePoint'])->name('character-sheet.spend-fortune-point');
         Route::post('/{hero}/log-fortune-point-satisfaction', [CharactersController::class, 'logFortunePointsSatisfaction'])->name('character-sheet.log-fortune-point-satisfaction');
+        Route::delete('/{hero}/delete-hero', [CharactersController::class, 'deleteHero'])->name('character-sheet.delete-hero');
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');

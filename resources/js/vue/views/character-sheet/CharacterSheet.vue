@@ -40,6 +40,9 @@
                 :inventory-data="hero.inventory"
                 @get-hero="getHero"
             ></hero-inventory-section>
+            <hero-options-section
+                :hero-id="hero.id"
+            ></hero-options-section>
             <hero-watcher
                 :hero-id="hero.id"
                 @add-new-item="handleNewItem"
@@ -82,6 +85,7 @@ import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
+import HeroOptionsSection from "./sections/HeroOptionsSection.vue";
 import HeroWatcher from "../../components/HeroWatcher.vue";
 import {CharacteristicPivot, Hero} from "../../../types/Hero";
 import {onMounted, ref} from "vue";
