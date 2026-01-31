@@ -80,7 +80,7 @@ class RacesSeeder extends Seeder
                     ],
                     [['talent_id' => $talents['Bystry wzrok'], 'additional_name' => '']],
                     [
-                        ['talent_id' => $talents['Opanowanie'], 'additional_name' => 'Długi łuk'],
+                        ['talent_id' => $talents['Opanowanie'], 'additional_name' => ''],
                         ['talent_id' => $talents['Błyskotliwość'], 'additional_name' => '']
                     ],
                     [['talent_id' => $talents['Zapiekła nienawiść'], 'additional_name' => '']],
