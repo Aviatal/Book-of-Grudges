@@ -119,7 +119,7 @@
                         label="text"
                         class="custom-select w-full"
                         @blur="updateHero('previous_profession_id')"
-                        @close="updateHero('current_profession_id')"
+                        @close="updateHero('previous_profession_id')"
                     ></v-select>
                 </v-col>
 
