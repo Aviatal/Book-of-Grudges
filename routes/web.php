@@ -69,6 +69,13 @@ Route::middleware('auth')->group(function (){
         Route::delete('/{hero}/delete-hero', [CharactersController::class, 'deleteHero'])->name('character-sheet.delete-hero');
     });
 
+    Route::group(['prefix' => 'create-character'], function () {
+        Route::post('/', [CharactersController::class, 'createCharacter'])->name('create-character.create-character');
+        Route::get('/get-professions/{race}', [CharactersController::class, 'getRaceProfessions'])->name('create-character.get-race-professions');
+        Route::get('/get-rolled-profession', [CharactersController::class, 'getRolledProfession'])->name('create-character.get-rolled-profession');
+        Route::get('/get-races', [CharactersController::class, 'getRaces'])->name('create-character.get-rolled-profession');
+    });
+
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
 });
 
