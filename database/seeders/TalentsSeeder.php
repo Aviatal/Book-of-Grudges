@@ -13,7 +13,12 @@ class TalentsSeeder extends Seeder
      */
     public function run(): void
     {
-        Talent::insert([
+        $simpleMagicDescription = 'Bohater poznał podstawowe tajniki rzucania czarów. Magia prosta, podobnie jak magia tajemna, obejmuje kilka zdolności. Każdy rodzaj magii prostej jest traktowany jako oddzielna zdolność magiczna. Na przykład magia prosta (tajemna) i magia prosta (kapłańska) to odrębne zdolności. Znajomość dowolnego rodzaju magii prostej i posiadanie cechy Magia przynajmniej na poziomie 1 pozwala na rzucanie czarów z odpowiedniej listy zaklęć. Istnieją trzy podstawowe rodzaje magii prostej: gusła, kapłańska i tajemna. Szczegółowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.';
+        $commonMagicDescription = 'Bohater potrafi rzucać zaklęcia, które są powszechnie używane przez czarodziejów i kapłanów. Magia powszechna obejmuje wybór czarów, z których każdy jest osobną zdolnością. Na przykład magia powszechna (rozproszenie magii) i magia powszechna (podniebny chód) to odrębne zdolności. Najczęściej wykorzystywane czary z magii powszechnej to: dotyk na odległość, magiczny alarm, magiczna broń, magiczny zamek, pancerz Eteru, podniebny chód, rozproszenie magii oraz uciszenie. Szczegółowe informacje na temat magii powszechnej i opis poszczególnych czarów znajdziesz w Rozdziale VII: Magia. Zdolność magia powszechna wymaga uprzedniego posiadania zdolności magia prosta.';
+        $secretMagicDescription = 'Bohater poznał tajniki jednej z kilku tradycji magicznych znanych w Imperium. Magia tajemna wymaga absolutnego poświęcenia i długotrwałych studiów. W konsekwencji Bohater musi dokonać wyboru jednej z dostępnych tradycji i nie będzie mógł uczyć się innych. Każdy rodzaj magii tajemnej jest oddzielną zdolnością. Na przykład magia tajemna (zwierzęta) różni się od magii tajemnej (ogień). W Imperium istnieje osiem Kolegiów Magii, z których każde naucza odrębnej Tradycji, czyli odmiennej magii tajemnej. Są to Tradycje: Cienia, Metalu, Niebios, Ognia, Śmierci, Światła, Zwierząt i Życia. Znajomość magii tajemnej pozwala na rzucanie czarów należących do określonej tradycji. Szczegółowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.';
+        $wizardMagicDescription = 'Twój Bohater poznał tajniki jednej z zakazanych tradycji magicznych. Podobnie jak w przypadku magii tajemnej, zglębianie sekretów magii czarnoksięskiej wymagania poświęcenia i wyboru jednej z dostępnych mrocznych tradycji. Każda magia czarnoksięska jest oddzielną zdolnością. Na przykład magia czarnoksięska (Chaos) różni się od magii czarnoksięskiej (nekromancja). W kolejnych dodatkach znajdziesz informacje o innych rodzajach magii czarnoksięskiej, wlacznic z wyszczególnieniem mocy bogów Chaosu: Nurgla, Slaanesha i Tzeentcha. Znajomość magii czarnoksięskiej pozwala na rzucanie czarów z określonej tradycji. Szezególowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.';
+        $priestMagicDescription = 'Bohater jest tak żarliwym wyznawcą jakiegoś bóstwa, że dzięki jego modlitwom zdarzają się rzeczy nadprzyrodzone. Zgłłębianie tajemnic boga wymaga fanatycznego poświęcenia i zaangażowania. Bohater musi wybrać jednego boga, a w konsekwencji także jedną z magii kapłańskich. Każda magia kapłańska jest oddzielną zdolnością magicznạ, pozwalająç̨̨ na rzucanie czarów z dziedziny określonego bóstwa. Na przykład magia kapłańska (dziedzina Sigmara) różni się od magii kapłańskiej (dziedzina Ulryka). Każde z większych bóstw w Starym Świecie posiada wlasny kult, który naucza magii kaplańskiej. Są to Świątynie: Mananna, Morra, Myrmidii, Ranalda, Sigmara, Shallyi, Taala i Rhyi, Ulryka oraz Vereny. Znajomość magii kapłańskiej pozwala na rzucanie czarów z określonej dziedziny. Szczególowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.';
+        $talents = [
             ['name' => 'Strzał mierzony', 'description' => 'Wykonując atak bronią strzelecką, Bohater potrafi skoncentrować się i znacznie lepiej wycelować. Po zadeklarowaniu akcji "wycelowanie" otrzymuje modyfikator +20 do Umiejętności Strzeleckich przy rzucie na trafienie, zamiast normalnego modyfikatora +10.'],
             ['name' => 'Strzał precyzyjny', 'description' => 'Wykonując atak bronią strzelecka, Bohater potrafi precyzyjnie wymierzyć strzał, który zadaje dodatkowe obrażenia. Otrzymuje modyfikator +1 do rzutów na obrażenia podczas ataku z użyciem broni strzeleckiej.'],
             ['name' => 'Strzał przebijający', 'description' => 'Bohater potrafi znaleźć odsłoniętą szczelinę w pancerzu przeciwnika. Po udanym ataku bronią strzelecką może zignorować 1 Punkt Zbroi przeciwnika. Jeśli przeciwnik nie nosi zbroi, ta zdolność jest nieskuteczna.'],
@@ -141,13 +146,127 @@ class TalentsSeeder extends Seeder
                 'description' => 'Bohater jest blisko zwiạzany ze światem przestẹpczym. Otrzymuje modyfikator +10 do testów plotkowania i przekonywania w kontaktach z przedstawicielami przestẹpczego pólświatka.'
             ],
             [
-                'name' => 'Magia czarnoksięska',
-                'description' => 'Twój Bohater poznał tajniki jednej z zakazanych tradycji magicznych. Podobnie jak w przypadku magii tajemnej, zglębianie sekretów magii czarnoksięskiej wymagania poświęcenia i wyboru jednej z dostępnych mrocznych tradycji. Każda magia czarnoksięska jest oddzielną zdolnością. Na przyklad magia czarnoksięska (Chaos) różni się od magii czarnoksięskiej (nekromancja). W kolejnych dodatkach znajdziesz informacje o innych rodzajach magii czarnoksięskiej, wlacznic z wyszczególnieniem mocy bogów Chaosu: Nurgla, Slaanesha i Tzeentcha. Znajomość magii czarnoksięskiej pozwala na rzucanie czarów z określonej tradycji. Szezególowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.'
+                'name' => 'Magia prosta (gusła)',
+                'description' => $simpleMagicDescription . ' Czarodziej posiadający zdolność magia prosta (gusła) może korzystać z poniższych czarów. Są to najprostsze formuły magiczne, zwykle przez przypadek odkrywane przez guślarzy. Oprócz nich istnieją także inne mniej popularne czary, wymyślane przez czarodziejów obdarzonych naturalnym talentem.'
             ],
             [
-                'name' => 'Magia kapłánska',
-                'description' => 'Bohater jest tak żarliwym wyznawcą jakiegoś bóstwa, że dzięki jego modlitwom zdarzają się rzeczy nadprzyrodzone. Zgłłębianie tajemnic boga wymaga fanatycznego poświęcenia i zaangażowania. Bohater musi wybrać jednego boga, a w konsekwencji także jedną z magii kapłańskich. Każda magia kapłańska jest oddzielną zdolnością magicznạ, pozwalająç̨̨ na rzucanie czarów z dziedziny określonego bóstwa. Na przyklad magia kaplańska (dziedzina Sigmara) różni się od magii kaplańskiej (dziedzina Ulryka). Każde z większych bóstw w Starym Świecie posiada wlasny kult, który naucza magii kaplańskiej. Są to Świątynie: Mananna, Morra, Myrmidii, Ranalda, Sigmara, Shallyi, Taala i Rhyi, Ulryka oraz Vereny. Znajomość magii kapłańskiej pozwala na rzucanie czarów z określonej dziedziny. Szczególowe zasady rzucania zaklęć znajdziesz w Rozdziale VII: Magia.'
+                'name' => 'Magia prosta (kapłańka)',
+                'description' => $simpleMagicDescription . ' Poznanie podstaw magii prostej (kapłańskiej) umożliwia kapłanowi rzucanie wymienionych poniżej czarów. Są to najprostsze formuły magiczne, które pozwalają zapoznać się z elementarnymi zasadami wiary. Tradycyjnie stanowią pierwszy etap nauki każdego kapłana.'
             ],
-        ]);
+            [
+                'name' => 'Magia prosta (tajemna)',
+                'description' => $simpleMagicDescription . ' '
+            ],
+            [
+                'name' => 'Magia powszechna (dotyk na odległość)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (pancerz Eteru)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Magiczna broń)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Magiczne zamknięcie)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Magiczny alarm)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Uciszenie)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Podniebny chód)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia powszechna (Rozproszenie magii)',
+                'description' => $commonMagicDescription
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja cienia)',
+                'description' =>$secretMagicDescription . ' Tradycja Cienia to magia kamuflażu, iluzji i zamętu, a czasem także podstępu i zaskoczenia. Opiera się na manipulacji Ulgu - szarym Wiatrem Magii. Magistrowie tej Tradycji nazywani są szarymi czarodziejami i bywają wyjątkowo tajemniczy. Zwykle skrywają swoje prawdziwe cele i uczucia pod maską pozorów. Prości ludzie zwą ich magikami lub sztukmistrzami. Wraz ze wzrostem mocy czarodzieje stają się jeszcze bardziej skryci i milczący. Szczupłością sylwetki i lekkością ruchów przypominają nieco złodziei i łotrzyków, choć przenikliwe, szare oczy przeczą temu wrażeniu. Zwykli ludzie zazwyczaj nie zapamiętują ich wyglądu, ani rysów twarzy, które wydają się nie wyróżniać niczym szczególnym. Plotki głoszą, że czarodzieje zmieniają swój wygląd, by dostosować się do otoczenia, w jakim przebywają. Ale to chyba zbyt trudna sztuka, nawet dla mistrzów magii iluzyjnej.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja metalu)',
+                'description' =>$secretMagicDescription . ' Tradycja Metalu to sztuka transmutacji, logiki, praktycznego wykorzystania wiedzy, eksperymentów i empirycznego podejścia do wszelkich zagadnień. Powszechnie znana jako alchemia, opiera się na manipulacji Chamon - żółtym Wiatrem Magii. Magistrowie tej Tradycji noszą miano złotych czarodziejów i zaliczają się do najlepiej wykształconych mieszkańców Imperium. Alchemicy często stosują magię rytualną (więcej informacji na temat magii rytualnej znajdziesz na str. 176) i do niej właśnie należą owiane legendą czary transmutacyjne.Wraz ze wzrostem mocy złotych czarodziejów, ich poglądy stają się coraz bardziej konserwatywne. Czarodzieje wolą zajmować się udoskonalaniem istniejących i sprawdzonych metod, niż pogonią za nowymi wynalazkami i cudownymi odkryciami. Tę niemal żelazną konsekwencję w postępowaniu odzwierciedla powoli postępująca przemiana ciała złotego czarodzieja. Jego ciało sztywnieje, stawy tracą giętkość, a skóra staje się grubsza i nabiera złotawego odcienia. Najstarsi alchemicy zwykle korzystają z różnego rodzaju lasek i wózków, które umożliwiają im poruszanie się.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja niebios)',
+                'description' =>$secretMagicDescription . ' Tradycja Niebios to magia gwiazd, nieba i ruchów ciał niebieskich, ale także przépowiedni i przeznaczenia. Zwana jest też Astromancją i opiera się na manipulowaniu Azyr - niebieskim Wiatrem Magii. Magistrowie tej Tradycji powszechnie nazywani są niebiańskimi czarodziejami. Słyną z umiejętności wróżenia i układania horoskopów. Są biegłymi astrologami i nawigatorami. Wraz ze wzrostem mocy niebiańscy czarodzieje coraz bardziej oddalają się od rzeczywistości i pogrążają się w marzeniach, czasem nawet śniąc na jawie. Ich oczy nabierają błękitnego odcienia, a włosy pokrywają się siwizną. Astromanci nigdzie się nie spieszą, a każdy ich ruch jest pełen godności, co znamionuje osiągnięcie wewnętrznego spokoju.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja śmierci)',
+                'description' =>$secretMagicDescription . ' Tradycja Śmierci to magia przemijania i ludzkiej śmiertelności. Opiera się na manipulacji Shyish - fioletowym Wiatrem Magii. Magistrowie tej tradycji zwani są ametys.owymi czarodziejami i budzą powszechny strach, w pełni zresztą uzasadniony. Mimo że często bywają utożsamiani z nekromantami, całkiem się od nich różnią. Ametystowi czarodzieje akceptują naturalny koniec wszystkich rzeczy, podczas gdy nekromanci starają się pokonać śmierć za pomocą mrocznych zaklęć. Wraz ze wzrostem mocy ametystowi czarodzieje stają się coraz bardziej milczący, choć wcale nie ponurzy. Unosi się nad nimi cień śmierci. Z czasem chudną i bledną, choć do końca zachowują szacunek dla wszelkiego życia i swoisty, wisielczy humor.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja światła)',
+                'description' =>$secretMagicDescription . ' Tradycja światła, zwana również Iluminacją, to magia zarówno duchowego oświecenia, jak i światła rozumianego w bardziej dosłowny sposób. Opiera się na manipulacji Hysh - białym Wiatrem Magii. To magia prawdy, mądrości, potęgi światła i życiodajnej energii. Magistrowie tej Tradycji nazywani są hierofantami lub świetlistymi czarodziejami. Wśród nich spotyka się zarówno spokojnych mędrców i uzdrowicieli, jak i nieustraszonych pogromców demonów. Wraz ze wzrostem mocy hierofanci niemal całkowicie wyzbywają się emocji. Są opanowani i spokojni, kierując się raczej żelazną logiką niż porywami serca. Ich skóra oraz włosy z wolna bledną i bieleją, w niektórych przypadkach stając się niemal przezroczyste. Oczy przybierają mlecznobiałą barwę, z delikatnym złotym odcieniem. Z czasem, większość hierofantów poświęca się wyłącznie medytacji lub czytaniu uczonych ksiąg.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja zwierząt)',
+                'description' =>$secretMagicDescription . ' Tradycja Zwierząt to najdziksza odmiana magii tajemnej. Zapewnia władzę nad światem zwierząt, przez co przypomina nieco magię szamańską. Opiera się na manipulowaniu Ghur - brązowym Wiatrem Magii. Magistrowie tej Tradycji znani są jako bursztynowi czarodzieje i zwykle trzymają się blisko dzikich ostępów, które stanowią źródło ich mocy. Wraz ze wzrostem mocy bursztynowi czarodzieje coraz bardziej oddalają się od ludzkiej społeczności. Długie paznokcie, ostre zęby i gęste owłosienie odzwierciedlają pierwotną naturę gnieżdżącą się w ich duszach.'
+            ],
+            [
+                'name' => 'Magia tajemna (tradycja życia)',
+                'description' =>$secretMagicDescription . ' Tradycja życia to magia natury, pór roku i ziemi. Opiera się na manipulowaniu Ghyran - zielonym Wiatrem Magii. Magistrowie tej Tradycji nazywani są jadeitowymi czarodziejami. Ich żywiołem są siły natury. Niechętnie odwiedzają miasta, zamiast tego wolą otaczać się potęgą i majestatem dzikiej przyrody. Potężni jadeitowi czarodzieje chodzą boso, czerpiąc moc ze stałego kontaktu z ziemią. Wraz ze wzrostem mocy coraz silniej reagują na zmiany pór roku. Zimą są zmęczeni, ale wraz z nadejściem wiosny stają się pobudzeni i podekscytowani. Latem promienieją i stają się bardzo aktywni, po czym z wolna uspokajają się i milkną wraz z nadejściem jesieni. Zwykle cieszą się bardzo dobrym zdrowiem.Wiele czarów tej Tradycji wymaga znalezienia się w pobliżu odsłoniętej ziemi. Oznacza to, że zaklęcia nie działają na podłożu pokrytym drewnem, kamieniami, posadzką albo brukiem. Nie można ich używać wewnątrz budynków, chyba że mają klepisko z gliny.'
+            ],
+            [
+                'name' => 'Magia czarnoksięska (tradycja chaosu)',
+                'description' => $wizardMagicDescription .'Wiele z czarów Chaosu wiąże się z przyzywaniem demonów. Czarnoksiężnik musi wykonać test Siły Woli, by sprawdzić, czy zapanował nad demonem. Nieudany test oznacza, że demon wyrywa się spod władzy czarnoksiężnika. W takim przypadku jego poczynaniami kieruje MG. Demony nie lubią być zmuszane do posłuszeństwa ani do wykonywania poleceń śmiertelników. Zwykle zachowują się agresywnie i próbują zemścić się na czarnoksiężniku, który je przyzwał.'
+            ],
+            [
+                'name' => 'Magia czarnoksięska (tradycja nekromancji)',
+                'description' => $wizardMagicDescription  . ' Nekromancja to magia śmierci. W odróżnieniu od magii ametystowej, jest praktyką wynaturzoną. Wykorzystując moc Dhar, nekromanta przedłuża swoje życie i powstrzymuje śmierć, gwałcąc w ten sposób najświętsze prawo natury. Najbardziej przerażające zaklęcia nekromanckie wymagają zwykle długotrwałych rytuałów. Na nekromantach zasłuženie ciąży jak najgorsza reputacja, co zmusza ich do praktykowania swojej sztuki w ukryciu i tajemnicy. Zawsze muszą wyprzedzać o krok ścigających ich łowców czarownic, rycerzy zakonnych i kapłanów. W Imperium praktykowarie nekromancji jest zakazane, a schwytani czarnoksiężnicy są paleni na stosie. Wiele czarów nekromanckich wiąże się z przyzywaniem ożywieńców. Te „żywe" trupy muszą być stale kontrolowane przez nekromantę. W przeciwnym wypadku spajająca je magia rozprasza się, a ożywieńcy rozpadają się w pył lub zamieniają z powrotem w gnijące zwłoki. Ożywieńcy muszą pozostawać w odległości do 48 metrów od kontrolującego ich nekromanty. Czarnoksiężnik może jednocześnie kontrolować tylu ożywieńców, ile wynosi wartość jego Siły Woli. Ożywieńcy są w większości przypadków istotami bezrozumnymi i mogą wykonywać jedynie najprostsze polecenia (idź, pilnuj, atakuj, itp.).'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Mananna)',
+                'description' => $priestMagicDescription . ' Manann, bóg morza, patronuje wszystkim tym, których życie związane jest z pływaniem po morzach Starego Świata - począwszy od zwykłych rybaków i żeglarzy, a skończywszy na żołnierzach okrętowych i piratach. Kapłani Mananna zwykle korzystają z czarów, by pomagać innym w przetrwaniu gniewu zmiennego bóstwa. Wraz ze wzrostem swojej mocy kapłani zaczynają upodabniać się do żywiołu morza - mają burzliwy temperament, a ich nastroje zmieniają się wraz z fazami księżyca.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Morra)',
+                'description' => $priestMagicDescription . ' Morr to władca podziemnego świata, opiekun śniących i zmarłych. Kapłani Morra zajmują się odprawianiem rytuałów pogrzebowych. Wraz ze wzrostem mocy coraz mniej uwagi poświęcają sprawom tego świata. Stają się też coraz bledsi. Często próbują pomagać nieszczęśliwym duszom i innym duchom uwięzionym w materialnym świecie.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Myrmidii)',
+                'description' => $priestMagicDescription . ' Myrmidia to patronka żołnierzy i strategów oraz naczelne bóstwo Estalii i Tilei. W przeciwieństwie do Ulryka, pana bitewnego szału, bogini ceni sobie sztukę wojenną i precyzyjnie realizowane plany strategiczne. Kapłani Myrmidii służą jako kapelani oddziałów wojskowych i kompanii najemników. Korzystają z czarów, by dowieść swojej sprawności w sztuce wojennej i wyższości Myrmidii nad innymi bóstwami. Jej wyznawcy są z reguły osobami zdecydowanymi, mówią donośnym głosem i odznaczają się wielką odwagą, cenioną przez boginię.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Ranalda)',
+                'description' => $priestMagicDescription . ' Ranald jest bogiem szczęścia i patronem złodziei, kanciarzy, szulerów oraz innych podejrzanych osobników. O jego łaskę modlą się kupcy, cyrkowcy i bardowie, a także zwykli mieszkańcy Imperium, dręczeni biedą i głodem. Kapłani Ranalda z natury są podstępni i zagadkowi. Używają zaklęć, by oszukać i zmylić swoich wrogów, wierząc, że w ten sposób przypodobają się przewrotnemu bogu. Wszyscy jego żarliwi wyznawcy mają obsesję na punkcie ryzyka i hazardu. Lepiej nie wierzyć w ich opowieści, gdyż zwykle nie ma w nich ani krzty prawdy.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Shallyi)',
+                'description' => $priestMagicDescription . ' Shallya to bogini leczenia i miłosierdzia. Zapewnia ukojenie w świecie pełnym wojen, chorób i bólu. Jest ukochanym bóstwem prostych ludzi. Kapłani Shallyi używają swej mocy, by pomagać chorym i potrzebującym duchowego wsparcia. Wraz ze wzrostem mocy stają się łagodni i pokojowo usposobieni. Często płaczą przez sen, smucąc się nieszczęściami mieszkańców tego ponurego swiata. Z czasem zyskują wręcz nadludzką odporność na ból.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Sigmara)',
+                'description' => $priestMagicDescription . ' Sigmar to legendarny założyciel i jednocześnie główny bóg Imperium. Prości ludzie wierzą w jego opiekuńczą moc i potęgę. Kapłani Młotodzierżcy używają swych czarów, by wypełniać główne przykazania Świątyni Sigmara, dotyczące obrony Imperium i zwalczania herezji. Z czasem stają się wielkimi przywódcami i obrońcami ludności Imperium.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Taala i Rhyi)',
+                'description' => $priestMagicDescription . ' Taal jest Panem Natury. a także opiekunem zwierząt i dzikich ostępów. Jego żona Rhya to Matka Ziemia, bogini płodności i roślin. Taal i Rhya są czczeni jako połączone, choć odmienne bóstwa. Ich kapłani muszą dbać o niezmierzone połacie ziemi należącej do Rhyi i chronić zwierzęta - dzieci Taala. Wraz ze wzrostem mocy kapłani coraz rzadziej chorują, stają się bardzo aktywni i przejawiają żywiołowy temperament. Gdy przebywają w miastach, ogarnia ich smutek i melancholia.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Ulryka)',
+                'description' => $priestMagicDescription . ' Ulryk to bóg zimy i szału bitewnego. Jest czczony od pradawnych czasów - był patronem samego Sigmara. Kapłani Ulryka są zaciekli i odważni niczym wilki. Swoje czary rzucają, by zwyciężać w imię Ulryka. Jego żarliwi wyznawcy zdecydowanie wolą chłodne dni od upalnych, a gdy przebywają na obszarach zamieszkanych, czują się nieswojo.'
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina )',
+                'description' => $priestMagicDescription . ' '
+            ],
+            [
+                'name' => 'Magia kapłańska (dziedzina Vereny)',
+                'description' => $priestMagicDescription . ' Verena to bogini sprawiedliwości i nauki. O jej błogosławieństwo modlą się wszyscy, którzy sprzeciwiają się niesprawiedliwości. Jest także patronką czarodziejów i uczonych. Kapłani Vereny używają swych czarów, by karać tyranów, przestępców i złoczyńców wszelkiej maści, a także by zaprowadzać rządy sprawiedliwości, tam gdzie panuje chaos i bezprawie. Wraz ze wzrostem mocy kapłani stawiają sobie coraz wyższe wymagania. Zwykle obdarzeni są fenomenalną pamięcią.'
+            ],
+        ];
+
+        Talent::upsert($talents, ['name'], ['description']);
     }
 }
