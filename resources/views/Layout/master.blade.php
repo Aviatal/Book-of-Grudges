@@ -117,9 +117,15 @@
             @if(Auth::user() && Auth::user()->hero?->id && !str_contains(url()->current(), 'panel'))
                 <div class="container mx-auto p-4">
                     <h2 class="text-center text-2xl font-bold text-[#d4af37] mb-4">Szybkie akcje</h2>
-                    <spend-fortune-point
-                        :hero-id="{{ Auth::user()->hero?->id }}"
-                    ></spend-fortune-point>
+                    <div class="actions-container">
+                        <spend-fortune-point
+                            :hero-id="{{ Auth::user()->hero?->id }}"
+                        ></spend-fortune-point>
+
+                        <spend-fate-point
+                            :hero-id="{{ Auth::user()->hero?->id }}"
+                        ></spend-fate-point>
+                    </div>
                 </div>
             @endif
         </aside>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NotEnoughFatePointsException;
 use App\Exceptions\NotEnoughFortunePointsException;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Models\Armor;
@@ -358,6 +359,19 @@ class CharactersController extends Controller
         } catch (\Throwable $exception) {
             \Log::error('ERROR SPENDING FORTUNE POINTS: ' . $exception->getMessage());
             return response()->json(['message' => 'Nie udało się wydać punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function spendFatePoint(Hero $hero): ?JsonResponse
+    {
+        try {
+            $this->heroService->spendFatePoint($hero);
+            return response()->json(['ok'], Response::HTTP_OK);
+        } catch (NotEnoughFatePointsException $exception) {
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $exception) {
+            \Log::error('ERROR SPENDING FATE POINTS: ' . $exception->getMessage());
+            return response()->json(['message' => 'Nie udało się wydać punktu przeznaczenia'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

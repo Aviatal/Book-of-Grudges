@@ -150,3 +150,9 @@ body {
 .v-overlay__content .v-list-item-title {
     font-family: 'Merriweather', serif;
 }
+
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
