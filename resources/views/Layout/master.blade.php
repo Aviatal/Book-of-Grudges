@@ -20,13 +20,13 @@
         <h1 class="text-4xl font-bold text-[#d4af37] tracking-widest">BOOK OF GRUDGES</h1>
     </header>
 
-    <main class="flex-grow container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <section class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b] col-span-2">
+    <main class="flex-grow max-w-[1600px] mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-12 gap-8">
+        <section class="bg-[#3b3a36] p-8 rounded-sm shadow-2xl border-4 border-double border-[#8b5a2b] md:col-span-9">
             @yield('content')
         </section>
 
-        <aside class="bg-[#3b3a36] p-6 rounded-lg shadow-lg border border-[#8b5a2b]">
-            <h2 class="text-xl font-bold text-[#d4af37] mb-4">Szybki dostęp</h2>
+        <aside class="bg-[#3b3a36] p-6 rounded-sm shadow-lg border border-[#8b5a2b] md:col-span-3 h-fit">
+            <h2 class="text-xl font-bold text-[#d4af37] mb-4 border-b border-[#8b5a2b] pb-2 tracking-widest uppercase text-center">Szybki dostęp</h2>
             <ul class="space-y-2">
                 {{--PANEL MENU--}}
                 @if(Auth::user() && Auth::user()->getAttribute('is_admin') && str_contains(url()->current(), 'panel'))

@@ -1,5 +1,5 @@
 <template>
-    <button class="btn-blood-fate w-100" @click="spendFatePoint">Wydaj punkt przeznaczenia</button>
+    <button class="btn-blood-fate w-full" @click="spendFatePoint">Wydaj punkt przeznaczenia</button>
 </template>
 <script setup lang="ts">
 import {defineProps} from "vue";
@@ -37,13 +37,13 @@ const spendFatePoint = () => {
     border: 1px solid #8b0000;
     border-radius: 4px;
     padding: 8px 16px;
-    min-width: 200px;
 
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .btn-blood-fate:hover {

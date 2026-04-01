@@ -1,5 +1,5 @@
 <template>
-    <button class="btn-grim-dark w-100" @click="spendFp">Wydaj punkt szczęścia</button>
+    <button class="btn-grim-dark w-full" @click="spendFp">Wydaj punkt szczęścia</button>
 </template>
 <script setup lang="ts">
 import {defineProps} from "vue";
@@ -58,13 +58,13 @@ const spendFp = () => {
     border: 1px solid #d4af37;
     border-radius: 4px;
     padding: 8px 16px;
-    min-width: 200px;
 
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .btn-grim-dark:hover {
