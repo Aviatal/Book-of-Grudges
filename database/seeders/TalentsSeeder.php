@@ -158,11 +158,11 @@ class TalentsSeeder extends Seeder
                 'description' => $simpleMagicDescription . ' '
             ],
             [
-                'name' => 'Magia powszechna (dotyk na odległość)',
+                'name' => 'Magia powszechna (Dotyk na odległość)',
                 'description' => $commonMagicDescription
             ],
             [
-                'name' => 'Magia powszechna (pancerz Eteru)',
+                'name' => 'Magia powszechna (Pancerz Eteru)',
                 'description' => $commonMagicDescription
             ],
             [
