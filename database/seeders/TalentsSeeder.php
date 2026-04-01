@@ -262,7 +262,7 @@ class TalentsSeeder extends Seeder
                 'description' => $priestMagicDescription . ' Ulryk to bóg zimy i szału bitewnego. Jest czczony od pradawnych czasów - był patronem samego Sigmara. Kapłani Ulryka są zaciekli i odważni niczym wilki. Swoje czary rzucają, by zwyciężać w imię Ulryka. Jego żarliwi wyznawcy zdecydowanie wolą chłodne dni od upalnych, a gdy przebywają na obszarach zamieszkanych, czują się nieswojo.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Vereny)',
+                'name' => 'Magia kapłańska (Dziedzina Vereny)',
                 'description' => $priestMagicDescription . ' Verena to bogini sprawiedliwości i nauki. O jej błogosławieństwo modlą się wszyscy, którzy sprzeciwiają się niesprawiedliwości. Jest także patronką czarodziejów i uczonych. Kapłani Vereny używają swych czarów, by karać tyranów, przestępców i złoczyńców wszelkiej maści, a także by zaprowadzać rządy sprawiedliwości, tam gdzie panuje chaos i bezprawie. Wraz ze wzrostem mocy kapłani stawiają sobie coraz wyższe wymagania. Zwykle obdarzeni są fenomenalną pamięcią.'
             ],
         ];
