@@ -230,40 +230,36 @@ class TalentsSeeder extends Seeder
                 'description' => $wizardMagicDescription  . ' Nekromancja to magia śmierci. W odróżnieniu od magii ametystowej, jest praktyką wynaturzoną. Wykorzystując moc Dhar, nekromanta przedłuża swoje życie i powstrzymuje śmierć, gwałcąc w ten sposób najświętsze prawo natury. Najbardziej przerażające zaklęcia nekromanckie wymagają zwykle długotrwałych rytuałów. Na nekromantach zasłuženie ciąży jak najgorsza reputacja, co zmusza ich do praktykowania swojej sztuki w ukryciu i tajemnicy. Zawsze muszą wyprzedzać o krok ścigających ich łowców czarownic, rycerzy zakonnych i kapłanów. W Imperium praktykowarie nekromancji jest zakazane, a schwytani czarnoksiężnicy są paleni na stosie. Wiele czarów nekromanckich wiąże się z przyzywaniem ożywieńców. Te „żywe" trupy muszą być stale kontrolowane przez nekromantę. W przeciwnym wypadku spajająca je magia rozprasza się, a ożywieńcy rozpadają się w pył lub zamieniają z powrotem w gnijące zwłoki. Ożywieńcy muszą pozostawać w odległości do 48 metrów od kontrolującego ich nekromanty. Czarnoksiężnik może jednocześnie kontrolować tylu ożywieńców, ile wynosi wartość jego Siły Woli. Ożywieńcy są w większości przypadków istotami bezrozumnymi i mogą wykonywać jedynie najprostsze polecenia (idź, pilnuj, atakuj, itp.).'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Mananna)',
+                'name' => 'Magia kapłańska (Dziedzina Mananna)',
                 'description' => $priestMagicDescription . ' Manann, bóg morza, patronuje wszystkim tym, których życie związane jest z pływaniem po morzach Starego Świata - począwszy od zwykłych rybaków i żeglarzy, a skończywszy na żołnierzach okrętowych i piratach. Kapłani Mananna zwykle korzystają z czarów, by pomagać innym w przetrwaniu gniewu zmiennego bóstwa. Wraz ze wzrostem swojej mocy kapłani zaczynają upodabniać się do żywiołu morza - mają burzliwy temperament, a ich nastroje zmieniają się wraz z fazami księżyca.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Morra)',
+                'name' => 'Magia kapłańska (Dziedzina Morra)',
                 'description' => $priestMagicDescription . ' Morr to władca podziemnego świata, opiekun śniących i zmarłych. Kapłani Morra zajmują się odprawianiem rytuałów pogrzebowych. Wraz ze wzrostem mocy coraz mniej uwagi poświęcają sprawom tego świata. Stają się też coraz bledsi. Często próbują pomagać nieszczęśliwym duszom i innym duchom uwięzionym w materialnym świecie.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Myrmidii)',
+                'name' => 'Magia kapłańska (Dziedzina Myrmidii)',
                 'description' => $priestMagicDescription . ' Myrmidia to patronka żołnierzy i strategów oraz naczelne bóstwo Estalii i Tilei. W przeciwieństwie do Ulryka, pana bitewnego szału, bogini ceni sobie sztukę wojenną i precyzyjnie realizowane plany strategiczne. Kapłani Myrmidii służą jako kapelani oddziałów wojskowych i kompanii najemników. Korzystają z czarów, by dowieść swojej sprawności w sztuce wojennej i wyższości Myrmidii nad innymi bóstwami. Jej wyznawcy są z reguły osobami zdecydowanymi, mówią donośnym głosem i odznaczają się wielką odwagą, cenioną przez boginię.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Ranalda)',
+                'name' => 'Magia kapłańska (Dziedzina Ranalda)',
                 'description' => $priestMagicDescription . ' Ranald jest bogiem szczęścia i patronem złodziei, kanciarzy, szulerów oraz innych podejrzanych osobników. O jego łaskę modlą się kupcy, cyrkowcy i bardowie, a także zwykli mieszkańcy Imperium, dręczeni biedą i głodem. Kapłani Ranalda z natury są podstępni i zagadkowi. Używają zaklęć, by oszukać i zmylić swoich wrogów, wierząc, że w ten sposób przypodobają się przewrotnemu bogu. Wszyscy jego żarliwi wyznawcy mają obsesję na punkcie ryzyka i hazardu. Lepiej nie wierzyć w ich opowieści, gdyż zwykle nie ma w nich ani krzty prawdy.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Shallyi)',
+                'name' => 'Magia kapłańska (Dziedzina Shallyi)',
                 'description' => $priestMagicDescription . ' Shallya to bogini leczenia i miłosierdzia. Zapewnia ukojenie w świecie pełnym wojen, chorób i bólu. Jest ukochanym bóstwem prostych ludzi. Kapłani Shallyi używają swej mocy, by pomagać chorym i potrzebującym duchowego wsparcia. Wraz ze wzrostem mocy stają się łagodni i pokojowo usposobieni. Często płaczą przez sen, smucąc się nieszczęściami mieszkańców tego ponurego swiata. Z czasem zyskują wręcz nadludzką odporność na ból.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Sigmara)',
+                'name' => 'Magia kapłańska (Dziedzina Sigmara)',
                 'description' => $priestMagicDescription . ' Sigmar to legendarny założyciel i jednocześnie główny bóg Imperium. Prości ludzie wierzą w jego opiekuńczą moc i potęgę. Kapłani Młotodzierżcy używają swych czarów, by wypełniać główne przykazania Świątyni Sigmara, dotyczące obrony Imperium i zwalczania herezji. Z czasem stają się wielkimi przywódcami i obrońcami ludności Imperium.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Taala i Rhyi)',
+                'name' => 'Magia kapłańska (Dziedzina Taala i Rhyi)',
                 'description' => $priestMagicDescription . ' Taal jest Panem Natury. a także opiekunem zwierząt i dzikich ostępów. Jego żona Rhya to Matka Ziemia, bogini płodności i roślin. Taal i Rhya są czczeni jako połączone, choć odmienne bóstwa. Ich kapłani muszą dbać o niezmierzone połacie ziemi należącej do Rhyi i chronić zwierzęta - dzieci Taala. Wraz ze wzrostem mocy kapłani coraz rzadziej chorują, stają się bardzo aktywni i przejawiają żywiołowy temperament. Gdy przebywają w miastach, ogarnia ich smutek i melancholia.'
             ],
             [
-                'name' => 'Magia kapłańska (dziedzina Ulryka)',
+                'name' => 'Magia kapłańska (Dziedzina Ulryka)',
                 'description' => $priestMagicDescription . ' Ulryk to bóg zimy i szału bitewnego. Jest czczony od pradawnych czasów - był patronem samego Sigmara. Kapłani Ulryka są zaciekli i odważni niczym wilki. Swoje czary rzucają, by zwyciężać w imię Ulryka. Jego żarliwi wyznawcy zdecydowanie wolą chłodne dni od upalnych, a gdy przebywają na obszarach zamieszkanych, czują się nieswojo.'
-            ],
-            [
-                'name' => 'Magia kapłańska (dziedzina )',
-                'description' => $priestMagicDescription . ' '
             ],
             [
                 'name' => 'Magia kapłańska (dziedzina Vereny)',
