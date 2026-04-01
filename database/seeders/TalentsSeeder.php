@@ -150,7 +150,7 @@ class TalentsSeeder extends Seeder
                 'description' => $simpleMagicDescription . ' Czarodziej posiadający zdolność magia prosta (gusła) może korzystać z poniższych czarów. Są to najprostsze formuły magiczne, zwykle przez przypadek odkrywane przez guślarzy. Oprócz nich istnieją także inne mniej popularne czary, wymyślane przez czarodziejów obdarzonych naturalnym talentem.'
             ],
             [
-                'name' => 'Magia prosta (kapłańka)',
+                'name' => 'Magia prosta (kapłańska)',
                 'description' => $simpleMagicDescription . ' Poznanie podstaw magii prostej (kapłańskiej) umożliwia kapłanowi rzucanie wymienionych poniżej czarów. Są to najprostsze formuły magiczne, które pozwalają zapoznać się z elementarnymi zasadami wiary. Tradycyjnie stanowią pierwszy etap nauki każdego kapłana.'
             ],
             [
