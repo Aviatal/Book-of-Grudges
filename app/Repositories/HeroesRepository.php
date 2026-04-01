@@ -19,7 +19,7 @@ class HeroesRepository
         return Hero::with([
             'previousProfession', 'currentProfession', 'description',
             'characteristic', 'coldWeapons.traits', 'rangedWeapons.traits', 'armors.locations',
-            'skills', 'talents', 'inventory'
+            'skills', 'talents', 'inventory', 'spells'
         ])
             ->where('user_id', $userId)
             ->first();

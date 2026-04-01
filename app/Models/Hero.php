@@ -13,10 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Hero extends Model
 {
-    use HasFactory, HasManyKeyBy, BelongsToManyKeyBy, SoftDeletes;
+    use HasFactory, HasManyKeyBy, BelongsToManyKeyBy, SoftDeletes, HasRelationships;
     protected $guarded = ['id'];
     const int GOLD_CROWS_TO_BRASS_ENCOUNTER = 240;
     const int SILVER_SHILLINGS_TO_BRASS_ENCOUNTER = 12;
@@ -128,6 +129,10 @@ class Hero extends Model
         return $this->belongsToMany(Talent::class, 'hero_talent', 'hero_id', 'talent_id')->withPivot(['additional_talent_name']);
     }
 
+    public function spells(): \Staudenmeir\EloquentHasManyDeep\HasManyDeep
+    {
+        return $this->hasManyDeep(Spell::class, ['hero_talent', Talent::class]);
+    }
     public function armors(): BelongsToMany
     {
         return $this->belongsToMany(Armor::class, 'hero_armors', 'hero_id', 'armor_id');

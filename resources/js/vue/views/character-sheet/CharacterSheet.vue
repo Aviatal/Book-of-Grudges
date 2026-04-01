@@ -35,6 +35,10 @@
                 :hero-id="hero.id"
                 :talents-data="hero.talents"
             ></hero-talents-section>
+            <hero-spells-section
+                :hero-id="hero.id"
+                :spells-data="hero.spells"
+            ></hero-spells-section>
             <hero-inventory-section
                 :hero-id="hero.id"
                 :inventory-data="hero.inventory"
@@ -84,6 +88,7 @@ import HeroWeaponsSection from "./sections/HeroWeaponsSection.vue";
 import HeroArmorsSection from "./sections/HeroArmorsSection.vue";
 import HeroSkillsSection from "./sections/HeroSkillsSection.vue";
 import HeroTalentsSection from "./sections/HeroTalentsSection.vue";
+import HeroSpellsSection from "./sections/HeroSpellsSection.vue";
 import HeroInventorySection from "./sections/HeroInventorySection.vue";
 import HeroOptionsSection from "./sections/HeroOptionsSection.vue";
 import HeroWatcher from "../../components/HeroWatcher.vue";
