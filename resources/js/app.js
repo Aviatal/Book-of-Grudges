@@ -20,6 +20,7 @@ import FooterText from "./vue/components/FooterText.vue";
 import ExperienceManagement from "./vue/views/panel/experience/ExperienceManagement.vue";
 import Purchases from "./vue/views/panel/purchases/Purchases.vue";
 import SpendFortunePoint from "./vue/components/SpendFortunePoint.vue";
+import SpendFatePoint from "./vue/components/SpendFatePoint.vue";
 import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
@@ -98,6 +99,7 @@ app.component('spells-index', SpellsIndex);
 app.component('talents-index', TalentsIndex);
 app.component('currency-converter', CurrencyConverter);
 app.component('spend-fortune-point', SpendFortunePoint);
+app.component('spend-fate-point', SpendFatePoint);
 app.component('footer-text', FooterText);
 
 //PANEL

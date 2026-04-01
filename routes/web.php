@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function (){
         Route::post('/{hero}/drop-item-from-inventory', [CharactersController::class, 'dropInventoryItem'])->name('character-sheet.drop-inventory-item');
 
         Route::patch('/{hero}/spend-fortune-point', [CharactersController::class, 'spendFortunePoint'])->name('character-sheet.spend-fortune-point');
+        Route::patch('/{hero}/spend-fate-point', [CharactersController::class, 'spendFatePoint'])->name('character-sheet.spend-fate-point');
         Route::post('/{hero}/log-fortune-point-satisfaction', [CharactersController::class, 'logFortunePointsSatisfaction'])->name('character-sheet.log-fortune-point-satisfaction');
         Route::delete('/{hero}/delete-hero', [CharactersController::class, 'deleteHero'])->name('character-sheet.delete-hero');
     });

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\NotEnoughMoneyException;
 use App\Helpers\Traits\BelongsToManyKeyBy;
 use App\Helpers\Traits\HasManyKeyBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -145,5 +146,19 @@ class Hero extends Model
     public function scopeOnlyActiveUsers($query)
     {
         return $query->whereRelation('user', 'is_active', true);
+    }
+
+    protected function fatePoints(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $fatePoints = $this->characteristic->where('id', '=', Characteristic::FATE_POINTS_CHARACTERISTIC_ID)->first();
+                if (!$fatePoints) {
+                    return 0;
+                }
+
+                return $fatePoints->pivot->start_value + $fatePoints->pivot->advancement;
+            }
+        );
     }
 }

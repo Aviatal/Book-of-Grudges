@@ -2,8 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\Characteristic;
 use App\Models\Hero;
 use Auth;
+use DB;
 use Illuminate\Support\Collection;
 
 class HeroesRepository
@@ -31,5 +33,11 @@ class HeroesRepository
     public function spendFortunePoint(Hero $hero): void
     {
         $hero->decrement('fortune_points');
+    }
+    public function spendFatePoint(Hero $hero): void
+    {
+        $hero->characteristic()->updateExistingPivot(Characteristic::FATE_POINTS_CHARACTERISTIC_ID, [
+            'advancement' => DB::raw('advancement - 1')
+        ]);
     }
 }

@@ -36,4 +36,6 @@ class Characteristic extends Model
         'PO',
         'PP'
     ];
+
+    const int FATE_POINTS_CHARACTERISTIC_ID = 16;
 }
