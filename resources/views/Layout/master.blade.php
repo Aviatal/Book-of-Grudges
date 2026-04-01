@@ -92,6 +92,13 @@
                             Zdolności
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('spells.spells-index') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Zaklęcia
+                        </a>
+                    </li>
                     @if(Auth::user() && Auth::user()->getAttribute('is_admin') && !str_contains(url()->current(), 'panel'))
                         <li>
                             <a href="{{ route('panel.experience.show-experiences-form') }}"

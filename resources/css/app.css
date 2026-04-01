@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&display=swap');
 @import "vue-select/dist/vue-select.css";
+@import '@mdi/font/css/materialdesignicons.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

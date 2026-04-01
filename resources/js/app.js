@@ -9,10 +9,11 @@ import 'vue-toast-notification/dist/theme-bootstrap.css';
 import VueSelect  from "vue-select";
 import {
     VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular,
-    VAutocomplete, VRating, VListItem, VListItemSubtitle, VForm,
+    VAutocomplete, VRating, VListItem, VListItemSubtitle, VForm, VIcon
 } from 'vuetify/components';
 import ArmorsIndex from "./vue/views/armors/ArmorsIndex.vue";
 import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
+import SpellsIndex from "./vue/views/spells/SpellsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
 import FooterText from "./vue/components/FooterText.vue";
@@ -22,11 +23,13 @@ import SpendFortunePoint from "./vue/components/SpendFortunePoint.vue";
 import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
+import '@mdi/font/css/materialdesignicons.css'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 const vuetify = createVuetify({
     components: {
         VTextField, VBtn, VCol, VRow, VDataTable, VDialog, VCard, VCardText, VCardTitle, VCardActions, VProgressCircular,
-        VAutocomplete, VRating, VListItem, VListItemSubtitle, VForm,
+        VAutocomplete, VRating, VListItem, VListItemSubtitle, VForm, VIcon
     },
     theme: {
         defaultTheme: 'dark',
@@ -41,7 +44,14 @@ const vuetify = createVuetify({
                 }
             }
         }
-    }
+    },
+    icons: {
+        defaultSet: 'mdi',
+        aliases,
+        sets: {
+            mdi,
+        },
+    },
 });
 
 window.axios.defaults.baseURL = document.head
@@ -84,6 +94,7 @@ app.component('character-sheet', CharacterSheet);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
 app.component('skills-index', SkillsIndex);
+app.component('spells-index', SpellsIndex);
 app.component('talents-index', TalentsIndex);
 app.component('currency-converter', CurrencyConverter);
 app.component('spend-fortune-point', SpendFortunePoint);

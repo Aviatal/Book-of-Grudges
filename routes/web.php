@@ -31,6 +31,11 @@ Route::group(['prefix' => 'zdolnosci'], function () {
     Route::get('/get-talents', [SkillsAndTalentsController::class, 'getTalents'])->name('skills-and-talents.get-talents');
 });
 
+Route::group(['prefix' => 'zaklecia'], function () {
+    Route::get('/', [\App\Http\Controllers\SpellsController::class, 'spellsIndex'])->name('spells.spells-index');
+    Route::get('/get-spells', [\App\Http\Controllers\SpellsController::class, 'getSpells'])->name('spells.get-spells');
+});
+
 Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
 
 Route::middleware('auth')->group(function (){
