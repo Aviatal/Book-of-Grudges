@@ -46,18 +46,18 @@
                     <h3 v-else class="text-3xl font-serif text-gray-600 italic"> Wiedza Powszechna </h3>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-q lg:grid-cols-2 gap-8">
                     <div v-for="spell in spellsInSpec" :key="spell.id"
                          class="spell-card bg-[#1A1A1A] border-l-4 border-l-[#7B1113] border-y border-r border-[#333] flex flex-col shadow-2xl">
 
                         <div class="bg-[#222] p-5 border-b border-[#333] flex justify-between items-center">
                             <h4 class="text-[#E0E0E0] font-bold text-xl uppercase tracking-tight">{{ spell.name }}</h4>
-                            <div class="bg-[#7B1113] text-white px-3 py-1 rounded-sm text-sm font-black">
-                                SM {{ spell.casting_number }}
+                            <div class="bg-[#7B1113] text-white px-3 py-1 rounded-sm text-sm font-black" title="Wymagany poziom mocy">
+                                WPM {{ spell.casting_number }}
                             </div>
                         </div>
 
-                        <div class="p-5 text-xs space-y-3 bg-[#1A1A1A]">
+                        <div class="p-5 text-s space-y-3 bg-[#1A1A1A]">
                             <div class="flex justify-between items-center">
                                 <span class="text-[#555] uppercase font-bold tracking-tighter">Inkantacja</span>
                                 <span class="text-[#CCC]">{{ spell.casting_duration }}</span>
