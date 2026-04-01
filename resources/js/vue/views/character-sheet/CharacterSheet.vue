@@ -36,6 +36,7 @@
                 :talents-data="hero.talents"
             ></hero-talents-section>
             <hero-spells-section
+                v-if="hero.characteristic['Mag']?.pivot.start_value + hero.characteristic['Mag']?.pivot.advancement > 0"
                 :hero-id="hero.id"
                 :spells-data="hero.spells"
             ></hero-spells-section>
