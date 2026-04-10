@@ -1,5 +1,7 @@
 @extends('Layout.master')
 
 @section('content')
-    <tabletop></tabletop>
+    <tabletop
+        :hero-id="{{ $heroId }}"
+    ></tabletop>
 @endsection

@@ -7,7 +7,7 @@
                 <v-group
                     v-for="token in tokens"
                     :key="token.id"
-                    :config="{ x: token.x, y: token.y, draggable: true }"
+                    :config="{ x: token.x, y: token.y, draggable: props.heroId === token.hero_id }"
                     @dragend="(e) => updateTokenPosition(e, token)"
                 >
                     <v-circle :config="{ radius: 25, fill: token.color, stroke: 'black', strokeWidth: 2 }" />
@@ -21,6 +21,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
+
+const props = defineProps<{
+    heroId: number
+}>();
 
 interface MoveTokenEvent {
     tokenId: number;
