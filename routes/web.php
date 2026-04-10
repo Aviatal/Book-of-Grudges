@@ -7,7 +7,9 @@ use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\Panel\PurchaseController;
 use App\Http\Controllers\ProfessionsController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SkillsAndTalentsController;
+use App\Http\Controllers\TokensController;
 use App\Http\Controllers\WeaponsController;
 use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
@@ -80,6 +82,14 @@ Route::middleware('auth')->group(function (){
         Route::get('/get-professions/{race}', [CharactersController::class, 'getRaceProfessions'])->name('create-character.get-race-professions');
         Route::get('/get-rolled-profession', [CharactersController::class, 'getRolledProfession'])->name('create-character.get-rolled-profession');
         Route::get('/get-races', [CharactersController::class, 'getRaces'])->name('create-character.get-rolled-profession');
+    });
+
+    Route::group(['prefix' => 'session'], function () {
+        Route::get('/', [SessionController::class, 'index'])->name('session.index');
+        Route::group(['prefix' => 'tokens'], function () {
+            Route::get('/', [TokensController::class, 'getTokens'])->name('tokens.get-tokens');
+            Route::patch('/{token}/move', [TokensController::class, 'moveToken'])->name('tokens.move-token');
+        });
     });
 
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');

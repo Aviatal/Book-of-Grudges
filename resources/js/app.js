@@ -2,7 +2,9 @@ import './bootstrap';
 
 import { createApp } from 'vue';
 import {createVuetify} from "vuetify";
+import VueKonva from 'vue-konva';
 import CharacterSheet from "./vue/views/character-sheet/CharacterSheet.vue";
+import Tabletop from "./vue/views/session/Tabletop.vue";
 import WeaponsIndex from "./vue/views/weapons/WeaponsIndex.vue";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
@@ -69,7 +71,8 @@ window.customSwal = customSwal;
 
 const app = createApp({})
     .use(vuetify)
-    .use(ToastPlugin);
+    .use(ToastPlugin)
+    .use(VueKonva);
 
 app.config.globalProperties.$calculatePrice = (price) => {
     let priceInGold = price / 240;
@@ -92,6 +95,7 @@ app.component('v-select', VueSelect);
 //FRONT
 app.component('create-hero-view', CreateHeroView)
 app.component('character-sheet', CharacterSheet);
+app.component('tabletop', Tabletop);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
 app.component('skills-index', SkillsIndex);
