@@ -24,6 +24,7 @@ import Purchases from "./vue/views/panel/purchases/Purchases.vue";
 import SpendFortunePoint from "./vue/components/SpendFortunePoint.vue";
 import SpendFatePoint from "./vue/components/SpendFatePoint.vue";
 import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
+import TokensManagement from "@/views/panel/tokens/TokensManagement.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 import '@mdi/font/css/materialdesignicons.css'
@@ -110,5 +111,6 @@ app.component('footer-text', FooterText);
 app.component('experience-management', ExperienceManagement)
 app.component('fortune-points-management', FortunePointsManagement)
 app.component('purchases', Purchases)
+app.component('tokens-management', TokensManagement)
 
 app.mount('#app');

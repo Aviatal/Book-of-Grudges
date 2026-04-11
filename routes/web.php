@@ -110,4 +110,9 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
         Route::get('/', [PurchaseController::class, 'index'])->name('panel.purchases.make-purchase-form');
         Route::post('/', [PurchaseController::class, 'sendPurchase'])->name('panel.purchases.sen-purchase');
     });
+
+    Route::prefix('tokens')->group(function () {
+        Route::get('/', [TokensController::class, 'index'])->name('panel.tokens.index');
+        Route::get('/get-tokens', [TokensController::class, 'getTokens'])->name('panel.tokens.get-tokens');
+    });
 });
