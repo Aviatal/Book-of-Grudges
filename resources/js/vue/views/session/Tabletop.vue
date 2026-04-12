@@ -1,11 +1,59 @@
 <template>
     <div class="game-container">
+        <div class="toolbar shadow-lg">
+            <div class="tool-group">
+                <button :class="{ active: activeTool === 'select' }" @click="activeTool = 'select'">🏹 Tokeny</button>
+                <button :class="{ active: activeTool === 'select-draw' }" @click="activeTool = 'select-draw'">🛠️ Edytuj</button>
+            </div>
+            <div class="tool-group">
+                <button :class="{ active: activeTool === 'pen' }" @click="activeTool = 'pen'">✏️ Pisak</button>
+                <button :class="{ active: activeTool === 'rect' }" @click="activeTool = 'rect'">⬜ Prostokąt</button>
+                <button :class="{ active: activeTool === 'eraser' }" @click="activeTool = 'eraser'">🧹 Gumka</button>
+            </div>
+            <div class="tool-group">
+                <button @click="undo">↩️</button>
+                <button @click="drawings = []" class="danger">💀</button>
+            </div>
+        </div>
+
         <v-stage
             :config="stageConfig"
             @mousedown="handleStageMouseDown"
             @mousemove="handleStageMouseMove"
             @mouseup="handleStageMouseUp"
         >
+            <v-layer ref="drawLayer">
+                <template v-for="draw in drawings" :key="draw.id">
+                    <v-line
+                        v-if="draw.type === 'pen'"
+                        :config="{
+                            ...draw,
+                            draggable: activeTool === 'select-draw'
+                        }"
+                        @click="(e) => handleShapeClick(e, draw.id)"
+                        @dragend="(e) => handleTransformEnd(e, draw)"
+                    />
+                    <v-rect
+                        v-if="draw.type === 'rect'"
+                        :config="{
+                            ...draw,
+                            draggable: activeTool === 'select-draw'
+                        }"
+                        @click="(e) => handleShapeClick(e, draw.id)"
+                        @transformend="(e) => handleTransformEnd(e, draw)"
+                        @dragend="(e) => handleTransformEnd(e, draw)"
+                    />
+                </template>
+
+                <v-transformer
+                    ref="transformerNode"
+                    :config="{
+                        visible: activeTool === 'select-draw' && selectedShapeId !== null,
+                        enabledAnchors: [ 'top-center', 'top-left', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right', 'middle-right', 'top-right' ]
+                    }"
+                />
+            </v-layer>
+
             <v-layer>
                 <v-group
                     v-for="token in tokens"
@@ -106,6 +154,56 @@ const moveToken = (tokenId: number, x: number, y: number) => {
 
 const tokens = ref<Token[]>([]);
 const loadedImages = ref<Record<number, HTMLImageElement>>({});
+const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' >('select');
+const drawings = ref<any[]>([]);
+const isDrawing = ref(false);
+const history = ref<any[]>([]);
+const selectedShapeId = ref<number | null>(null);
+
+const transformerNode = ref();
+const drawLayer = ref();
+
+const handleShapeClick = (e: any, shapeId: number) => {
+    // 1. Logika GUMKI
+    if (activeTool.value === 'eraser') {
+        drawings.value = drawings.value.filter(d => d.id !== shapeId);
+        selectedShapeId.value = null;
+        transformerNode.value.getNode().nodes([]); // Ukryj transformer
+        // Tutaj wyślij info do Reverb o usunięciu (np. axios.delete...)
+        return;
+    }
+
+    // 2. Logika EDYCJI (Transformer)
+    if (activeTool.value === 'select-draw') {
+        selectedShapeId.value = shapeId;
+        const selectedNode = e.target; // Element, w który kliknęliśmy
+
+        // Podpinamy transformer pod węzeł
+        transformerNode.value.getNode().nodes([selectedNode]);
+        transformerNode.value.getNode().getLayer().batchDraw();
+    }
+};
+
+// Po zakończeniu skalowania/przesuwania
+const handleTransformEnd = (e: any, draw: any) => {
+    const node = e.target;
+    draw.x = node.x();
+    draw.y = node.y();
+    draw.scaleX = node.scaleX();
+    draw.scaleY = node.scaleY();
+    draw.rotation = node.rotation();
+
+    // Wyślij aktualizację przez Reverb (UpdateDrawingEvent)
+    // broadcastUpdate(draw);
+};
+
+const undo = () => {
+    if (drawings.value.length === 0) return;
+    const lastItem = drawings.value.pop();
+    history.value.push(lastItem);
+    // Powiadom backend/Echo o usunięciu elementu
+    // broadcastDelete(lastItem.id);
+};
 
 const stageConfig = ref({
     width: window.innerWidth,
@@ -171,16 +269,24 @@ const isInside = (token: Token, box: any) => {
     return token.x >= x1 && token.x <= x2 && token.y >= y1 && token.y <= y2;
 };
 
-const handleStageMouseDown = (e: any) => {
-    // Jeśli klikniemy w pusty obszar sceny
+const handleSelectionStart = (e: any) => {
+    // Jeśli klikniemy w tło (pusty obszar)
     if (e.target === e.target.getStage()) {
-        const pos = e.target.getStage().getPointerPosition();
-        selectionBox.value = { x: pos.x, y: pos.y, width: 0, height: 0, visible: true };
-        selectedIds.value = []; // Reset zaznaczenia
+        // Resetujemy zaznaczenie rysunku
+        selectedShapeId.value = null;
+        if (transformerNode.value) {
+            transformerNode.value.getNode().nodes([]);
+        }
+
+        // Twoja stara logika zaznaczania prostokątem (tylko dla narzędzia select)
+        if (activeTool.value === 'select') {
+            const pos = e.target.getStage().getPointerPosition();
+            selectionBox.value = { x: pos.x, y: pos.y, width: 0, height: 0, visible: true };
+            selectedIds.value = [];
+        }
     }
 };
-
-const handleStageMouseMove = (e: any) => {
+const handleSelectionMove = (e: any) => {
     if (!selectionBox.value.visible) return;
 
     const pos = e.target.getStage().getPointerPosition();
@@ -188,7 +294,7 @@ const handleStageMouseMove = (e: any) => {
     selectionBox.value.height = pos.y - selectionBox.value.y;
 };
 
-const handleStageMouseUp = () => {
+const handleSelectionEnd = () => {
     if (!selectionBox.value.visible) return;
 
     // Zaznaczamy tylko tokeny, które należą do gracza (zgodnie z Twoją logiką props.heroId)
@@ -249,6 +355,68 @@ const handleGroupDragEnd = async () => {
     }
 };
 
+const handleStageMouseDown = (e: any) => {
+    // Jeśli nie jesteśmy w trybie rysowania, używamy Twojej starej logiki (selection box)
+    if (activeTool.value === 'select') {
+        handleSelectionStart(e); // Przenieś tam starą logikę handleStageMouseDown
+        return;
+    }
+
+    isDrawing.value = true;
+    const pos = e.target.getStage().getPointerPosition();
+
+    if (activeTool.value === 'pen') {
+        drawings.value.push({
+            id: Date.now(), // Tymczasowe ID
+            type: 'pen',
+            points: [pos.x, pos.y],
+            stroke: '#ff0000',
+            strokeWidth: 3,
+            tension: 0.5, // Wygładzanie linii
+            lineCap: 'round',
+            lineJoin: 'round'
+        });
+    } else if (activeTool.value === 'rect') {
+        drawings.value.push({
+            id: Date.now(),
+            type: 'rect',
+            x: pos.x,
+            y: pos.y,
+            width: 0,
+            height: 0,
+            stroke: '#ff0000',
+            strokeWidth: 2
+        });
+    }
+};
+
+const handleStageMouseMove = (e: any) => {
+    if (!isDrawing.value || activeTool.value === 'select') {
+        handleSelectionMove(e); // Stara logika selection box
+        return;
+    }
+
+    const pos = e.target.getStage().getPointerPosition();
+    const lastShape = drawings.value[drawings.value.length - 1];
+
+    if (activeTool.value === 'pen') {
+        lastShape.points = lastShape.points.concat([pos.x, pos.y]);
+    } else if (activeTool.value === 'rect') {
+        lastShape.width = pos.x - lastShape.x;
+        lastShape.height = pos.y - lastShape.y;
+    }
+};
+
+const handleStageMouseUp = () => {
+    if (isDrawing.value) {
+        isDrawing.value = false;
+        const lastShape = drawings.value[drawings.value.length - 1];
+        // Tutaj wyślij broadcast przez Reverb: 'drawing-finished'
+        // broadcastDrawing(lastShape);
+    }
+    handleSelectionEnd(); // Stara logika
+};
+
 onMounted(() => {
     fetchTokens();
     window.addEventListener('resize', updateSize);
@@ -282,4 +450,18 @@ onUnmounted(() => {
     color: white;
     cursor: pointer;
 }
+ .toolbar {
+     position: fixed;
+     top: 20px;
+     left: 20px;
+     z-index: 10001;
+     display: flex;
+     gap: 10px;
+     background: rgba(0,0,0,0.7);
+     padding: 10px;
+     border-radius: 8px;
+     border: 1px solid #d4af37;
+ }
+button { background: #333; color: white; border: 1px solid #555; padding: 5px 10px; cursor: pointer; }
+button.active { background: #d4af37; color: black; }
 </style>
