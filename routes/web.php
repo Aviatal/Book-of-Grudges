@@ -113,6 +113,13 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
 
     Route::prefix('tokens')->group(function () {
         Route::get('/', [TokensController::class, 'index'])->name('panel.tokens.index');
+        Route::get('/create', [TokensController::class, 'create'])->name('panel.tokens.create');
+        Route::post('/store', [TokensController::class, 'store'])->name('panel.tokens.store');
+        Route::get('/{id}/edit', [TokensController::class, 'edit'])->name('panel.tokens.edit');
+        Route::put('/{id}/update', [TokensController::class, 'update'])->name('panel.tokens.update');
+        Route::delete('/{id}/delete', [TokensController::class, 'delete'])->name('panel.tokens.delete');
+
         Route::get('/get-tokens', [TokensController::class, 'getTokens'])->name('panel.tokens.get-tokens');
+        Route::get('/get-token/{token}', [TokensController::class, 'getToken'])->name('panel.tokens.get-token');
     });
 });

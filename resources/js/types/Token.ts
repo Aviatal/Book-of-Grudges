@@ -6,8 +6,10 @@ export interface Token {
     x: number,
     y: number,
     color: string,
-    hero_id: number,
-    hero: Hero
-    created_at: string
+    image: string | null | Blob | File,
+    image_url: string,
+    hero_id: number | null,
+    hero: Hero,
+    created_at: string,
     updated_at: string
 }

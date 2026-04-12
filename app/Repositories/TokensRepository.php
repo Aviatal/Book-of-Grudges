@@ -15,6 +15,30 @@ class TokensRepository
             })
             ->get();
     }
+    public function getToken(int $id, array $relations = []): Token
+    {
+        return Token::query()
+            ->when(count($relations) > 0, function (Builder $query) use ($relations) {
+                $query->with($relations);
+            })
+            ->findOrFail($id);
+    }
+
+    public function createToken(array $data): Token
+    {
+        return Token::query()->create($data);
+    }
+
+    public function updateAndRequestToken(Token $token, array $data): Token
+    {
+        $token->update($data);
+        return $token->refresh();
+    }
+
+    public function deleteToken(Token $token): bool
+    {
+        return $token->delete();
+    }
 
     public function moveToken(int $tokenId, int $x, int $y): int
     {
