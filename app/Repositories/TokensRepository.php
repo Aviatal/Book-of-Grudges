@@ -44,4 +44,8 @@ class TokensRepository
     {
         return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y]);
     }
+    public function moveMultipleToken(array $tokens): int
+    {
+        return Token::query()->upsert($tokens, 'id', ['x', 'y']);
+    }
 }

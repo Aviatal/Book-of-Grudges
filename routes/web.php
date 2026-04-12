@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function (){
         Route::group(['prefix' => 'tokens'], function () {
             Route::get('/', [TokensController::class, 'getTokens'])->name('tokens.get-tokens');
             Route::patch('/{token}/move', [SessionController::class, 'moveToken'])->name('tokens.move-token');
+            Route::patch('/bulk-move', [SessionController::class, 'bulkMove']);
         });
     });
 

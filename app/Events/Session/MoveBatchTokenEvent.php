@@ -8,14 +8,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MoveTokenEvent implements ShouldBroadcastNow
+class MoveBatchTokenEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $id, public int $x, public int $y) {}
+    public function __construct(public array $tokens) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -31,6 +31,6 @@ class MoveTokenEvent implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'move';
+        return 'batch-move';
     }
 }
