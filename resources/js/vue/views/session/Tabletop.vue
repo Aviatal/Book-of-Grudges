@@ -163,12 +163,22 @@ const selectedShapeId = ref<number | null>(null);
 const transformerNode = ref();
 const drawLayer = ref();
 
+const fetchDrawings = async () => {
+    const { data } = await axios.get('/session/drawings');
+    drawings.value = data.map(d => ({
+        id: d.id,
+        type: d.type,
+        ...d.data // Rozpakowujemy właściwości x, y, points itp.
+    }));
+};
+
 const handleShapeClick = (e: any, shapeId: number) => {
     // 1. Logika GUMKI
     if (activeTool.value === 'eraser') {
         drawings.value = drawings.value.filter(d => d.id !== shapeId);
         selectedShapeId.value = null;
         transformerNode.value.getNode().nodes([]); // Ukryj transformer
+        axios.delete(`/session/drawings/${shapeId}`);
         // Tutaj wyślij info do Reverb o usunięciu (np. axios.delete...)
         return;
     }
@@ -185,13 +195,20 @@ const handleShapeClick = (e: any, shapeId: number) => {
 };
 
 // Po zakończeniu skalowania/przesuwania
-const handleTransformEnd = (e: any, draw: any) => {
+const handleTransformEnd = async (e: any, draw: any) => {
     const node = e.target;
     draw.x = node.x();
     draw.y = node.y();
     draw.scaleX = node.scaleX();
     draw.scaleY = node.scaleY();
     draw.rotation = node.rotation();
+
+    const updatedData = {
+        id: draw.id,
+        data: draw,
+    };
+
+    await axios.patch(`/session/drawings/${node.id()}`, updatedData);
 
     // Wyślij aktualizację przez Reverb (UpdateDrawingEvent)
     // broadcastUpdate(draw);
@@ -356,7 +373,9 @@ const handleGroupDragEnd = async () => {
 };
 
 const handleStageMouseDown = (e: any) => {
-    // Jeśli nie jesteśmy w trybie rysowania, używamy Twojej starej logiki (selection box)
+    if (activeTool.value === 'select-draw' || activeTool.value === 'eraser') {
+        return;
+    }
     if (activeTool.value === 'select') {
         handleSelectionStart(e); // Przenieś tam starą logikę handleStageMouseDown
         return;
@@ -407,10 +426,15 @@ const handleStageMouseMove = (e: any) => {
     }
 };
 
-const handleStageMouseUp = () => {
+const handleStageMouseUp = async () => {
     if (isDrawing.value) {
         isDrawing.value = false;
         const lastShape = drawings.value[drawings.value.length - 1];
+        const { data } = await axios.post('/session/drawings/store', {
+            id: lastShape.id,
+            type: lastShape.type,
+            data: lastShape
+        });
         // Tutaj wyślij broadcast przez Reverb: 'drawing-finished'
         // broadcastDrawing(lastShape);
     }
@@ -418,6 +442,7 @@ const handleStageMouseUp = () => {
 };
 
 onMounted(() => {
+    fetchDrawings();
     fetchTokens();
     window.addEventListener('resize', updateSize);
 });

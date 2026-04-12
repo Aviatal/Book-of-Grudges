@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
+use App\Http\Controllers\DrawingsController;
 use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
@@ -90,6 +91,12 @@ Route::middleware('auth')->group(function (){
             Route::get('/', [TokensController::class, 'getTokens'])->name('tokens.get-tokens');
             Route::patch('/{token}/move', [SessionController::class, 'moveToken'])->name('tokens.move-token');
             Route::patch('/bulk-move', [SessionController::class, 'bulkMove']);
+        });
+        Route::group(['prefix' => 'drawings'], function () {
+            Route::get('/', [DrawingsController::class, 'getDrawings'])->name('drawings.get-drawings');
+            Route::post('/store', [DrawingsController::class, 'storeDrawing'])->name('drawings.store-drawing');
+            Route::patch('/{drawingId}', [DrawingsController::class, 'updateDrawing'])->name('drawings.update-drawing');
+            Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
         });
     });
 
