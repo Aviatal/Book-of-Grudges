@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Session\DrawingCreateEvent;
+use App\Events\Session\DrawingDeleteEvent;
+use App\Events\Session\DrawingUpdateEvent;
 use App\Http\Requests\StoreDrawingRequest;
 use App\Repositories\DrawingsRepository;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +26,8 @@ class DrawingsController extends Controller
     public function storeDrawing(StoreDrawingRequest $request, DrawingsRepository $drawingsRepository): \Illuminate\Http\JsonResponse
     {
         try {
-            $drawingsRepository->storeDrawing($request->all());
+            $drawing = $drawingsRepository->storeDrawing($request->all());
+            event(new DrawingCreateEvent($drawing->getAttribute('data')));
             return response()->json('ok', Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('ERROR STORING DRAWING');
@@ -35,7 +39,9 @@ class DrawingsController extends Controller
     public function updateDrawing(StoreDrawingRequest $request, int $drawingId, DrawingsRepository $drawingsRepository): \Illuminate\Http\JsonResponse
     {
         try {
-            $drawingsRepository->updateDrawing($drawingId, $request->input('data'));
+            $drawingData = $request->input('data');
+            $drawingsRepository->updateDrawing($drawingId, $drawingData);
+            event(new DrawingUpdateEvent($drawingId, $drawingData));
             return response()->json('ok', Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('ERROR STORING DRAWING');
@@ -48,6 +54,7 @@ class DrawingsController extends Controller
     {
         try {
             $drawingsRepository->deleteDrawing($drawingId);
+            event(new DrawingDeleteEvent($drawingId));
             return response()->json('ok', Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('ERROR STORING DRAWING');

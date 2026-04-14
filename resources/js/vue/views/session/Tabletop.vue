@@ -10,10 +10,6 @@
                 <button :class="{ active: activeTool === 'rect' }" @click="activeTool = 'rect'">⬜ Prostokąt</button>
                 <button :class="{ active: activeTool === 'eraser' }" @click="activeTool = 'eraser'">🧹 Gumka</button>
             </div>
-            <div class="tool-group">
-                <button @click="undo">↩️</button>
-                <button @click="drawings = []" class="danger">💀</button>
-            </div>
         </div>
 
         <v-stage
@@ -123,6 +119,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
+import {DrawingData} from "@/types/DrawingData";
 
 const props = defineProps<{
     heroId: number
@@ -133,6 +130,10 @@ interface MoveTokenEvent {
     x: number;
     y: number;
 }
+interface DrawingEditEvent {
+    drawingId: number;
+    data: DrawingData
+}
 window.Echo.channel('token-move')
     .listen('.move', (e: MoveTokenEvent) => {
         moveToken(e.id, e.x, e.y);
@@ -142,6 +143,20 @@ window.Echo.channel('token-move')
         e.tokens.forEach(token => {
             moveToken(token.id, token.x, token.y);
         })
+    });
+window.Echo.channel('drawings')
+    .listen('.drawing-update', (e: DrawingEditEvent) => {
+        let drawing = drawings.value.find(d => d.id === e.drawingId);
+        if (drawing) {
+            Object.assign(drawing, e.data);
+        }
+    })
+    .listen('.drawing-create', (e: {data: DrawingData}) => {
+        console.log('Received drawing create event:', e);
+        drawings.value.push(e.data);
+    })
+    .listen('.drawing-delete', (e: { drawingId: number}) => {
+        drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
     });
 
 const moveToken = (tokenId: number, x: number, y: number) => {
@@ -177,9 +192,8 @@ const handleShapeClick = (e: any, shapeId: number) => {
     if (activeTool.value === 'eraser') {
         drawings.value = drawings.value.filter(d => d.id !== shapeId);
         selectedShapeId.value = null;
-        transformerNode.value.getNode().nodes([]); // Ukryj transformer
+        transformerNode.value.getNode().nodes([]);
         axios.delete(`/session/drawings/${shapeId}`);
-        // Tutaj wyślij info do Reverb o usunięciu (np. axios.delete...)
         return;
     }
 
@@ -209,17 +223,6 @@ const handleTransformEnd = async (e: any, draw: any) => {
     };
 
     await axios.patch(`/session/drawings/${node.id()}`, updatedData);
-
-    // Wyślij aktualizację przez Reverb (UpdateDrawingEvent)
-    // broadcastUpdate(draw);
-};
-
-const undo = () => {
-    if (drawings.value.length === 0) return;
-    const lastItem = drawings.value.pop();
-    history.value.push(lastItem);
-    // Powiadom backend/Echo o usunięciu elementu
-    // broadcastDelete(lastItem.id);
 };
 
 const stageConfig = ref({
@@ -435,10 +438,8 @@ const handleStageMouseUp = async () => {
             type: lastShape.type,
             data: lastShape
         });
-        // Tutaj wyślij broadcast przez Reverb: 'drawing-finished'
-        // broadcastDrawing(lastShape);
     }
-    handleSelectionEnd(); // Stara logika
+    handleSelectionEnd();
 };
 
 onMounted(() => {
