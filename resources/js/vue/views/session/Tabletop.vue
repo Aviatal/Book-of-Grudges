@@ -10,6 +10,16 @@
                 <button :class="{ active: activeTool === 'rect' }" @click="activeTool = 'rect'">⬜ Prostokąt</button>
                 <button :class="{ active: activeTool === 'eraser' }" @click="activeTool = 'eraser'">🧹 Gumka</button>
             </div>
+            <button :class="{ active: activeTool === 'ping' }" @click="activeTool = 'ping'">📍 Ping</button>
+            <div v-if="activeTool === 'ping'" class="color-picker">
+                <div
+                    v-for="color in colors"
+                    :key="color.value"
+                    class="color-dot"
+                    :style="{ backgroundColor: color.value, border: pingColor === color.value ? '2px solid white' : 'none' }"
+                    @click="pingColor = color.value"
+                ></div>
+            </div>
         </div>
 
         <v-stage
@@ -111,6 +121,16 @@
                     strokeWidth: 1
                 }" />
             </v-layer>
+
+            <v-layer>
+                <PingItem
+                    v-for="ping in pings"
+                    :key="ping.id"
+                    :x="ping.x"
+                    :y="ping.y"
+                    :color="ping.color"
+                />
+            </v-layer>
         </v-stage>
     </div>
 </template>
@@ -120,6 +140,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
 import {DrawingData} from "@/types/DrawingData";
+import PingItem from '../../components/session/PingItem.vue';
 
 const props = defineProps<{
     heroId: number
@@ -134,7 +155,15 @@ interface DrawingEditEvent {
     drawingId: number;
     data: DrawingData
 }
-window.Echo.channel('token-move')
+
+interface PingData {
+    id: number
+    x: number,
+    y: number,
+    color: number,
+}
+
+    window.Echo.channel('token-move')
     .listen('.move', (e: MoveTokenEvent) => {
         moveToken(e.id, e.x, e.y);
     })
@@ -157,6 +186,16 @@ window.Echo.channel('drawings')
     })
     .listen('.drawing-delete', (e: { drawingId: number}) => {
         drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
+    })
+    .listen('.ping', (e: { newPing: PingData }) => {
+        const newPing = {
+            id: Date.now(),
+            x: e.newPing.x,
+            y: e.newPing.y,
+            color: pingColor.value
+        };
+
+        createPing(newPing);
     });
 
 const moveToken = (tokenId: number, x: number, y: number) => {
@@ -169,11 +208,20 @@ const moveToken = (tokenId: number, x: number, y: number) => {
 
 const tokens = ref<Token[]>([]);
 const loadedImages = ref<Record<number, HTMLImageElement>>({});
-const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' >('select');
+const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping'>('select');
 const drawings = ref<any[]>([]);
 const isDrawing = ref(false);
 const history = ref<any[]>([]);
 const selectedShapeId = ref<number | null>(null);
+const pingColor = ref('#00a1ff');
+const pings = ref<any[]>([]);
+
+const colors = [
+    { name: 'Niebieski', value: '#00a1ff' },
+    { name: 'Czerwony', value: '#ff4d4d' },
+    { name: 'Zielony', value: '#2ecc71' },
+    { name: 'Złoty', value: '#d4af37' }
+];
 
 const transformerNode = ref();
 const drawLayer = ref();
@@ -384,10 +432,10 @@ const handleStageMouseDown = (e: any) => {
         return;
     }
 
-    isDrawing.value = true;
     const pos = e.target.getStage().getPointerPosition();
 
     if (activeTool.value === 'pen') {
+        isDrawing.value = true;
         drawings.value.push({
             id: Date.now(), // Tymczasowe ID
             type: 'pen',
@@ -399,6 +447,7 @@ const handleStageMouseDown = (e: any) => {
             lineJoin: 'round'
         });
     } else if (activeTool.value === 'rect') {
+        isDrawing.value = true;
         drawings.value.push({
             id: Date.now(),
             type: 'rect',
@@ -409,9 +458,27 @@ const handleStageMouseDown = (e: any) => {
             stroke: '#ff0000',
             strokeWidth: 2
         });
+    } else if (activeTool.value === 'ping') {
+        const newPing = {
+            id: Date.now(),
+            x: pos.x,
+            y: pos.y,
+            color: pingColor.value
+        };
+
+        createPing(newPing);
+        axios.post('/session/ping', newPing);
+        return;
     }
 };
 
+const createPing = (pingData: any) => {
+    pings.value.push(pingData);
+
+    setTimeout(() => {
+        pings.value = pings.value.filter(p => p.id !== pingData.id);
+    }, 3000);
+};
 const handleStageMouseMove = (e: any) => {
     if (!isDrawing.value || activeTool.value === 'select') {
         handleSelectionMove(e); // Stara logika selection box
@@ -476,18 +543,18 @@ onUnmounted(() => {
     color: white;
     cursor: pointer;
 }
- .toolbar {
-     position: fixed;
-     top: 20px;
-     left: 20px;
-     z-index: 10001;
-     display: flex;
-     gap: 10px;
-     background: rgba(0,0,0,0.7);
-     padding: 10px;
-     border-radius: 8px;
-     border: 1px solid #d4af37;
- }
+.toolbar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10001;
+    display: flex;
+    gap: 10px;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d4af37;
+}
 button { background: #333; color: white; border: 1px solid #555; padding: 5px 10px; cursor: pointer; }
 button.active { background: #d4af37; color: black; }
 </style>

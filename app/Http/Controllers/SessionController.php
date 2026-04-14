@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\Session\MoveBatchTokenEvent;
 use App\Events\Session\MoveTokenEvent;
+use App\Events\Session\PingPlayersEvent;
 use App\Models\Token;
 use App\Repositories\HeroesRepository;
 use App\Repositories\TokensRepository;
@@ -29,6 +30,12 @@ class SessionController extends Controller
     {
         $tokensRepository->moveMultipleToken($request->input('tokens'));
         broadcast(new MoveBatchTokenEvent($request->input('tokens')))->toOthers();
+        return response()->json('OK', Response::HTTP_OK);
+    }
+
+    public function pingPlayers(Request $request): \Illuminate\Http\JsonResponse
+    {
+        broadcast(new PingPlayersEvent($request->all()))->toOthers();
         return response()->json('OK', Response::HTTP_OK);
     }
 }
