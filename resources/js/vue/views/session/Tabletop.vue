@@ -1,6 +1,6 @@
 <template>
     <div class="game-container">
-        <div class="toolbar shadow-lg">
+        <div v-if="hasDrawingPermission" class="toolbar shadow-lg">
             <div class="tool-group">
                 <button :class="{ active: activeTool === 'select' }" @click="activeTool = 'select'">🏹 Tokeny</button>
                 <button :class="{ active: activeTool === 'select-draw' }" @click="activeTool = 'select-draw'">🛠️ Edytuj</button>
@@ -34,7 +34,7 @@
                         v-if="draw.type === 'pen'"
                         :config="{
                             ...draw,
-                            draggable: activeTool === 'select-draw'
+                            draggable: activeTool === 'select-draw' && hasDrawingPermission
                         }"
                         @click="(e) => handleShapeClick(e, draw.id)"
                         @dragend="(e) => handleTransformEnd(e, draw)"
@@ -43,7 +43,7 @@
                         v-if="draw.type === 'rect'"
                         :config="{
                             ...draw,
-                            draggable: activeTool === 'select-draw'
+                            draggable: activeTool === 'select-draw' && hasDrawingPermission
                         }"
                         @click="(e) => handleShapeClick(e, draw.id)"
                         @transformend="(e) => handleTransformEnd(e, draw)"
@@ -54,7 +54,7 @@
                 <v-transformer
                     ref="transformerNode"
                     :config="{
-                        visible: activeTool === 'select-draw' && selectedShapeId !== null,
+                        visible: activeTool === 'select-draw' && selectedShapeId !== null && hasDrawingPermission,
                         enabledAnchors: [ 'top-center', 'top-left', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right', 'middle-right', 'top-right' ]
                     }"
                 />
@@ -67,7 +67,7 @@
                     :config="{
                         x: token.x,
                         y: token.y,
-                        draggable: props.heroId === token.hero_id
+                        draggable: hasDrawingPermission
                     }"
                     @dragmove="(e) => handleGroupDragMove(e, token)"
                     @dragend="handleGroupDragEnd"
@@ -143,7 +143,8 @@ import {DrawingData} from "@/types/DrawingData";
 import PingItem from '../../components/session/PingItem.vue';
 
 const props = defineProps<{
-    heroId: number
+    heroId: number,
+    hasDrawingPermission: boolean
 }>();
 
 interface MoveTokenEvent {

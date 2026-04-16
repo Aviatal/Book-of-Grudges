@@ -16,7 +16,8 @@ class SessionController extends Controller
     public function index(Request $request, HeroesRepository $heroesRepository)
     {
         $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier())->id;
-        return view('Pages.session.index', compact('heroId'));
+        $hasDrawingPermission = $request->user()->is_admin;
+        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission'));
     }
 
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
