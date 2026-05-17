@@ -22,6 +22,31 @@
             </div>
         </div>
 
+        <div class="chat-container shadow-lg" :class="{ 'chat-minimized': isChatMinimized }">
+            <div class="chat-header" @click="isChatMinimized = !isChatMinimized">
+                <span>📜 Komunikaty sesji</span>
+                <button class="minimize-btn">{{ isChatMinimized ? '▲' : '▼' }}</button>
+            </div>
+
+            <div v-if="!isChatMinimized" class="chat-messages" ref="messageContainer">
+                <div v-for="msg in messages" :key="msg.id" class="message">
+                    <span class="msg-author">[{{ msg.author_name }}]</span>
+                    <span class="msg-content">{{ msg.text }}</span>
+                    <span class="msg-time">{{ formatDate(msg.created_at) }}</span>
+                </div>
+            </div>
+
+            <div v-if="!isChatMinimized" class="chat-input-area">
+                <input
+                    v-model="newMessage"
+                    @keyup.enter="sendMessage"
+                    placeholder="Napisz wiadomość... (/roll 2d10)"
+                    type="text"
+                />
+                <button @click="sendMessage">➤</button>
+            </div>
+        </div>
+
         <v-stage
             :config="stageConfig"
             @mousedown="handleStageMouseDown"
@@ -198,6 +223,12 @@ window.Echo.channel('drawings')
 
         createPing(newPing);
     });
+// todo:: Webhooks
+window.Echo.channel('session-chat')
+    .listen('.message-sent', (e: any) => {
+        messages.value.push(e.message);
+        scrollToBottom();
+    });
 
 const moveToken = (tokenId: number, x: number, y: number) => {
     const token = tokens.value.find(t => t.id === tokenId);
@@ -216,6 +247,10 @@ const history = ref<any[]>([]);
 const selectedShapeId = ref<number | null>(null);
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
+const messages = ref<any[]>([]);
+const newMessage = ref('');
+const isChatMinimized = ref(false);
+const messageContainer = ref<HTMLElement | null>(null);
 
 const colors = [
     { name: 'Niebieski', value: '#00a1ff' },
@@ -234,6 +269,20 @@ const fetchDrawings = async () => {
         type: d.type,
         ...d.data // Rozpakowujemy właściwości x, y, points itp.
     }));
+};
+
+const fetchTokens = async () => {
+    const response = await axios.get('/session/tokens');
+    tokens.value = response.data;
+
+    tokens.value.forEach(token => {
+        loadImage(token);
+    });
+};
+
+const fetchMessages = async () => {
+    const { data } = await axios.get('/session/chat');
+    messages.value = data;
 };
 
 const handleShapeClick = (e: any, shapeId: number) => {
@@ -294,15 +343,6 @@ const updateSize = () => {
     stageConfig.value.height = window.innerHeight;
 };
 
-// Pobierz tokeny z bazy przy starcie
-const fetchTokens = async () => {
-    const response = await axios.get('/session/tokens');
-    tokens.value = response.data;
-
-    tokens.value.forEach(token => {
-        loadImage(token);
-    });
-};
 
 // Aktualizacja pozycji po przeciągnięciu
 const updateTokenPosition = async (event, token) => {
@@ -497,6 +537,31 @@ const handleStageMouseMove = (e: any) => {
     }
 };
 
+const sendMessage = async () => {
+    if (newMessage.value.trim() === '') return;
+
+    try {
+        const { data } = await axios.post('/session/chat/send', {
+            text: newMessage.value
+        });
+
+        // Lokalnie dodajemy od razu (opcjonalnie, jeśli Reverb jest b. szybki, czekaj na event)
+        messages.value.push(data.message);
+        newMessage.value = '';
+        scrollToBottom();
+    } catch (error) {
+        console.error("Błąd wysyłania wiadomości");
+    }
+};
+
+const scrollToBottom = () => {
+    setTimeout(() => {
+        if (messageContainer.value) {
+            messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+        }
+    }, 50);
+};
+
 const handleStageMouseUp = async () => {
     if (isDrawing.value) {
         isDrawing.value = false;
@@ -510,9 +575,23 @@ const handleStageMouseUp = async () => {
     handleSelectionEnd();
 };
 
+const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+
+    return new Intl.DateTimeFormat('pl-PL', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    }).format(date);
+};
+
 onMounted(() => {
     fetchDrawings();
     fetchTokens();
+    fetchMessages();
     window.addEventListener('resize', updateSize);
 });
 onUnmounted(() => {
@@ -558,4 +637,71 @@ onUnmounted(() => {
 }
 button { background: #333; color: white; border: 1px solid #555; padding: 5px 10px; cursor: pointer; }
 button.active { background: #d4af37; color: black; }
+
+.chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 900px;
+    background: rgba(26, 26, 26, 0.9);
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 10002;
+    font-family: 'Crimson Text', serif;
+}
+
+.chat-minimized { height: 40px; }
+
+.chat-header {
+    padding: 8px 15px;
+    background: #2a2a2a;
+    border-bottom: 1px solid #d4af37;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    color: #d4af37;
+    font-weight: bold;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message { font-size: 0.95rem; line-height: 1.2; border-bottom: 1px solid #333; padding-bottom: 2px; }
+.msg-author { font-weight: bold; margin-right: 5px; }
+.msg-content { color: #ccc; word-break: break-word; display: block; }
+.msg-time { font-size: 0.7rem; color: #666; float: right; }
+
+.chat-input-area {
+    padding: 10px;
+    display: flex;
+    gap: 5px;
+    background: #111;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: #222;
+    border: 1px solid #444;
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.chat-input-area button {
+    background: #d4af37;
+    border: none;
+    color: black;
+    padding: 0 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
 </style>

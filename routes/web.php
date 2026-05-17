@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DrawingsController;
 use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
@@ -98,6 +99,9 @@ Route::middleware('auth')->group(function (){
             Route::post('/store', [DrawingsController::class, 'storeDrawing'])->name('drawings.store-drawing');
             Route::patch('/{drawingId}', [DrawingsController::class, 'updateDrawing'])->name('drawings.update-drawing');
             Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
+        });
+        Route::group(['prefix' => 'chat'], function () {
+            Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
         });
     });
 
