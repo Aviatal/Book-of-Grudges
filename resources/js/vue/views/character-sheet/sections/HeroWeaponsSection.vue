@@ -254,11 +254,11 @@ const updateWeapon = (weapon: Weapon) => {
 };
 const weaponPower = (weapon: Weapon) => {
     let weaponPower = 0;
-    if (weapon.power === 0) {
-        weaponPower += heroPower.value
+    if (!weapon.is_ranged) {
+        weaponPower = weaponPower + heroPower.value + weapon.power
     } else {
-        const calculatedWeaponPower = heroPower.value + weapon.power
-        weaponPower += calculatedWeaponPower;
+        weaponPower += weapon.power;
+
     }
 
     if (
