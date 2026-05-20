@@ -21,4 +21,24 @@ class ChatService
 
         return $message;
     }
+
+    public function rollInitiative(User $user): Message
+    {
+        $hero = $user->hero()->with('characteristic')->first();
+        $authorName = $hero?->name ?? $user->name;
+
+        $zr = $hero?->characteristic['Zr'];
+        $zrValue = $zr ? ($zr->pivot->start_value + $zr->pivot->advancement) : 0;
+
+        $roll = random_int(1, 10);
+        $total = $zrValue + $roll;
+
+        $text = "🎲 Rzut na inicjatywę: Zr ({$zrValue}) + k10 [{$roll}] = {$total}";
+
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'roll');
+
+        broadcast(new MessageSentEvent($message));
+
+        return $message;
+    }
 }

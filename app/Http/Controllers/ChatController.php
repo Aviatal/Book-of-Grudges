@@ -42,4 +42,16 @@ class ChatController extends Controller
             return response()->json(['error' => 'Wystąpił błąd podczas wysyłania wiadomości'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function rollInitiative(Request $request): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            $message = $this->chatService->rollInitiative($request->user());
+            return response()->json(['message' => $message], Response::HTTP_CREATED);
+        } catch (\Throwable $exception) {
+            Log::error('Error during rolling initiative');
+            Log::error($exception);
+            return response()->json(['error' => 'Wystąpił błąd podczas rzutu na inicjatywę'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

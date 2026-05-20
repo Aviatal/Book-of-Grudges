@@ -29,21 +29,57 @@
             </div>
 
             <div v-if="!isChatMinimized" class="chat-messages" ref="messageContainer">
-                <div v-for="msg in messages" :key="msg.id" class="message">
-                    <span class="msg-author">[{{ msg.author_name }}]</span>
-                    <span class="msg-content">{{ msg.text }}</span>
-                    <span class="msg-time">{{ formatDate(msg.created_at) }}</span>
-                </div>
+                <template v-for="msg in messages" :key="msg.id">
+                    <div v-if="msg.type === 'roll'" class="message-roll-card">
+                        <div class="roll-card-header">
+                            <span class="roll-card-icon">🎲</span>
+                            <span class="roll-card-type">INICJATYWA</span>
+                            <span class="roll-card-time">{{ formatDate(msg.created_at) }}</span>
+                        </div>
+                        <div class="roll-card-author">{{ msg.author_name }}</div>
+                        <div class="roll-card-breakdown">
+                            <div class="roll-die">
+                                <span class="roll-die-value">{{ parseRoll(msg.text).zr }}</span>
+                                <span class="roll-die-label">Zręczność</span>
+                            </div>
+                            <span class="roll-op">+</span>
+                            <div class="roll-die roll-die-d10">
+                                <span class="roll-die-value">{{ parseRoll(msg.text).dice }}</span>
+                                <span class="roll-die-label">k10</span>
+                            </div>
+                            <span class="roll-op">=</span>
+                            <div class="roll-die roll-die-total">
+                                <span class="roll-die-value">{{ parseRoll(msg.text).total }}</span>
+                                <span class="roll-die-label">Wynik</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="message">
+                        <span class="msg-author">[{{ msg.author_name }}]</span>
+                        <span class="msg-content">{{ msg.text }}</span>
+                        <span class="msg-time">{{ formatDate(msg.created_at) }}</span>
+                    </div>
+                </template>
+            </div>
+
+            <div v-if="isRolling && !isChatMinimized" class="dice-overlay">
+                <div class="dice-overlay-die">🎲</div>
+                <div class="dice-overlay-label">Rzut na inicjatywę...</div>
             </div>
 
             <div v-if="!isChatMinimized" class="chat-input-area">
                 <input
                     v-model="newMessage"
                     @keyup.enter="sendMessage"
-                    placeholder="Napisz wiadomość... (/roll 2d10)"
+                    placeholder="Napisz wiadomość..."
                     type="text"
                 />
                 <button @click="sendMessage">➤</button>
+            </div>
+            <div v-if="!isChatMinimized" class="chat-actions">
+                <button class="roll-btn" @click="rollInitiative" :disabled="isRolling">
+                    🎲 Inicjatywa
+                </button>
             </div>
         </div>
 
@@ -250,6 +286,7 @@ const pings = ref<any[]>([]);
 const messages = ref<any[]>([]);
 const newMessage = ref('');
 const isChatMinimized = ref(false);
+const isRolling = ref(false);
 const messageContainer = ref<HTMLElement | null>(null);
 
 const colors = [
@@ -552,6 +589,69 @@ const sendMessage = async () => {
     }
 };
 
+const playDiceSound = () => {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+    const sampleRate = ctx.sampleRate;
+
+    // Kilka "klaknięć" kostką o stół z malejącą głośnością
+    const clacks = [0, 0.09, 0.17, 0.27, 0.36];
+    const totalDuration = 0.55;
+    const bufferSize = Math.floor(sampleRate * totalDuration);
+    const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    clacks.forEach((clackTime, idx) => {
+        const start = Math.floor(clackTime * sampleRate);
+        const clackLen = Math.floor(0.045 * sampleRate);
+        const volume = 1 - idx * 0.15;
+        for (let i = 0; i < clackLen && start + i < bufferSize; i++) {
+            const env = Math.exp(-i / (clackLen * 0.25));
+            data[start + i] += (Math.random() * 2 - 1) * env * volume;
+        }
+    });
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1800;
+    filter.Q.value = 0.8;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.65;
+
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start();
+    source.onended = () => ctx.close();
+};
+
+const parseRoll = (text: string) => {
+    const match = text.match(/Zr \((\d+)\) \+ k10 \[(\d+)\] = (\d+)/);
+    return match
+        ? { zr: match[1], dice: match[2], total: match[3] }
+        : { zr: '?', dice: '?', total: '?' };
+};
+
+const rollInitiative = async () => {
+    if (isRolling.value) return;
+    isRolling.value = true;
+    playDiceSound();
+    try {
+        const { data } = await axios.post('/session/chat/roll-initiative');
+        scrollToBottom();
+    } catch (error) {
+        console.error('Błąd rzutu na inicjatywę');
+    } finally {
+        isRolling.value = false;
+    }
+};
+
 const scrollToBottom = () => {
     setTimeout(() => {
         if (messageContainer.value) {
@@ -650,6 +750,7 @@ button.active { background: #d4af37; color: black; }
     flex-direction: column;
     z-index: 10002;
     font-family: 'Crimson Text', serif;
+    overflow: hidden;
 }
 
 .chat-minimized { height: 40px; }
@@ -679,6 +780,136 @@ button.active { background: #d4af37; color: black; }
 .msg-content { color: #ccc; word-break: break-word; display: block; }
 .msg-time { font-size: 0.7rem; color: #666; float: right; }
 
+/* Roll card */
+.message-roll-card {
+    border: 1px solid #d4af37;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #1a1500 0%, #0f0f0f 100%);
+    padding: 8px 10px;
+    margin: 4px 0;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.4);
+}
+
+.roll-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.roll-card-icon { font-size: 1rem; }
+
+.roll-card-type {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #d4af37;
+    text-transform: uppercase;
+    flex: 1;
+}
+
+.roll-card-time {
+    font-size: 0.65rem;
+    color: #555;
+}
+
+.roll-card-author {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+
+.roll-card-breakdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.roll-op {
+    color: #888;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.roll-die {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 4px 10px;
+    min-width: 48px;
+}
+
+.roll-die-d10 {
+    border-color: #d4af37;
+    background: #1a1500;
+}
+
+.roll-die-total {
+    border: 2px solid #d4af37;
+    background: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    min-width: 54px;
+}
+
+.roll-die-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.roll-die-total .roll-die-value {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+}
+
+.roll-die-label {
+    font-size: 0.55rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.roll-die-total .roll-die-label { color: #5a4a00; }
+
+/* Dice overlay */
+.dice-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: inherit;
+    z-index: 20;
+}
+
+.dice-overlay-die {
+    font-size: 3rem;
+    animation: diceSpin 0.6s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.8));
+}
+
+.dice-overlay-label {
+    color: #d4af37;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+@keyframes diceSpin {
+    from { transform: rotate(-20deg) scale(0.9); }
+    to   { transform: rotate(20deg)  scale(1.1); }
+}
+
 .chat-input-area {
     padding: 10px;
     display: flex;
@@ -703,4 +934,25 @@ button.active { background: #d4af37; color: black; }
     cursor: pointer;
     border-radius: 4px;
 }
+
+.chat-actions {
+    padding: 5px 10px 8px;
+    background: #111;
+    display: flex;
+    gap: 5px;
+}
+
+.roll-btn {
+    background: #2a2a1a;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+
+.roll-btn:hover:not(:disabled) { background: #3a3a1a; }
+.roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
