@@ -545,8 +545,6 @@ const sendMessage = async () => {
             text: newMessage.value
         });
 
-        // Lokalnie dodajemy od razu (opcjonalnie, jeśli Reverb jest b. szybki, czekaj na event)
-        messages.value.push(data.message);
         newMessage.value = '';
         scrollToBottom();
     } catch (error) {
@@ -597,6 +595,7 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
     window.Echo.leaveChannel('token-move');
+    window.Echo.leaveChannel('session-chat');
 });
 </script>
 

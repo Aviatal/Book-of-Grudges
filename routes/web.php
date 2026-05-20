@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function (){
         });
         Route::group(['prefix' => 'chat'], function () {
             Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
+            Route::post('/send', [ChatController::class, 'sendMessage'])->name('messages.send-message');
         });
     });
 

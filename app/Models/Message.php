@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Message extends Model
 {
+    protected $fillable = ['user_id', 'author_name', 'text', 'type'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
