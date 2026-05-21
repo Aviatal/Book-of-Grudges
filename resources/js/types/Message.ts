@@ -3,6 +3,6 @@ export interface Message {
     user_id: number,
     author_name: string,
     text: string,
-    type: 'chat' | 'roll'
+    type: 'chat' | 'roll' | 'skill_test'
     created_at: string
 }

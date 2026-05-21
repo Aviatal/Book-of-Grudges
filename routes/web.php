@@ -104,6 +104,8 @@ Route::middleware('auth')->group(function (){
             Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
             Route::post('/send', [ChatController::class, 'sendMessage'])->name('messages.send-message');
             Route::post('/roll-initiative', [ChatController::class, 'rollInitiative'])->name('messages.roll-initiative');
+            Route::get('/skills', [ChatController::class, 'getSkillsForRoll'])->name('messages.skills');
+            Route::post('/roll-skill', [ChatController::class, 'rollSkill'])->name('messages.roll-skill');
         });
     });
 

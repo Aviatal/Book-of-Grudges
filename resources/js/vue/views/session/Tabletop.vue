@@ -54,6 +54,41 @@
                             </div>
                         </div>
                     </div>
+                    <div v-else-if="msg.type === 'skill_test'" class="message-skill-card" :class="parseSkillTest(msg.text)?.passed ? 'skill-passed' : 'skill-failed'">
+                        <div class="skill-card-header">
+                            <span class="skill-card-icon">🎯</span>
+                            <span class="skill-card-type">TEST UMIEJĘTNOŚCI</span>
+                            <span class="skill-card-time">{{ formatDate(msg.created_at) }}</span>
+                        </div>
+                        <div class="skill-card-author">{{ msg.author_name }}</div>
+                        <div class="skill-card-name">
+                            {{ parseSkillTest(msg.text)?.skill }}
+                            <span class="skill-card-char">({{ parseSkillTest(msg.text)?.characteristic }})</span>
+                        </div>
+                        <div class="skill-card-effective" v-if="parseSkillTest(msg.text)?.half || parseSkillTest(msg.text)?.modifier !== 0">
+                            <span class="eff-base">{{ parseSkillTest(msg.text)?.characteristic_value }}</span>
+                            <span class="eff-op" v-if="parseSkillTest(msg.text)?.half">÷2</span>
+                            <span class="eff-op" v-if="parseSkillTest(msg.text)?.modifier !== 0">
+                                {{ parseSkillTest(msg.text)?.modifier > 0 ? '+' + parseSkillTest(msg.text)?.modifier : parseSkillTest(msg.text)?.modifier }}
+                            </span>
+                            <span class="eff-sep">=</span>
+                            <span class="eff-result">{{ parseSkillTest(msg.text)?.effective_value }}</span>
+                        </div>
+                        <div class="skill-card-breakdown">
+                            <div class="skill-stat">
+                                <span class="skill-stat-value">{{ parseSkillTest(msg.text)?.effective_value ?? parseSkillTest(msg.text)?.characteristic_value }}</span>
+                                <span class="skill-stat-label">Próg</span>
+                            </div>
+                            <span class="skill-vs">vs</span>
+                            <div class="skill-stat">
+                                <span class="skill-stat-value">{{ parseSkillTest(msg.text)?.roll }}</span>
+                                <span class="skill-stat-label">k100</span>
+                            </div>
+                            <div class="skill-verdict" :class="parseSkillTest(msg.text)?.passed ? 'skill-verdict-pass' : 'skill-verdict-fail'">
+                                {{ parseSkillTest(msg.text)?.passed ? '✓ ZDANY' : '✗ NIEZDANY' }}
+                            </div>
+                        </div>
+                    </div>
                     <div v-else class="message">
                         <span class="msg-author">[{{ msg.author_name }}]</span>
                         <span class="msg-content">{{ msg.text }}</span>
@@ -80,6 +115,60 @@
                 <button class="roll-btn" @click="rollInitiative" :disabled="isRolling">
                     🎲 Inicjatywa
                 </button>
+                <button class="roll-btn" @click="toggleSkillPicker" :disabled="isRollingSkill" :class="{ active: showSkillPicker }">
+                    🎯 Test umiejętności
+                </button>
+            </div>
+
+            <div v-if="showSkillPicker && !isChatMinimized" class="skill-picker">
+                <div class="skill-picker-modifiers">
+                    <button
+                        v-for="mod in MODIFIERS"
+                        :key="mod"
+                        class="mod-btn"
+                        :class="{ 'mod-active': skillModifier === mod, 'mod-neg': mod < 0, 'mod-pos': mod > 0, 'mod-zero': mod === 0 }"
+                        @click="skillModifier = mod"
+                    >{{ mod > 0 ? '+' + mod : mod }}</button>
+                </div>
+                <div class="skill-picker-options">
+                    <button
+                        class="half-btn"
+                        :class="{ 'half-active': skillHalf }"
+                        @click="skillHalf = !skillHalf"
+                    >½ Połowa cechy</button>
+                </div>
+                <input
+                    v-model="skillSearch"
+                    class="skill-picker-search"
+                    placeholder="Szukaj umiejętności..."
+                    type="text"
+                />
+                <div class="skill-picker-list">
+                    <template v-if="filteredSkills.length">
+                        <div v-if="filteredSkills.some(s => s.is_purchased)" class="skill-group-label">Wykupione</div>
+                        <button
+                            v-for="skill in filteredSkills.filter(s => s.is_purchased)"
+                            :key="skill.id"
+                            class="skill-item skill-item-purchased"
+                            @click="rollSkill(skill.id)"
+                        >
+                            <span class="skill-item-name">{{ skill.additional_name ?? skill.name }}</span>
+                            <span class="skill-item-char">{{ skill.characteristic }} {{ skill.characteristic_value }}</span>
+                        </button>
+                        <div v-if="filteredSkills.some(s => !s.is_purchased)" class="skill-group-label">Pozostałe</div>
+                        <button
+                            v-for="skill in filteredSkills.filter(s => !s.is_purchased)"
+                            :key="skill.id"
+                            class="skill-item"
+                            @click="rollSkill(skill.id)"
+                        >
+                            <span class="skill-item-name">{{ skill.name }}</span>
+                            <span class="skill-item-char">{{ skill.characteristic }} {{ skill.characteristic_value }}</span>
+                        </button>
+                    </template>
+                    <div v-else-if="isLoadingSkills" class="skill-picker-info">Ładowanie...</div>
+                    <div v-else class="skill-picker-info">Brak wyników</div>
+                </div>
             </div>
         </div>
 
@@ -197,10 +286,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
 import {DrawingData} from "@/types/DrawingData";
+import {Message} from "@/types/Message";
 import PingItem from '../../components/session/PingItem.vue';
 
 const props = defineProps<{
@@ -283,11 +373,47 @@ const history = ref<any[]>([]);
 const selectedShapeId = ref<number | null>(null);
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
-const messages = ref<any[]>([]);
+interface SkillTestResult {
+    skill: string;
+    characteristic: string;
+    characteristic_value: number;
+    effective_value: number;
+    modifier: number;
+    half: boolean;
+    roll: number;
+    passed: boolean;
+}
+
+interface SkillOption {
+    id: number;
+    name: string;
+    type: string;
+    characteristic: string;
+    characteristic_value: number;
+    is_purchased: boolean;
+    additional_name: string | null;
+}
+
+const messages = ref<Message[]>([]);
 const newMessage = ref('');
 const isChatMinimized = ref(false);
 const isRolling = ref(false);
+const isRollingSkill = ref(false);
+const showSkillPicker = ref(false);
+const skillSearch = ref('');
+const skillModifier = ref(0);
+const skillHalf = ref(false);
+const skills = ref<SkillOption[]>([]);
+const isLoadingSkills = ref(false);
+const MODIFIERS = [-40, -30, -20, -10, 0, 10, 20, 30, 40];
 const messageContainer = ref<HTMLElement | null>(null);
+
+const filteredSkills = computed(() => {
+    const q = skillSearch.value.trim().toLowerCase();
+    return skills.value.filter(s =>
+        !q || s.name.toLowerCase().includes(q) || (s.additional_name ?? '').toLowerCase().includes(q)
+    );
+});
 
 const colors = [
     { name: 'Niebieski', value: '#00a1ff' },
@@ -320,6 +446,7 @@ const fetchTokens = async () => {
 const fetchMessages = async () => {
     const { data } = await axios.get('/session/chat');
     messages.value = data;
+    scrollToBottom();
 };
 
 const handleShapeClick = (e: any, shapeId: number) => {
@@ -629,6 +756,51 @@ const playDiceSound = () => {
     gain.connect(ctx.destination);
     source.start();
     source.onended = () => ctx.close();
+};
+
+const parseSkillTest = (text: string): SkillTestResult | null => {
+    try {
+        return JSON.parse(text) as SkillTestResult;
+    } catch (e) {
+        console.error('Failed to parse skill test message', e);
+        return null;
+    }
+};
+
+const toggleSkillPicker = async () => {
+    showSkillPicker.value = !showSkillPicker.value;
+    if (showSkillPicker.value && skills.value.length === 0) {
+        isLoadingSkills.value = true;
+        try {
+            const { data } = await axios.get<SkillOption[]>('/session/chat/skills');
+            skills.value = data;
+        } catch (e) {
+            console.error('Błąd pobierania umiejętności', e);
+        } finally {
+            isLoadingSkills.value = false;
+        }
+    }
+};
+
+const rollSkill = async (skillId: number) => {
+    if (isRollingSkill.value) return;
+    isRollingSkill.value = true;
+    showSkillPicker.value = false;
+    playDiceSound();
+    try {
+        await axios.post('/session/chat/roll-skill', {
+            skill_id: skillId,
+            modifier: skillModifier.value,
+            half: skillHalf.value,
+        });
+        scrollToBottom();
+    } catch (e) {
+        console.error('Błąd testu umiejętności', e);
+    } finally {
+        skillModifier.value = 0;
+        skillHalf.value = false;
+        isRollingSkill.value = false;
+    }
 };
 
 const parseRoll = (text: string) => {
@@ -955,4 +1127,245 @@ button.active { background: #d4af37; color: black; }
 
 .roll-btn:hover:not(:disabled) { background: #3a3a1a; }
 .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.roll-btn.active { background: #3a3a00; border-color: #ffdf00; }
+
+/* Skill picker */
+.skill-picker {
+    background: #0d0d0d;
+    border-top: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    max-height: 260px;
+}
+
+.skill-picker-modifiers {
+    display: flex;
+    gap: 3px;
+    padding: 7px 7px 0;
+    flex-wrap: wrap;
+}
+
+.mod-btn {
+    flex: 1;
+    min-width: 34px;
+    padding: 3px 2px;
+    border-radius: 3px;
+    border: 1px solid #2a2a2a;
+    background: #141414;
+    color: #777;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-align: center;
+}
+
+.mod-btn:hover { border-color: #555; color: #ccc; background: #1e1e1e; }
+.mod-neg { color: #c0392b; }
+.mod-pos { color: #27ae60; }
+.mod-zero { color: #777; }
+.mod-active { border-color: #d4af37 !important; background: #1a1500 !important; color: #d4af37 !important; box-shadow: 0 0 6px rgba(212,175,55,0.3); }
+
+.skill-picker-options {
+    padding: 5px 7px 3px;
+    display: flex;
+    gap: 5px;
+}
+
+.half-btn {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    color: #777;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    transition: all 0.12s;
+    width: 100%;
+}
+
+.half-btn:hover { border-color: #555; color: #ccc; }
+.half-active { border-color: #7b68ee !important; color: #9d91f0 !important; background: #0e0d1a !important; }
+
+.skill-picker-search {
+    margin: 8px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+.skill-picker-search:focus { border-color: #d4af37; }
+
+.skill-picker-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0 6px 6px;
+}
+
+.skill-group-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #555;
+    padding: 6px 4px 2px;
+}
+
+.skill-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    color: #aaa;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    margin-bottom: 2px;
+    text-align: left;
+    transition: border-color 0.12s, background 0.12s;
+}
+
+.skill-item:hover {
+    background: #1e1e1e;
+    border-color: #555;
+    color: #ddd;
+}
+
+.skill-item-purchased {
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #e8d68a;
+    background: #16130a;
+}
+
+.skill-item-purchased:hover {
+    background: #201c0e;
+    border-color: #d4af37;
+}
+
+.skill-item-name { flex: 1; }
+
+.skill-item-char {
+    font-size: 0.7rem;
+    color: #666;
+    margin-left: 6px;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+.skill-item-purchased .skill-item-char { color: #a08030; }
+
+.skill-picker-info {
+    color: #555;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 12px;
+}
+
+/* Skill test card */
+.message-skill-card {
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+    border: 1px solid #333;
+    background: #0f0f0f;
+}
+
+.skill-passed { border-color: #2e7d32; background: linear-gradient(135deg, #071209 0%, #0f0f0f 100%); }
+.skill-failed  { border-color: #7f1d1d; background: linear-gradient(135deg, #120707 0%, #0f0f0f 100%); }
+
+.skill-card-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+}
+
+.skill-card-icon { font-size: 0.9rem; }
+
+.skill-card-type {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #888;
+    text-transform: uppercase;
+    flex: 1;
+}
+
+.skill-card-time { font-size: 0.65rem; color: #555; }
+
+.skill-card-author { font-size: 0.78rem; color: #888; font-style: italic; margin-bottom: 5px; }
+
+.skill-card-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ddd;
+    margin-bottom: 7px;
+}
+
+.skill-card-char { font-size: 0.75rem; color: #666; font-weight: normal; }
+
+.skill-card-effective {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+    color: #888;
+}
+
+.eff-base { color: #aaa; font-weight: 700; }
+.eff-op { color: #9d91f0; font-weight: 700; }
+.eff-sep { color: #555; }
+.eff-result { color: #d4af37; font-weight: 800; font-size: 0.88rem; }
+
+.skill-card-breakdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.skill-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 4px 10px;
+    min-width: 44px;
+}
+
+.skill-stat-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.skill-stat-label {
+    font-size: 0.55rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+}
+
+.skill-vs { color: #555; font-size: 0.8rem; font-weight: bold; }
+
+.skill-verdict {
+    flex: 1;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
+.skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
 </style>
