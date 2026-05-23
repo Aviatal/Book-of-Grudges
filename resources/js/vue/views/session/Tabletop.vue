@@ -10,6 +10,11 @@
                 <button :class="{ active: activeTool === 'rect' }" @click="activeTool = 'rect'">⬜ Prostokąt</button>
                 <button :class="{ active: activeTool === 'eraser' }" @click="activeTool = 'eraser'">🧹 Gumka</button>
             </div>
+            <button
+                v-if="activeTool === 'select-draw' && selectedDrawingIds.length > 0"
+                class="delete-selected-btn"
+                @click="bulkDeleteSelectedDrawings"
+            >🗑 Usuń zaznaczone ({{ selectedDrawingIds.length }})</button>
             <button :class="{ active: activeTool === 'ping' }" @click="activeTool = 'ping'">📍 Ping</button>
             <div v-if="activeTool === 'ping'" class="color-picker">
                 <div
@@ -172,81 +177,145 @@
             </div>
         </div>
 
+        <!-- Panel warstw -->
+        <div v-if="hasDrawingPermission" class="layers-panel shadow-lg">
+            <div class="layers-panel-title">🗂 Warstwy</div>
+
+            <div
+                v-for="layer in mapLayers"
+                :key="layer.id"
+                class="layer-row"
+                :class="{ 'layer-active': activeLayerId === layer.id }"
+                @click="setActiveLayer(layer.id)"
+            >
+                <span
+                    class="layer-color-dot"
+                    :style="{ backgroundColor: layer.color }"
+                ></span>
+                <span class="layer-name">{{ layer.name }}</span>
+                <div class="layer-actions" @click.stop>
+                    <button
+                        class="layer-icon-btn"
+                        :title="layer.visible ? 'Ukryj' : 'Pokaż'"
+                        @click="layer.visible = !layer.visible"
+                    >{{ layer.visible ? '👁' : '🚫' }}</button>
+                    <button
+                        class="layer-icon-btn"
+                        :title="layer.locked ? 'Odblokuj' : 'Zablokuj'"
+                        @click="layer.locked = !layer.locked"
+                    >{{ layer.locked ? '🔒' : '🔓' }}</button>
+                    <button
+                        v-if="selectedShapeId !== null && activeLayerId !== layer.id"
+                        class="layer-move-btn"
+                        title="Przenieś zaznaczony element tutaj"
+                        @click="moveSelectedDrawingToLayer(layer.id)"
+                    >📤</button>
+                </div>
+            </div>
+
+            <div class="layers-divider"></div>
+
+            <!-- Warstwa tokenów (zawsze widoczna) -->
+            <div
+                class="layer-row"
+                :class="{ 'layer-active': activeLayerId === 'tokens' }"
+                @click="setActiveLayer('tokens')"
+            >
+                <span class="layer-color-dot" style="background:#d4af37"></span>
+                <span class="layer-name">🏹 Tokeny</span>
+                <div class="layer-actions" @click.stop>
+                    <button
+                        class="layer-icon-btn"
+                        :title="tokenLayerVisible ? 'Ukryj' : 'Pokaż'"
+                        @click="tokenLayerVisible = !tokenLayerVisible"
+                    >{{ tokenLayerVisible ? '👁' : '🚫' }}</button>
+                    <button
+                        class="layer-icon-btn"
+                        :title="tokenLayerLocked ? 'Odblokuj' : 'Zablokuj'"
+                        @click="tokenLayerLocked = !tokenLayerLocked"
+                    >{{ tokenLayerLocked ? '🔒' : '🔓' }}</button>
+                </div>
+            </div>
+        </div>
+
         <v-stage
             :config="stageConfig"
             @mousedown="handleStageMouseDown"
             @mousemove="handleStageMouseMove"
             @mouseup="handleStageMouseUp"
         >
-            <v-layer ref="drawLayer">
-                <template v-for="draw in drawings" :key="draw.id">
+            <!-- Osobna v-layer dla każdej warstwy rysunków -->
+            <v-layer
+                v-for="layer in mapLayers"
+                :key="layer.id"
+                :config="{ visible: layer.visible }"
+            >
+                <template v-for="draw in drawingsByLayer[layer.id]" :key="draw.id">
                     <v-line
                         v-if="draw.type === 'pen'"
                         :config="{
                             ...draw,
-                            draggable: activeTool === 'select-draw' && hasDrawingPermission
+                            id: String(draw.id),
+                            stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
+                            strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 3) + 2 : draw.strokeWidth,
+                            draggable: canEditLayer(layer) && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
-                        @click="(e) => handleShapeClick(e, draw.id)"
+                        @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @dragend="(e) => handleTransformEnd(e, draw)"
                     />
                     <v-rect
                         v-if="draw.type === 'rect'"
                         :config="{
                             ...draw,
-                            draggable: activeTool === 'select-draw' && hasDrawingPermission
+                            id: String(draw.id),
+                            stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
+                            strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 2) + 2 : draw.strokeWidth,
+                            draggable: canEditLayer(layer) && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
-                        @click="(e) => handleShapeClick(e, draw.id)"
+                        @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @transformend="(e) => handleTransformEnd(e, draw)"
                         @dragend="(e) => handleTransformEnd(e, draw)"
                     />
                 </template>
-
-                <v-transformer
-                    ref="transformerNode"
-                    :config="{
-                        visible: activeTool === 'select-draw' && selectedShapeId !== null && hasDrawingPermission,
-                        enabledAnchors: [ 'top-center', 'top-left', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right', 'middle-right', 'top-right' ]
-                    }"
-                />
             </v-layer>
 
-            <v-layer>
+            <!-- Warstwa tokenów -->
+            <v-layer
+                :config="{ visible: tokenLayerVisible }"
+                @dragmove="handleTokenLayerDragMove"
+                @dragend="handleGroupDragEnd"
+                @click="handleTokenLayerClick"
+            >
                 <v-group
                     v-for="token in tokens"
                     :key="token.id"
                     :config="{
+                        id: String(token.id),
                         x: token.x,
                         y: token.y,
-                        draggable: hasDrawingPermission
+                        draggable: hasDrawingPermission && !tokenLayerLocked && activeLayerId === 'tokens'
                     }"
-                    @dragmove="(e) => handleGroupDragMove(e, token)"
-                    @dragend="handleGroupDragEnd"
-                    @click="selectedIds = [token.id]"
                 >
                     <v-circle v-if="selectedIds.includes(token.id)" :config="{
                         radius: 55,
                         fill: '#d4af37',
                         opacity: 0.4
                     }" />
-
                     <v-image v-if="loadedImages[token.id]" :config="{
                         image: loadedImages[token.id],
                         width: 100,
                         height: 100,
                         x: -50,
                         y: -50,
-                        clipFunc: (ctx) => {
-                            // Centrujemy koło tnące (50, 50 to środek obrazka 100x100)
+                        clipFunc: (ctx: CanvasRenderingContext2D) => {
                             ctx.arc(50, 50, 50, 0, Math.PI * 2, false);
                         }
                     }" />
-
                     <v-circle :config="{
                         radius: 50,
                         stroke: selectedIds.includes(token.id) ? '#00ff00' : (props.heroId === token.hero_id ? '#d4af37' : 'black'),
                         strokeWidth: selectedIds.includes(token.id) ? 5 : 3
                     }" />
-
                     <v-text :config="{
                         text: token.name,
                         fontSize: 12,
@@ -272,7 +341,26 @@
                 }" />
             </v-layer>
 
+            <!-- Warstwa UI: transformer + selection box + pingi (zawsze na wierzchu) -->
             <v-layer>
+                <v-transformer
+                    ref="transformerNode"
+                    :config="{
+                        visible: activeTool === 'select-draw' && selectedDrawingIds.length === 1 && hasDrawingPermission,
+                        enabledAnchors: ['top-center','top-left','middle-left','bottom-left','bottom-center','bottom-right','middle-right','top-right']
+                    }"
+                />
+                <!-- Selection box dla rysunków -->
+                <v-rect v-if="drawingSelectionBox.visible" :config="{
+                    x: drawingSelectionBox.x,
+                    y: drawingSelectionBox.y,
+                    width: drawingSelectionBox.width,
+                    height: drawingSelectionBox.height,
+                    fill: 'rgba(0, 161, 255, 0.15)',
+                    stroke: '#00a1ff',
+                    strokeWidth: 1,
+                    dash: [6, 3]
+                }" />
                 <PingItem
                     v-for="ping in pings"
                     :key="ping.id"
@@ -289,7 +377,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
-import {DrawingData} from "@/types/DrawingData";
+import {DrawingData, DrawingLayerId} from "@/types/DrawingData";
 import {Message} from "@/types/Message";
 import PingItem from '../../components/session/PingItem.vue';
 
@@ -315,6 +403,14 @@ interface PingData {
     color: number,
 }
 
+interface MapLayer {
+    id: DrawingLayerId;
+    name: string;
+    color: string;
+    visible: boolean;
+    locked: boolean;
+}
+
     window.Echo.channel('token-move')
     .listen('.move', (e: MoveTokenEvent) => {
         moveToken(e.id, e.x, e.y);
@@ -332,12 +428,17 @@ window.Echo.channel('drawings')
             Object.assign(drawing, e.data);
         }
     })
-    .listen('.drawing-create', (e: {data: DrawingData}) => {
-        console.log('Received drawing create event:', e);
-        drawings.value.push(e.data);
+    .listen('.drawing-create', (e: { id: number; data: DrawingData; layer: DrawingLayerId }) => {
+        drawings.value.push({ ...e.data, id: e.id, layer: e.layer === 'gm' ? 'gm' : 'map' });
     })
-    .listen('.drawing-delete', (e: { drawingId: number}) => {
+    .listen('.drawing-delete', (e: { drawingId: number }) => {
         drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
+    })
+    .listen('.drawing-layer-changed', (e: { drawingId: number; layer: DrawingLayerId }) => {
+        const drawing = drawings.value.find(d => d.id === e.drawingId);
+        if (drawing) {
+            drawing.layer = e.layer;
+        }
     })
     .listen('.ping', (e: { newPing: PingData }) => {
         const newPing = {
@@ -367,10 +468,12 @@ const moveToken = (tokenId: number, x: number, y: number) => {
 const tokens = ref<Token[]>([]);
 const loadedImages = ref<Record<number, HTMLImageElement>>({});
 const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping'>('select');
-const drawings = ref<any[]>([]);
+const drawings = ref<DrawingData[]>([]);
 const isDrawing = ref(false);
 const history = ref<any[]>([]);
 const selectedShapeId = ref<number | null>(null);
+const selectedDrawingIds = ref<number[]>([]);
+const drawingSelectionBox = ref({ x: 0, y: 0, width: 0, height: 0, visible: false });
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
 interface SkillTestResult {
@@ -415,6 +518,18 @@ const filteredSkills = computed(() => {
     );
 });
 
+const drawingsByLayer = computed<Record<DrawingLayerId, DrawingData[]>>(() => {
+    const result: Record<DrawingLayerId, DrawingData[]> = {
+        map: [],
+        gm: [],
+    };
+    drawings.value.forEach((d: DrawingData) => {
+        const layerId: DrawingLayerId = (d.layer === 'gm') ? 'gm' : 'map';
+        result[layerId].push(d);
+    });
+    return result;
+});
+
 const colors = [
     { name: 'Niebieski', value: '#00a1ff' },
     { name: 'Czerwony', value: '#ff4d4d' },
@@ -423,14 +538,22 @@ const colors = [
 ];
 
 const transformerNode = ref();
-const drawLayer = ref();
+const mapLayers = ref<MapLayer[]>([
+    { id: 'map', name: '🗺 Mapa', color: '#2e7d32', visible: true, locked: false },
+    { id: 'gm', name: '👁 Warstwa MG', color: '#8e24aa', visible: true, locked: false },
+]);
+const activeLayerId = ref<DrawingLayerId | 'tokens'>('map');
+const tokenLayerVisible = ref(true);
+const tokenLayerLocked = ref(false);
 
 const fetchDrawings = async () => {
     const { data } = await axios.get('/session/drawings');
-    drawings.value = data.map(d => ({
+    drawings.value = data.map((d: any): DrawingData => ({
+        ...d.data,
+        // id i layer muszą być PO spreadzie, żeby nie zostały nadpisane przez d.data (które może zawierać stare tymczasowe id)
         id: d.id,
         type: d.type,
-        ...d.data // Rozpakowujemy właściwości x, y, points itp.
+        layer: (d.layer === 'gm' ? 'gm' : 'map') as DrawingLayerId,
     }));
 };
 
@@ -449,25 +572,141 @@ const fetchMessages = async () => {
     scrollToBottom();
 };
 
-const handleShapeClick = (e: any, shapeId: number) => {
+const handleShapeClick = (e: any, shapeId: number, layerId: DrawingLayerId) => {
+    const layer = mapLayers.value.find(l => l.id === layerId);
+
     // 1. Logika GUMKI
     if (activeTool.value === 'eraser') {
+        if (layer?.locked) return;
         drawings.value = drawings.value.filter(d => d.id !== shapeId);
         selectedShapeId.value = null;
         transformerNode.value.getNode().nodes([]);
-        axios.delete(`/session/drawings/${shapeId}`);
+        axios.delete(`/session/drawings/${shapeId}`).catch((error: unknown) => {
+            console.error('Błąd usuwania rysunku', error);
+        });
         return;
     }
 
-    // 2. Logika EDYCJI (Transformer)
+    // 2. Logika EDYCJI / ZAZNACZANIA
     if (activeTool.value === 'select-draw') {
-        selectedShapeId.value = shapeId;
-        const selectedNode = e.target; // Element, w który kliknęliśmy
+        if (!layer || !canEditLayer(layer)) return;
 
-        // Podpinamy transformer pod węzeł
-        transformerNode.value.getNode().nodes([selectedNode]);
-        transformerNode.value.getNode().getLayer().batchDraw();
+        if (e.evt?.shiftKey) {
+            // Shift+klik — toggle w multi-selekcji
+            if (selectedDrawingIds.value.includes(shapeId)) {
+                selectedDrawingIds.value = selectedDrawingIds.value.filter(id => id !== shapeId);
+            } else {
+                selectedDrawingIds.value.push(shapeId);
+            }
+            // Przy multi-selekcji chowamy transformer
+            selectedShapeId.value = null;
+            if (transformerNode.value) {
+                transformerNode.value.getNode().nodes([]);
+            }
+        } else {
+            // Zwykły klik — singleselect + transformer
+            selectedDrawingIds.value = [shapeId];
+            selectedShapeId.value = shapeId;
+            transformerNode.value.getNode().nodes([e.target]);
+            transformerNode.value.getNode().getLayer().batchDraw();
+        }
     }
+};
+
+const canEditLayer = (layer: MapLayer): boolean => {
+    return !layer.locked && activeLayerId.value === layer.id;
+};
+
+const setActiveLayer = (layerId: DrawingLayerId | 'tokens'): void => {
+    activeLayerId.value = layerId;
+    selectedShapeId.value = null;
+    selectedDrawingIds.value = [];
+    if (transformerNode.value) {
+        transformerNode.value.getNode().nodes([]);
+    }
+};
+
+const moveSelectedDrawingToLayer = async (targetLayerId: DrawingLayerId): Promise<void> => {
+    if (selectedShapeId.value === null) return;
+    const drawingId = selectedShapeId.value;
+    try {
+        await axios.patch(`/session/drawings/${drawingId}/layer`, { layer: targetLayerId });
+        const drawing = drawings.value.find(d => d.id === drawingId);
+        if (drawing) {
+            drawing.layer = targetLayerId;
+        }
+    } catch (error: unknown) {
+        console.error('Błąd przenoszenia rysunku do warstwy', error);
+    }
+};
+
+const clearDrawingSelection = (): void => {
+    selectedDrawingIds.value = [];
+    selectedShapeId.value = null;
+    if (transformerNode.value) {
+        transformerNode.value.getNode().nodes([]);
+    }
+};
+
+const handleDrawingSelectionStart = (e: any): void => {
+    const pos = e.target.getStage().getPointerPosition();
+    drawingSelectionBox.value = { x: pos.x, y: pos.y, width: 0, height: 0, visible: true };
+};
+
+const handleDrawingSelectionMove = (e: any): void => {
+    if (!drawingSelectionBox.value.visible) return;
+    const pos = e.target.getStage().getPointerPosition();
+    drawingSelectionBox.value.width = pos.x - drawingSelectionBox.value.x;
+    drawingSelectionBox.value.height = pos.y - drawingSelectionBox.value.y;
+};
+
+const handleDrawingSelectionEnd = (): void => {
+    if (!drawingSelectionBox.value.visible) return;
+
+    const box = drawingSelectionBox.value;
+    const x1 = Math.min(box.x, box.x + box.width);
+    const x2 = Math.max(box.x, box.x + box.width);
+    const y1 = Math.min(box.y, box.y + box.height);
+    const y2 = Math.max(box.y, box.y + box.height);
+
+    const activeLayer = activeLayerId.value;
+    const layerDrawings = activeLayer === 'tokens'
+        ? drawings.value
+        : drawings.value.filter(d => d.layer === activeLayer);
+
+    const selected = layerDrawings.filter(d => {
+        if (d.type === 'rect') {
+            const dx = d.scaleX ? d.width * d.scaleX : d.width;
+            const dy = d.scaleY ? d.height * d.scaleY : d.height;
+            return d.x < x2 && d.x + dx > x1 && d.y < y2 && d.y + dy > y1;
+        }
+        if (d.type === 'pen') {
+            const pts = d.points ?? [];
+            return pts.some((_, i) =>
+                i % 2 === 0 &&
+                pts[i] >= x1 && pts[i] <= x2 &&
+                pts[i + 1] >= y1 && pts[i + 1] <= y2
+            );
+        }
+        return false;
+    });
+
+    selectedDrawingIds.value = selected.map(d => d.id);
+    drawingSelectionBox.value.visible = false;
+};
+
+const bulkDeleteSelectedDrawings = async (): Promise<void> => {
+    if (selectedDrawingIds.value.length === 0) return;
+    const idsToDelete = [...selectedDrawingIds.value];
+    clearDrawingSelection();
+    drawings.value = drawings.value.filter(d => !idsToDelete.includes(d.id));
+    await Promise.all(
+        idsToDelete.map(id =>
+            axios.delete(`/session/drawings/${id}`).catch((error: unknown) => {
+                console.error('Błąd usuwania rysunku', error);
+            })
+        )
+    );
 };
 
 // Po zakończeniu skalowania/przesuwania
@@ -578,19 +817,30 @@ const handleSelectionEnd = () => {
     selectedIds.value = newlySelected;
     selectionBox.value.visible = false;
 };
-const handleGroupDragMove = (e: any, draggedToken: Token) => {
-    // Jeśli przesuwany token nie jest zaznaczony, zaznacz go (single selection)
+const getTokenFromEvent = (e: any): Token | undefined => {
+    let node = e.target;
+    while (node && node.getType() !== 'Stage') {
+        if (node.getType() === 'Group' && node.id()) {
+            return tokens.value.find(t => t.id === parseInt(node.id()));
+        }
+        node = node.getParent();
+    }
+    return undefined;
+};
+
+const handleTokenLayerDragMove = (e: any): void => {
+    const draggedToken = getTokenFromEvent(e);
+    if (!draggedToken) return;
+
     if (!selectedIds.value.includes(draggedToken.id)) {
         selectedIds.value = [draggedToken.id];
         return;
     }
 
-    // Obliczamy o ile przesunął się aktualny token
     const { x, y } = e.target.attrs;
     const dx = x - draggedToken.x;
     const dy = y - draggedToken.y;
 
-    // Przesuwamy wszystkie INNE zaznaczone tokeny o tę samą różnicę
     tokens.value.forEach(t => {
         if (selectedIds.value.includes(t.id) && t.id !== draggedToken.id) {
             t.x += dx;
@@ -598,9 +848,15 @@ const handleGroupDragMove = (e: any, draggedToken: Token) => {
         }
     });
 
-    // Aktualizujemy pozycję "lidera" (draggedToken jest reaktywny, więc to zaktualizuje widok)
     draggedToken.x = x;
     draggedToken.y = y;
+};
+
+const handleTokenLayerClick = (e: any): void => {
+    const token = getTokenFromEvent(e);
+    if (token) {
+        selectedIds.value = [token.id];
+    }
 };
 
 const handleGroupDragEnd = async () => {
@@ -629,40 +885,63 @@ const handleGroupDragEnd = async () => {
 };
 
 const handleStageMouseDown = (e: any) => {
-    if (activeTool.value === 'select-draw' || activeTool.value === 'eraser') {
+    if (activeTool.value === 'eraser') {
+        return;
+    }
+    if (activeTool.value === 'select-draw') {
+        // Klik w puste miejsce — zacznij box-select i wyczyść selekcję
+        if (e.target === e.target.getStage()) {
+            clearDrawingSelection();
+            handleDrawingSelectionStart(e);
+        }
         return;
     }
     if (activeTool.value === 'select') {
-        handleSelectionStart(e); // Przenieś tam starą logikę handleStageMouseDown
+        handleSelectionStart(e);
         return;
     }
 
     const pos = e.target.getStage().getPointerPosition();
 
+    const drawingLayer: DrawingLayerId = activeLayerId.value === 'tokens' ? 'map' : activeLayerId.value;
+
     if (activeTool.value === 'pen') {
         isDrawing.value = true;
         drawings.value.push({
-            id: Date.now(), // Tymczasowe ID
+            id: Date.now(),
             type: 'pen',
+            layer: drawingLayer,
             points: [pos.x, pos.y],
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
             stroke: '#ff0000',
             strokeWidth: 3,
-            tension: 0.5, // Wygładzanie linii
+            tension: 0.5,
             lineCap: 'round',
-            lineJoin: 'round'
-        });
+            lineJoin: 'round',
+            scaleX: 1,
+            scaleY: 1,
+            rotation: 0,
+        } as DrawingData);
     } else if (activeTool.value === 'rect') {
         isDrawing.value = true;
         drawings.value.push({
             id: Date.now(),
             type: 'rect',
+            layer: drawingLayer,
             x: pos.x,
             y: pos.y,
             width: 0,
             height: 0,
+            points: [],
             stroke: '#ff0000',
-            strokeWidth: 2
-        });
+            strokeWidth: 2,
+            scaleX: 1,
+            scaleY: 1,
+            rotation: 0,
+        } as DrawingData);
     } else if (activeTool.value === 'ping') {
         const newPing = {
             id: Date.now(),
@@ -685,8 +964,12 @@ const createPing = (pingData: any) => {
     }, 3000);
 };
 const handleStageMouseMove = (e: any) => {
+    if (activeTool.value === 'select-draw') {
+        handleDrawingSelectionMove(e);
+        return;
+    }
     if (!isDrawing.value || activeTool.value === 'select') {
-        handleSelectionMove(e); // Stara logika selection box
+        handleSelectionMove(e);
         return;
     }
 
@@ -833,14 +1116,27 @@ const scrollToBottom = () => {
 };
 
 const handleStageMouseUp = async () => {
+    if (activeTool.value === 'select-draw') {
+        handleDrawingSelectionEnd();
+        return;
+    }
     if (isDrawing.value) {
         isDrawing.value = false;
         const lastShape = drawings.value[drawings.value.length - 1];
-        const { data } = await axios.post('/session/drawings/store', {
-            id: lastShape.id,
-            type: lastShape.type,
-            data: lastShape
-        });
+        const tempId = lastShape.id;
+        try {
+            const { id: _id, layer: _layer, type: _type, ...shapeData } = lastShape;
+            const { data } = await axios.post<{ id: number }>('/session/drawings/store', {
+                type: lastShape.type,
+                layer: lastShape.layer,
+                data: shapeData, // bez id/layer/type — to są kolumny, nie dane kształtu
+            });
+            // Zastępujemy tymczasowe Date.now() ID prawdziwym ID z bazy
+            lastShape.id = data.id;
+        } catch (error: unknown) {
+            console.error('Błąd zapisu rysunku', error);
+            drawings.value = drawings.value.filter(d => d.id !== tempId);
+        }
     }
     handleSelectionEnd();
 };
@@ -858,14 +1154,22 @@ const formatDate = (isoString: string) => {
     }).format(date);
 };
 
+const handleKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Delete' && selectedDrawingIds.value.length > 0) {
+        bulkDeleteSelectedDrawings();
+    }
+};
+
 onMounted(() => {
     fetchDrawings();
     fetchTokens();
     fetchMessages();
     window.addEventListener('resize', updateSize);
+    window.addEventListener('keydown', handleKeyDown);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
+    window.removeEventListener('keydown', handleKeyDown);
     window.Echo.leaveChannel('token-move');
     window.Echo.leaveChannel('session-chat');
 });
@@ -1368,4 +1672,127 @@ button.active { background: #d4af37; color: black; }
 
 .skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
 .skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
+
+/* ── Layers panel ── */
+.layers-panel {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 170px;
+}
+
+.layers-panel-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #d4af37;
+    text-transform: uppercase;
+    padding: 0 4px 4px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 2px;
+}
+
+.layer-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.layer-row:hover { background: rgba(255,255,255,0.05); border-color: #444; }
+
+.layer-active {
+    background: rgba(212, 175, 55, 0.1) !important;
+    border-color: #d4af37 !important;
+}
+
+.layer-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.layer-name {
+    flex: 1;
+    font-size: 0.78rem;
+    color: #ccc;
+    white-space: nowrap;
+}
+
+.layer-active .layer-name { color: #f5d97b; font-weight: 700; }
+
+.layer-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.layer-icon-btn {
+    background: none;
+    border: none;
+    padding: 1px 3px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: #888;
+    border-radius: 3px;
+    line-height: 1;
+    transition: background 0.1s, color 0.1s;
+}
+
+.layer-icon-btn:hover { background: rgba(255,255,255,0.08); color: #ddd; }
+
+.layer-move-btn {
+    background: none;
+    border: 1px solid #555;
+    padding: 1px 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    color: #aaa;
+    border-radius: 3px;
+    line-height: 1;
+    transition: border-color 0.1s, color 0.1s, background 0.1s;
+}
+
+.layer-move-btn:hover {
+    border-color: #d4af37;
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.layers-divider {
+    height: 1px;
+    background: #333;
+    margin: 2px 4px;
+}
+
+.delete-selected-btn {
+    background: #3a0a0a;
+    border: 1px solid #c0392b;
+    color: #e74c3c;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.delete-selected-btn:hover {
+    background: #5a1010;
+    color: #ff6b6b;
+    border-color: #e74c3c;
+}
 </style>

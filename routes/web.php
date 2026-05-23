@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function (){
             Route::get('/', [DrawingsController::class, 'getDrawings'])->name('drawings.get-drawings');
             Route::post('/store', [DrawingsController::class, 'storeDrawing'])->name('drawings.store-drawing');
             Route::patch('/{drawingId}', [DrawingsController::class, 'updateDrawing'])->name('drawings.update-drawing');
+            Route::patch('/{drawingId}/layer', [DrawingsController::class, 'moveDrawingToLayer'])->name('drawings.move-to-layer');
             Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
         });
         Route::group(['prefix' => 'chat'], function () {

@@ -10,7 +10,8 @@ class StoreDrawingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['in:' . implode(',', Drawing::DRAWING_TYPES)],
+            'type'  => ['in:' . implode(',', Drawing::DRAWING_TYPES)],
+            'layer' => ['nullable', 'string', 'in:' . implode(',', Drawing::LAYERS)],
             'data.type' => ['in:' . implode(',', Drawing::DRAWING_TYPES)],
             'data.points' => ['nullable', 'array'],
             'data.x' => ['nullable', 'numeric'],

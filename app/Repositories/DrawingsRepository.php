@@ -3,23 +3,36 @@
 namespace App\Repositories;
 
 use App\Models\Drawing;
+use Illuminate\Database\Eloquent\Collection;
 
 class DrawingsRepository
 {
-    public function fetchDrawings(): \Illuminate\Database\Eloquent\Collection
+    public function fetchDrawings(): Collection
     {
         return Drawing::all();
     }
-    public function storeDrawing(array $data)
+
+    public function storeDrawing(array $data): Drawing
     {
-        return Drawing::query()->create($data);
+        return Drawing::query()->create([
+            'type'  => $data['type'],
+            'layer' => $data['layer'] ?? 'map',
+            'data'  => $data['data'] ?? [],
+        ]);
     }
-    public function updateDrawing(int $drawingId, array $data): int
+
+    public function updateDrawing(int $drawingId, array $data): bool
     {
-        return Drawing::query()->where('id', $drawingId)->update(['data' => $data]);
+        return (bool) Drawing::query()->where('id', $drawingId)->update(['data' => $data]);
     }
-    public function deleteDrawing(int $drawingId)
+
+    public function updateDrawingLayer(int $drawingId, string $layer): bool
     {
-        return Drawing::query()->where('id', $drawingId)->delete();
+        return (bool) Drawing::query()->where('id', $drawingId)->update(['layer' => $layer]);
+    }
+
+    public function deleteDrawing(int $drawingId): bool
+    {
+        return (bool) Drawing::query()->where('id', $drawingId)->delete();
     }
 }

@@ -8,14 +8,13 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DrawingCreateEvent implements ShouldBroadcastNow
+class DrawingLayerChangedEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public readonly array $data,
-        public readonly string $layer = 'map',
-        public readonly int $id = 0,
+        public readonly int $drawingId,
+        public readonly string $layer,
     ) {}
 
     public function broadcastOn(): array
@@ -25,15 +24,14 @@ class DrawingCreateEvent implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'drawing-create';
+        return 'drawing-layer-changed';
     }
 
     public function broadcastWith(): array
     {
         return [
-            'id'    => $this->id,
-            'data'  => $this->data,
-            'layer' => $this->layer,
+            'drawingId' => $this->drawingId,
+            'layer'     => $this->layer,
         ];
     }
 }
