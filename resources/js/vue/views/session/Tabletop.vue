@@ -16,6 +16,27 @@
                 @click="bulkDeleteSelectedDrawings"
             >🗑 Usuń zaznaczone ({{ selectedDrawingIds.length }})</button>
             <button :class="{ active: activeTool === 'ping' }" @click="activeTool = 'ping'">📍 Ping</button>
+            <div v-if="hasDrawingPermission" class="tool-group">
+                <button :class="{ active: activeTool === 'fog' }" @click="activeTool = 'fog'" title="Mgła Wojny">🌫️ Mgła</button>
+            </div>
+            <template v-if="hasDrawingPermission && activeTool === 'fog'">
+                <div class="tool-group">
+                    <button :class="{ active: fogMode === 'reveal' }" @click="fogMode = 'reveal'" title="Rysuj obszary widoczne dla graczy">🔍 Odkryj</button>
+                    <button :class="{ active: fogMode === 'hide' }" @click="fogMode = 'hide'" title="Zaciemnij ponownie zaznaczony obszar">🌑 Zaciemnij</button>
+                </div>
+                <button @click="toggleFog" :class="{ active: fogEnabled }" :title="fogEnabled ? 'Wyłącz mgłę dla wszystkich' : 'Włącz mgłę dla wszystkich'">
+                    {{ fogEnabled ? '🔒 Wyłącz' : '🔓 Włącz' }}
+                </button>
+                <button v-if="fogShapes.length > 0" @click="clearFogShapes" title="Usuń wszystkie obszary (odkryte i zaciemnione)">
+                    🗑 Wyczyść ({{ fogShapes.length }})
+                </button>
+            </template>
+            <button
+                v-if="hasDrawingPermission && fogEnabled"
+                @click="gmFogVisible = !gmFogVisible"
+                :class="{ active: gmFogVisible }"
+                :title="gmFogVisible ? 'Wróć do widoku MG (z mgłą)' : 'Podgląd pełnej mapy bez mgły'"
+            >{{ gmFogVisible ? '🌑 Widok MG' : '👁️ Pełny widok' }}</button>
             <div class="zoom-control">
                 <button class="zoom-btn" @click="stageScale = Math.min(8, stageScale * 1.12)" title="Powiększ">＋</button>
                 <span class="zoom-label" @click="stageScale = 1; stagePos = { x: 0, y: 0 }" title="Kliknij, aby zresetować zoom">{{ Math.round(stageScale * 100) }}%</span>
@@ -357,6 +378,36 @@
                 </template>
             </v-layer>
 
+            <!-- Warstwa Mgły Wojny -->
+            <v-layer
+                v-if="fogEnabled && (!hasDrawingPermission || !gmFogVisible)"
+                :config="{ opacity: hasDrawingPermission ? 0.6 : 1, listening: false }"
+            >
+                <!-- Pełne pokrycie mgłą -->
+                <v-rect
+                    :config="{
+                        x: -50000, y: -50000,
+                        width: 100000, height: 100000,
+                        fill: 'black',
+                        listening: false
+                    }"
+                />
+                <!-- Kształty mgły w kolejności tworzenia — reveal wycina dziury, hide zapełnia je z powrotem -->
+                <v-rect
+                    v-for="area in fogShapesOrdered"
+                    :key="area.id"
+                    :config="{
+                        x: area.x,
+                        y: area.y,
+                        width: area.width * (area.scaleX ?? 1),
+                        height: area.height * (area.scaleY ?? 1),
+                        fill: 'rgba(0,0,0,1)',
+                        globalCompositeOperation: area.type === 'fog' ? 'destination-out' : 'source-over',
+                        listening: false
+                    }"
+                />
+            </v-layer>
+
             <!-- Warstwa tokenów -->
             <v-layer
                 :config="{ visible: tokenLayerVisible }"
@@ -514,8 +565,8 @@ window.Echo.channel('drawings')
             Object.assign(drawing, e.data);
         }
     })
-    .listen('.drawing-create', (e: { id: number; data: DrawingData; layer: DrawingLayerId }) => {
-        const drawing: DrawingData = { ...e.data, id: e.id, layer: e.layer === 'gm' ? 'gm' : 'map' };
+    .listen('.drawing-create', (e: { id: number; type: string; data: DrawingData; layer: DrawingLayerId }) => {
+        const drawing: DrawingData = { ...e.data, id: e.id, type: e.type, layer: e.layer === 'gm' ? 'gm' : 'map' };
         drawings.value.push(drawing);
         loadDrawingImage(drawing);
     })
@@ -555,7 +606,7 @@ const moveToken = (tokenId: number, x: number, y: number) => {
 
 const tokens = ref<Token[]>([]);
 const loadedImages = ref<Record<number, HTMLImageElement>>({});
-const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping'>('select');
+const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping' | 'fog'>('select');
 const drawings = ref<DrawingData[]>([]);
 const isDrawing = ref(false);
 const history = ref<any[]>([]);
@@ -617,11 +668,20 @@ const drawingsByLayer = computed<Record<DrawingLayerId, DrawingData[]>>(() => {
         gm: [],
     };
     drawings.value.forEach((d: DrawingData) => {
+        if (d.type === 'fog' || d.type === 'fog_meta' || d.type === 'fog_hide') return;
         const layerId: DrawingLayerId = (d.layer === 'gm') ? 'gm' : 'map';
         result[layerId].push(d);
     });
     return result;
 });
+
+const fogEnabled = computed(() => drawings.value.some(d => d.type === 'fog_meta'));
+const fogRevealShapes = computed(() => drawings.value.filter(d => d.type === 'fog'));
+const fogHideShapes = computed(() => drawings.value.filter(d => d.type === 'fog_hide'));
+const fogShapes = computed(() => drawings.value.filter(d => d.type === 'fog' || d.type === 'fog_hide'));
+const fogShapesOrdered = computed(() =>
+    fogShapes.value.slice().sort((a, b) => a.id - b.id)
+);
 
 const colors = [
     { name: 'Niebieski', value: '#00a1ff' },
@@ -916,6 +976,41 @@ const bulkDeleteSelectedDrawings = async (): Promise<void> => {
     );
 };
 
+const toggleFog = async (): Promise<void> => {
+    if (fogEnabled.value) {
+        const metaIds = drawings.value.filter(d => d.type === 'fog_meta').map(d => d.id);
+        drawings.value = drawings.value.filter(d => d.type !== 'fog_meta');
+        await Promise.all(metaIds.map(id =>
+            axios.delete(`/session/drawings/${id}`).catch((e: unknown) => console.error('Błąd wyłączania mgły', e))
+        ));
+    } else {
+        const tempId = Date.now();
+        drawings.value.push({
+            id: tempId, type: 'fog_meta', layer: 'map' as DrawingLayerId,
+            x: 0, y: 0, width: 0, height: 0, points: [], strokeWidth: 0, scaleX: 1, scaleY: 1, rotation: 0,
+        });
+        try {
+            const { data } = await axios.post<{ id: number }>('/session/drawings/store', {
+                type: 'fog_meta', layer: 'map',
+                data: { x: 0, y: 0, width: 0, height: 0, points: [], strokeWidth: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+            });
+            const meta = drawings.value.find(d => d.id === tempId);
+            if (meta) meta.id = data.id;
+        } catch (e: unknown) {
+            drawings.value = drawings.value.filter(d => d.id !== tempId);
+            console.error('Błąd włączania mgły', e);
+        }
+    }
+};
+
+const clearFogShapes = async (): Promise<void> => {
+    const fogIds = drawings.value.filter(d => d.type === 'fog' || d.type === 'fog_hide').map(d => d.id);
+    drawings.value = drawings.value.filter(d => d.type !== 'fog' && d.type !== 'fog_hide');
+    await Promise.all(fogIds.map(id =>
+        axios.delete(`/session/drawings/${id}`).catch((e: unknown) => console.error('Błąd czyszczenia mgły', e))
+    ));
+};
+
 // Podczas przeciągania obrazu — podpis i zaznaczone rysunki podążają za kursorem
 const handleImageDragMove = (e: any, draw: DrawingData): void => {
     const newX = e.target.x();
@@ -977,6 +1072,8 @@ const stagePos  = ref({ x: 0, y: 0 });
 const stageSize = ref({ width: window.innerWidth, height: window.innerHeight });
 const isPanning = ref(false);
 const lastPanPos = ref({ x: 0, y: 0 });
+const gmFogVisible = ref(false);
+const fogMode = ref<'reveal' | 'hide'>('reveal');
 
 const stageConfig = computed(() => ({
     width:  stageSize.value.width,
@@ -1184,6 +1281,20 @@ const handleStageMouseDown = (e: any) => {
         return;
     }
 
+    if (activeTool.value === 'fog') {
+        if (!fogEnabled.value) { toggleFog(); }
+        const pos = e.target.getStage().getRelativePointerPosition();
+        isDrawing.value = true;
+        drawings.value.push({
+            id: Date.now(),
+            type: fogMode.value === 'reveal' ? 'fog' : 'fog_hide',
+            layer: 'map' as DrawingLayerId,
+            x: pos.x, y: pos.y, width: 0, height: 0,
+            points: [], strokeWidth: 0, scaleX: 1, scaleY: 1, rotation: 0,
+        });
+        return;
+    }
+
     const pos = e.target.getStage().getRelativePointerPosition();
 
     const drawingLayer: DrawingLayerId = activeLayerId.value === 'tokens' ? 'map' : activeLayerId.value;
@@ -1268,7 +1379,7 @@ const handleStageMouseMove = (e: any) => {
 
     if (activeTool.value === 'pen') {
         lastShape.points = lastShape.points.concat([pos.x, pos.y]);
-    } else if (activeTool.value === 'rect') {
+    } else if (activeTool.value === 'rect' || activeTool.value === 'fog') {
         lastShape.width = pos.x - lastShape.x;
         lastShape.height = pos.y - lastShape.y;
     }
@@ -1418,14 +1529,18 @@ const handleStageMouseUp = async () => {
         isDrawing.value = false;
         const lastShape = drawings.value[drawings.value.length - 1];
         const tempId = lastShape.id;
+        // Pomijamy zbyt małe kształty (klik bez przeciągnięcia)
+        if ((lastShape.type === 'fog' || lastShape.type === 'fog_hide') && Math.abs(lastShape.width) < 5 && Math.abs(lastShape.height) < 5) {
+            drawings.value = drawings.value.filter(d => d.id !== tempId);
+            return;
+        }
         try {
             const { id: _id, layer: _layer, type: _type, ...shapeData } = lastShape;
             const { data } = await axios.post<{ id: number }>('/session/drawings/store', {
                 type: lastShape.type,
                 layer: lastShape.layer,
-                data: shapeData, // bez id/layer/type — to są kolumny, nie dane kształtu
+                data: shapeData,
             });
-            // Zastępujemy tymczasowe Date.now() ID prawdziwym ID z bazy
             lastShape.id = data.id;
         } catch (error: unknown) {
             console.error('Błąd zapisu rysunku', error);

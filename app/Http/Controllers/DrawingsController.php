@@ -32,7 +32,7 @@ class DrawingsController extends Controller
         try {
             $drawing = $drawingsRepository->storeDrawing($request->all());
             try {
-                event(new DrawingCreateEvent($drawing->data, $drawing->layer, $drawing->id));
+                event(new DrawingCreateEvent($drawing->data, $drawing->type, $drawing->layer, $drawing->id));
             } catch (BroadcastException $e) {
                 Log::warning('Drawing created but broadcast failed', ['exception' => $e]);
             }
