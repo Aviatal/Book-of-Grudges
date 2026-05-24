@@ -16,6 +16,11 @@
                 @click="bulkDeleteSelectedDrawings"
             >🗑 Usuń zaznaczone ({{ selectedDrawingIds.length }})</button>
             <button :class="{ active: activeTool === 'ping' }" @click="activeTool = 'ping'">📍 Ping</button>
+            <div class="zoom-control">
+                <button class="zoom-btn" @click="stageScale = Math.min(8, stageScale * 1.12)" title="Powiększ">＋</button>
+                <span class="zoom-label" @click="stageScale = 1; stagePos = { x: 0, y: 0 }" title="Kliknij, aby zresetować zoom">{{ Math.round(stageScale * 100) }}%</span>
+                <button class="zoom-btn" @click="stageScale = Math.max(0.1, stageScale / 1.12)" title="Oddal">－</button>
+            </div>
             <div v-if="activeTool === 'ping'" class="color-picker">
                 <div
                     v-for="color in colors"
@@ -277,13 +282,14 @@
             </div>
         </div>
 
-        <div class="stage-wrapper" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
+        <div class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
         <v-stage
             ref="stageRef"
             :config="stageConfig"
             @mousedown="handleStageMouseDown"
             @mousemove="handleStageMouseMove"
             @mouseup="handleStageMouseUp"
+            @wheel="handleWheel"
         >
             <!-- Osobna v-layer dla każdej warstwy rysunków -->
             <v-layer
@@ -447,7 +453,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
 import {DrawingData, DrawingLayerId} from "@/types/DrawingData";
@@ -720,8 +726,10 @@ const onCanvasDrop = async (e: DragEvent): Promise<void> => {
     if (!stage) return;
 
     const stageBox = stage.container().getBoundingClientRect();
-    const dropX = e.clientX - stageBox.left;
-    const dropY = e.clientY - stageBox.top;
+    const screenX  = e.clientX - stageBox.left;
+    const screenY  = e.clientY - stageBox.top;
+    const dropX    = (screenX - stagePos.value.x) / stageScale.value;
+    const dropY    = (screenY - stagePos.value.y) / stageScale.value;
 
     const img = new window.Image();
     img.src = url;
@@ -848,13 +856,13 @@ const clearDrawingSelection = (): void => {
 };
 
 const handleDrawingSelectionStart = (e: any): void => {
-    const pos = e.target.getStage().getPointerPosition();
+    const pos = e.target.getStage().getRelativePointerPosition();
     drawingSelectionBox.value = { x: pos.x, y: pos.y, width: 0, height: 0, visible: true };
 };
 
 const handleDrawingSelectionMove = (e: any): void => {
     if (!drawingSelectionBox.value.visible) return;
-    const pos = e.target.getStage().getPointerPosition();
+    const pos = e.target.getStage().getRelativePointerPosition();
     drawingSelectionBox.value.width = pos.x - drawingSelectionBox.value.x;
     drawingSelectionBox.value.height = pos.y - drawingSelectionBox.value.y;
 };
@@ -964,10 +972,20 @@ const handleTransformEnd = async (e: any, draw: any) => {
     await axios.patch(`/session/drawings/${node.id()}`, updatedData);
 };
 
-const stageConfig = ref({
-    width: window.innerWidth,
-    height: window.innerHeight,
-});
+const stageScale = ref(1);
+const stagePos  = ref({ x: 0, y: 0 });
+const stageSize = ref({ width: window.innerWidth, height: window.innerHeight });
+const isPanning = ref(false);
+const lastPanPos = ref({ x: 0, y: 0 });
+
+const stageConfig = computed(() => ({
+    width:  stageSize.value.width,
+    height: stageSize.value.height,
+    scaleX: stageScale.value,
+    scaleY: stageScale.value,
+    x: stagePos.value.x,
+    y: stagePos.value.y,
+}));
 
 const loadImage = (token: Token) => {
     if (!token.image) return;
@@ -980,8 +998,8 @@ const loadImage = (token: Token) => {
 };
 
 const updateSize = () => {
-    stageConfig.value.width = window.innerWidth;
-    stageConfig.value.height = window.innerHeight;
+    stageSize.value.width  = window.innerWidth;
+    stageSize.value.height = window.innerHeight;
 };
 
 
@@ -1030,7 +1048,7 @@ const handleSelectionStart = (e: any) => {
 
         // Twoja stara logika zaznaczania prostokątem (tylko dla narzędzia select)
         if (activeTool.value === 'select') {
-            const pos = e.target.getStage().getPointerPosition();
+            const pos = e.target.getStage().getRelativePointerPosition();
             selectionBox.value = { x: pos.x, y: pos.y, width: 0, height: 0, visible: true };
             selectedIds.value = [];
         }
@@ -1039,7 +1057,7 @@ const handleSelectionStart = (e: any) => {
 const handleSelectionMove = (e: any) => {
     if (!selectionBox.value.visible) return;
 
-    const pos = e.target.getStage().getPointerPosition();
+    const pos = e.target.getStage().getRelativePointerPosition();
     selectionBox.value.width = pos.x - selectionBox.value.x;
     selectionBox.value.height = pos.y - selectionBox.value.y;
 };
@@ -1122,7 +1140,34 @@ const handleGroupDragEnd = async () => {
     }
 };
 
+const handleWheel = (e: any): void => {
+    e.evt.preventDefault();
+    const stage = stageRef.value?.getNode();
+    if (!stage) return;
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const scaleBy  = 1.12;
+    const oldScale = stageScale.value;
+    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const clamped  = Math.max(0.1, Math.min(8, newScale));
+
+    // Zoom wycentrowany na kursorze
+    stagePos.value = {
+        x: pointer.x - (pointer.x - stagePos.value.x) * (clamped / oldScale),
+        y: pointer.y - (pointer.y - stagePos.value.y) * (clamped / oldScale),
+    };
+    stageScale.value = clamped;
+};
+
 const handleStageMouseDown = (e: any) => {
+    // Środkowy przycisk myszy → pan
+    if (e.evt.button === 1) {
+        isPanning.value  = true;
+        lastPanPos.value = { x: e.evt.clientX, y: e.evt.clientY };
+        e.evt.preventDefault();
+        return;
+    }
     if (activeTool.value === 'eraser') {
         return;
     }
@@ -1139,7 +1184,7 @@ const handleStageMouseDown = (e: any) => {
         return;
     }
 
-    const pos = e.target.getStage().getPointerPosition();
+    const pos = e.target.getStage().getRelativePointerPosition();
 
     const drawingLayer: DrawingLayerId = activeLayerId.value === 'tokens' ? 'map' : activeLayerId.value;
 
@@ -1202,6 +1247,13 @@ const createPing = (pingData: any) => {
     }, 3000);
 };
 const handleStageMouseMove = (e: any) => {
+    if (isPanning.value) {
+        const dx = e.evt.clientX - lastPanPos.value.x;
+        const dy = e.evt.clientY - lastPanPos.value.y;
+        stagePos.value   = { x: stagePos.value.x + dx, y: stagePos.value.y + dy };
+        lastPanPos.value = { x: e.evt.clientX, y: e.evt.clientY };
+        return;
+    }
     if (activeTool.value === 'select-draw') {
         handleDrawingSelectionMove(e);
         return;
@@ -1211,7 +1263,7 @@ const handleStageMouseMove = (e: any) => {
         return;
     }
 
-    const pos = e.target.getStage().getPointerPosition();
+    const pos = e.target.getStage().getRelativePointerPosition();
     const lastShape = drawings.value[drawings.value.length - 1];
 
     if (activeTool.value === 'pen') {
@@ -1354,6 +1406,10 @@ const scrollToBottom = () => {
 };
 
 const handleStageMouseUp = async () => {
+    if (isPanning.value) {
+        isPanning.value = false;
+        return;
+    }
     if (activeTool.value === 'select-draw') {
         handleDrawingSelectionEnd();
         return;
@@ -1398,6 +1454,10 @@ const handleKeyDown = (e: KeyboardEvent): void => {
     }
 };
 
+const handleWindowMouseUp = (e: MouseEvent): void => {
+    if (e.button === 1) isPanning.value = false;
+};
+
 onMounted(() => {
     fetchDrawings();
     fetchTokens();
@@ -1405,10 +1465,12 @@ onMounted(() => {
     fetchAssets();
     window.addEventListener('resize', updateSize);
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('mouseup', handleWindowMouseUp);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
     window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('mouseup', handleWindowMouseUp);
     window.Echo.leaveChannel('token-move');
     window.Echo.leaveChannel('session-chat');
 });
@@ -2020,6 +2082,43 @@ button.active { background: #d4af37; color: black; }
     position: absolute;
     inset: 0;
 }
+
+.stage-wrapper.cursor-grab canvas {
+    cursor: grabbing !important;
+}
+
+.zoom-control {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 0 4px;
+}
+
+.zoom-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+
+.zoom-btn:hover { color: #d4af37; }
+
+.zoom-label {
+    font-size: 0.72rem;
+    color: #ccc;
+    min-width: 38px;
+    text-align: center;
+    cursor: pointer;
+    font-family: monospace;
+}
+
+.zoom-label:hover { color: #d4af37; }
 
 /* ── Schowek ── */
 .stash-panel {
