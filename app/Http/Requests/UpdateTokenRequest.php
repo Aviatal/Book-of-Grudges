@@ -9,9 +9,9 @@ class UpdateTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'hero_id' => ['required', 'exists:heroes,id'],
-            'file' => ['nullable', 'image'],
+            'name'    => ['nullable', 'string', 'max:255'],
+            'hero_id' => ['nullable', 'exists:heroes,id'],
+            'file'    => ['nullable', 'image'],
         ];
     }
 

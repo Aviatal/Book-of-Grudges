@@ -147,12 +147,15 @@ const onFileChange = (e: Event) => {
     if (files && files[0]) {
         const file = files[0];
 
-        // Stwórz tymczasowy URL do podglądu
         if (imagePreviewUrl.value) {
             URL.revokeObjectURL(imagePreviewUrl.value);
         }
         imagePreviewUrl.value = URL.createObjectURL(file);
-        token.value.image = file
+        token.value.image = file;
+        // Jeśli token nie jest przypisany do bohatera gracza — aktualizuj nazwę z pliku
+        if (!token.value.hero_id) {
+            token.value.name = file.name.replace(/\.[^/.]+$/, '');
+        }
     }
 };
 

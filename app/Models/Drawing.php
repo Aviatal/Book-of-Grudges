@@ -11,6 +11,6 @@ class Drawing extends Model
     ];
     protected $fillable = ['type', 'layer', 'data'];
 
-    public const array DRAWING_TYPES = ['pen', 'rect', 'circle'];
+    public const array DRAWING_TYPES = ['pen', 'rect', 'circle', 'image'];
     public const array LAYERS = ['map', 'gm'];
 }

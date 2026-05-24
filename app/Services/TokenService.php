@@ -15,6 +15,9 @@ readonly class TokenService
     public function storeToken(array $data): \App\Models\Token
     {
         if (isset($data['file'])) {
+            if (empty($data['name'])) {
+                $data['name'] = pathinfo($data['file']->getClientOriginalName(), PATHINFO_FILENAME);
+            }
             $data['image'] = $this->storeTokenImage($data['file']);
         }
         return $this->tokensRepository->createToken($data);

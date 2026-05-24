@@ -22,24 +22,22 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="md:col-span-2 space-y-6 bg-[#2b2a27] p-6 rounded-sm border border-[#8b5a2b] shadow-inner">
                 <h3 class="text-xl font-bold text-[#c4a47c] uppercase tracking-wide border-b border-[#5e4128] pb-2">Dane Podstawowe</h3>
-                <div>
-                    <label class="warhammer-label">Nazwa Tokenu</label>
-                    <div class="relative">
-                        <i class="mdi mdi-skull absolute left-3 top-1/2 -translate-y-1/2 text-[#8b5a2b] z-10"></i>
-                        <input type="text" v-model="token.name" class="warhammer-input pl-11" placeholder="np. Felix Jaeger">
-                    </div>
-                </div>
 
                 <div>
-                    <label class="warhammer-label">Bohater</label>
+                    <label class="warhammer-label">Bohater <span class="text-[#706f6c] normal-case font-normal">(opcjonalnie)</span></label>
                     <v-select
                         v-model="token.hero_id"
                         :options="props.heroes"
                         :reduce="(hero: Hero) => hero.id"
-                        placeholder="Bohater"
+                        placeholder="Brak — token NPC/potwora"
                         label="name"
                         class="custom-select w-full"
                     ></v-select>
+                </div>
+
+                <div v-if="token.name" class="text-sm text-[#8b5a2b]">
+                    <i class="mdi mdi-label-outline mr-1"></i>
+                    Podpis na mapie: <span class="text-[#c4a47c] font-bold">{{ token.name }}</span>
                 </div>
             </div>
 
@@ -123,12 +121,13 @@ const onFileChange = (e: Event) => {
     if (files && files[0]) {
         const file = files[0];
 
-        // Stwórz tymczasowy URL do podglądu
         if (imagePreviewUrl.value) {
             URL.revokeObjectURL(imagePreviewUrl.value);
         }
         imagePreviewUrl.value = URL.createObjectURL(file);
-        token.value.image = file
+        token.value.image = file;
+        // Nazwa tokenu = nazwa pliku bez rozszerzenia
+        token.value.name = file.name.replace(/\.[^/.]+$/, '');
     }
 };
 
@@ -144,15 +143,17 @@ const removeImage = () => {
 }
 
 const saveToken = async () => {
-    loading.value = true;
-    const formData = new FormData();
-    formData.append('name', token.value.name ?? '');
-    if (!imagePreviewUrl.value || token.value.hero_id === null || token.value.hero_id === undefined) {
-        toast.error('Wybierz bohatera i wybierz zdjęcie');
+    if (!imagePreviewUrl.value) {
+        toast.error('Wybierz zdjęcie tokenu');
         return;
     }
-    formData.append('file',token.value.image ?? '');
-    formData.append('hero_id', token.value.hero_id.toString());
+    loading.value = true;
+    const formData = new FormData();
+    formData.append('file', token.value.image ?? '');
+    formData.append('name', token.value.name ?? '');
+    if (token.value.hero_id !== null && token.value.hero_id !== undefined) {
+        formData.append('hero_id', token.value.hero_id.toString());
+    }
 
     await axios.post(`/panel/tokens/store`, formData)
         .then(response => {
@@ -161,8 +162,11 @@ const saveToken = async () => {
             }
         })
         .catch((error) => {
-            toast.error(error.response.data.error)
+            toast.error(error.response.data.error);
         })
+        .finally(() => {
+            loading.value = false;
+        });
 };
 
 const cancel = () => {

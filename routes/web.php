@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\ChatController;
@@ -101,6 +102,7 @@ Route::middleware('auth')->group(function (){
             Route::patch('/{drawingId}/layer', [DrawingsController::class, 'moveDrawingToLayer'])->name('drawings.move-to-layer');
             Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
         });
+        Route::get('/assets', [AssetsController::class, 'index'])->name('session.assets.index');
         Route::group(['prefix' => 'chat'], function () {
             Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
             Route::post('/send', [ChatController::class, 'sendMessage'])->name('messages.send-message');
@@ -127,6 +129,11 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
     Route::prefix('purchases')->group(function () {
         Route::get('/', [PurchaseController::class, 'index'])->name('panel.purchases.make-purchase-form');
         Route::post('/', [PurchaseController::class, 'sendPurchase'])->name('panel.purchases.sen-purchase');
+    });
+
+    Route::prefix('assets')->group(function () {
+        Route::post('/upload', [AssetsController::class, 'upload'])->name('panel.assets.upload');
+        Route::delete('/{id}', [AssetsController::class, 'delete'])->name('panel.assets.delete');
     });
 
     Route::prefix('tokens')->group(function () {

@@ -238,7 +238,48 @@
             </div>
         </div>
 
+        <!-- Schowek -->
+        <div v-if="hasDrawingPermission" class="stash-panel shadow-lg" :class="{ 'stash-open': showStash }">
+            <div class="stash-header" @click="showStash = !showStash">
+                <span>🗃 Schowek <span v-if="assets.length" class="stash-count">{{ assets.length }}</span></span>
+                <span>{{ showStash ? '▼' : '▲' }}</span>
+            </div>
+            <div v-if="showStash" class="stash-body">
+                <div class="stash-upload">
+                    <select v-model="uploadAssetType" class="stash-type-select">
+                        <option value="image">🖼 Obraz</option>
+                        <option value="map">🗺 Mapa</option>
+                        <option value="token">🏹 Token</option>
+                    </select>
+                    <label class="stash-upload-btn" :class="{ 'stash-uploading': isUploadingAsset }">
+                        {{ isUploadingAsset ? '⏳' : '+ Dodaj plik' }}
+                        <input type="file" accept="image/*" style="display:none" :disabled="isUploadingAsset" @change="uploadAsset" />
+                    </label>
+                </div>
+                <div class="stash-grid">
+                    <div
+                        v-for="asset in assets"
+                        :key="asset.id"
+                        class="stash-item"
+                        :title="asset.name"
+                        draggable="true"
+                        @dragstart="(e) => onAssetDragStart(e, asset)"
+                    >
+                        <img :src="asset.file_url" class="stash-thumb" :alt="asset.name" />
+                        <div class="stash-item-footer">
+                            <span class="stash-item-name">{{ asset.name }}</span>
+                            <button class="stash-item-delete" @click.stop="deleteAsset(asset)" title="Usuń">✕</button>
+                        </div>
+                        <span class="stash-type-badge">{{ asset.type }}</span>
+                    </div>
+                    <div v-if="assets.length === 0" class="stash-empty">Brak zasobów</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stage-wrapper" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
         <v-stage
+            ref="stageRef"
             :config="stageConfig"
             @mousedown="handleStageMouseDown"
             @mousemove="handleStageMouseMove"
@@ -251,6 +292,37 @@
                 :config="{ visible: layer.visible }"
             >
                 <template v-for="draw in drawingsByLayer[layer.id]" :key="draw.id">
+                    <v-image
+                        v-if="draw.type === 'image' && loadedDrawingImages[draw.id]"
+                        :config="{
+                            ...draw,
+                            id: String(draw.id),
+                            image: loadedDrawingImages[draw.id],
+                            stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : undefined,
+                            strokeWidth: selectedDrawingIds.includes(draw.id) ? 3 : 0,
+                            draggable: !layer.locked && (activeTool === 'select-draw' || activeTool === 'select')
+                        }"
+                        @click="(e) => handleShapeClick(e, draw.id, layer.id)"
+                        @dragmove="(e) => handleImageDragMove(e, draw)"
+                        @transformend="(e) => handleTransformEnd(e, draw)"
+                        @dragend="(e) => handleImageDragEnd(e, draw)"
+                    />
+                    <v-text
+                        v-if="draw.type === 'image' && draw.label && loadedDrawingImages[draw.id]"
+                        :config="{
+                            text: draw.label,
+                            x: draw.x,
+                            y: draw.y + (draw.height ?? 0) * (draw.scaleY ?? 1) + 4,
+                            width: (draw.width ?? 100) * (draw.scaleX ?? 1),
+                            align: 'center',
+                            fontSize: 12,
+                            fill: 'white',
+                            fontStyle: 'bold',
+                            shadowColor: 'black',
+                            shadowBlur: 4,
+                            listening: false
+                        }"
+                    />
                     <v-line
                         v-if="draw.type === 'pen'"
                         :config="{
@@ -258,7 +330,7 @@
                             id: String(draw.id),
                             stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
                             strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 3) + 2 : draw.strokeWidth,
-                            draggable: canEditLayer(layer) && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
+                            draggable: !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
                         @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @dragend="(e) => handleTransformEnd(e, draw)"
@@ -270,7 +342,7 @@
                             id: String(draw.id),
                             stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
                             strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 2) + 2 : draw.strokeWidth,
-                            draggable: canEditLayer(layer) && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
+                            draggable: !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
                         @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @transformend="(e) => handleTransformEnd(e, draw)"
@@ -370,6 +442,7 @@
                 />
             </v-layer>
         </v-stage>
+        </div>
     </div>
 </template>
 
@@ -403,6 +476,13 @@ interface PingData {
     color: number,
 }
 
+interface Asset {
+    id: number;
+    name: string;
+    type: 'map' | 'token' | 'image';
+    file_url: string;
+}
+
 interface MapLayer {
     id: DrawingLayerId;
     name: string;
@@ -429,7 +509,9 @@ window.Echo.channel('drawings')
         }
     })
     .listen('.drawing-create', (e: { id: number; data: DrawingData; layer: DrawingLayerId }) => {
-        drawings.value.push({ ...e.data, id: e.id, layer: e.layer === 'gm' ? 'gm' : 'map' });
+        const drawing: DrawingData = { ...e.data, id: e.id, layer: e.layer === 'gm' ? 'gm' : 'map' };
+        drawings.value.push(drawing);
+        loadDrawingImage(drawing);
     })
     .listen('.drawing-delete', (e: { drawingId: number }) => {
         drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
@@ -474,6 +556,11 @@ const history = ref<any[]>([]);
 const selectedShapeId = ref<number | null>(null);
 const selectedDrawingIds = ref<number[]>([]);
 const drawingSelectionBox = ref({ x: 0, y: 0, width: 0, height: 0, visible: false });
+const assets = ref<Asset[]>([]);
+const showStash = ref(false);
+const isUploadingAsset = ref(false);
+const uploadAssetType = ref<Asset['type']>('image');
+const loadedDrawingImages = ref<Record<number, HTMLImageElement>>({});
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
 interface SkillTestResult {
@@ -538,6 +625,7 @@ const colors = [
 ];
 
 const transformerNode = ref();
+const stageRef = ref();
 const mapLayers = ref<MapLayer[]>([
     { id: 'map', name: '🗺 Mapa', color: '#2e7d32', visible: true, locked: false },
     { id: 'gm', name: '👁 Warstwa MG', color: '#8e24aa', visible: true, locked: false },
@@ -550,11 +638,12 @@ const fetchDrawings = async () => {
     const { data } = await axios.get('/session/drawings');
     drawings.value = data.map((d: any): DrawingData => ({
         ...d.data,
-        // id i layer muszą być PO spreadzie, żeby nie zostały nadpisane przez d.data (które może zawierać stare tymczasowe id)
+        // id i layer muszą być PO spreadzie, żeby nie zostały nadpisane przez d.data
         id: d.id,
         type: d.type,
         layer: (d.layer === 'gm' ? 'gm' : 'map') as DrawingLayerId,
     }));
+    drawings.value.forEach(loadDrawingImage);
 };
 
 const fetchTokens = async () => {
@@ -570,6 +659,110 @@ const fetchMessages = async () => {
     const { data } = await axios.get('/session/chat');
     messages.value = data;
     scrollToBottom();
+};
+
+const loadDrawingImage = (drawing: DrawingData): void => {
+    if (drawing.type !== 'image' || !drawing.src || loadedDrawingImages.value[drawing.id]) return;
+    const img = new window.Image();
+    img.src = drawing.src;
+    img.onload = () => { loadedDrawingImages.value[drawing.id] = img; };
+};
+
+const fetchAssets = async (): Promise<void> => {
+    const { data } = await axios.get<Asset[]>('/session/assets');
+    assets.value = data;
+};
+
+const uploadAsset = async (e: Event): Promise<void> => {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    isUploadingAsset.value = true;
+    try {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('type', uploadAssetType.value);
+        form.append('name', file.name.replace(/\.[^/.]+$/, ''));
+        const { data } = await axios.post<Asset>('/panel/assets/upload', form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        assets.value.unshift(data);
+    } catch (error: unknown) {
+        console.error('Błąd uploadu pliku', error);
+    } finally {
+        isUploadingAsset.value = false;
+        input.value = '';
+    }
+};
+
+const deleteAsset = async (asset: Asset): Promise<void> => {
+    try {
+        await axios.delete(`/panel/assets/${asset.id}`);
+        assets.value = assets.value.filter(a => a.id !== asset.id);
+    } catch (error: unknown) {
+        console.error('Błąd usuwania assetu', error);
+    }
+};
+
+const onAssetDragStart = (e: DragEvent, asset: Asset): void => {
+    e.dataTransfer?.setData('application/asset', JSON.stringify({ id: asset.id, url: asset.file_url, type: asset.type, name: asset.name }));
+};
+
+const onCanvasDragOver = (e: DragEvent): void => { e.preventDefault(); };
+
+const onCanvasDrop = async (e: DragEvent): Promise<void> => {
+    e.preventDefault();
+    const raw = e.dataTransfer?.getData('application/asset');
+    if (!raw) return;
+
+    const { url, type, name } = JSON.parse(raw) as { id: number; url: string; type: Asset['type']; name: string };
+    const stage = stageRef.value?.getNode();
+    if (!stage) return;
+
+    const stageBox = stage.container().getBoundingClientRect();
+    const dropX = e.clientX - stageBox.left;
+    const dropY = e.clientY - stageBox.top;
+
+    const img = new window.Image();
+    img.src = url;
+    await new Promise<void>(resolve => { img.onload = () => resolve(); });
+
+    const defaultWidth = type === 'map' ? 800 : type === 'token' ? 100 : 300;
+    const scale = defaultWidth / img.naturalWidth;
+    const w = Math.round(img.naturalWidth * scale);
+    const h = Math.round(img.naturalHeight * scale);
+
+    const layerId: DrawingLayerId = activeLayerId.value === 'tokens' ? 'map' : activeLayerId.value;
+    const shapeData = {
+        src: url,
+        label: name,
+        x: Math.round(dropX - w / 2),
+        y: Math.round(dropY - h / 2),
+        width: w,
+        height: h,
+        points: [] as number[],
+        strokeWidth: 0,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+    };
+
+    try {
+        const { data } = await axios.post<{ id: number }>('/session/drawings/store', {
+            type: 'image',
+            layer: layerId,
+            data: shapeData,
+        });
+        const drawing: DrawingData = { ...shapeData, id: data.id, type: 'image', layer: layerId };
+        drawings.value.push(drawing);
+        loadedDrawingImages.value[data.id] = img;
+        // Po upuszczeniu: aktywuj właściwą warstwę i narzędzie edycji,
+        // żeby można od razu klikać i przesuwać wstawiony obraz
+        activeLayerId.value = layerId;
+        activeTool.value = 'select-draw';
+    } catch (error: unknown) {
+        console.error('Błąd zapisu obrazu na mapie', error);
+    }
 };
 
 const handleShapeClick = (e: any, shapeId: number, layerId: DrawingLayerId) => {
@@ -589,7 +782,13 @@ const handleShapeClick = (e: any, shapeId: number, layerId: DrawingLayerId) => {
 
     // 2. Logika EDYCJI / ZAZNACZANIA
     if (activeTool.value === 'select-draw') {
-        if (!layer || !canEditLayer(layer)) return;
+        // Kliknięcie zaznacza rysunek niezależnie od aktywnej warstwy.
+        // Automatycznie przełącz aktywną warstwę na tę, do której należy rysunek,
+        // żeby drag i transformer działały poprawnie.
+        if (layer && layer.locked) return;
+        if (layer && activeLayerId.value !== layer.id) {
+            activeLayerId.value = layer.id;
+        }
 
         if (e.evt?.shiftKey) {
             // Shift+klik — toggle w multi-selekcji
@@ -675,9 +874,9 @@ const handleDrawingSelectionEnd = (): void => {
         : drawings.value.filter(d => d.layer === activeLayer);
 
     const selected = layerDrawings.filter(d => {
-        if (d.type === 'rect') {
-            const dx = d.scaleX ? d.width * d.scaleX : d.width;
-            const dy = d.scaleY ? d.height * d.scaleY : d.height;
+        if (d.type === 'rect' || d.type === 'image') {
+            const dx = (d.scaleX ?? 1) * d.width;
+            const dy = (d.scaleY ?? 1) * d.height;
             return d.x < x2 && d.x + dx > x1 && d.y < y2 && d.y + dy > y1;
         }
         if (d.type === 'pen') {
@@ -707,6 +906,45 @@ const bulkDeleteSelectedDrawings = async (): Promise<void> => {
             })
         )
     );
+};
+
+// Podczas przeciągania obrazu — podpis i zaznaczone rysunki podążają za kursorem
+const handleImageDragMove = (e: any, draw: DrawingData): void => {
+    const newX = e.target.x();
+    const newY = e.target.y();
+    const dx = newX - draw.x;
+    const dy = newY - draw.y;
+
+    // Przesuń wszystkie pozostałe zaznaczone rysunki o ten sam delta
+    if (selectedDrawingIds.value.length > 1) {
+        drawings.value.forEach(d => {
+            if (selectedDrawingIds.value.includes(d.id) && d.id !== draw.id) {
+                d.x += dx;
+                d.y += dy;
+            }
+        });
+    }
+
+    draw.x = newX;
+    draw.y = newY;
+};
+
+// Po zakończeniu przeciągania — zapisz pozycje wszystkich przesuniętych rysunków
+const handleImageDragEnd = async (e: any, draw: DrawingData): Promise<void> => {
+    draw.x = e.target.x();
+    draw.y = e.target.y();
+
+    if (selectedDrawingIds.value.length > 1) {
+        const toSave = drawings.value.filter(d => selectedDrawingIds.value.includes(d.id));
+        await Promise.all(
+            toSave.map(d =>
+                axios.patch(`/session/drawings/${d.id}`, { id: d.id, data: d })
+                    .catch((error: unknown) => console.error('Błąd zapisu pozycji rysunku', error))
+            )
+        );
+    } else {
+        await handleTransformEnd(e, draw);
+    }
 };
 
 // Po zakończeniu skalowania/przesuwania
@@ -1164,6 +1402,7 @@ onMounted(() => {
     fetchDrawings();
     fetchTokens();
     fetchMessages();
+    fetchAssets();
     window.addEventListener('resize', updateSize);
     window.addEventListener('keydown', handleKeyDown);
 });
@@ -1775,6 +2014,167 @@ button.active { background: #d4af37; color: black; }
     height: 1px;
     background: #333;
     margin: 2px 4px;
+}
+
+.stage-wrapper {
+    position: absolute;
+    inset: 0;
+}
+
+/* ── Schowek ── */
+.stash-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.82);
+    border: 1px solid #d4af37;
+    border-radius: 10px;
+    min-width: 320px;
+    max-width: 700px;
+    font-family: 'Crimson Text', serif;
+    transition: max-height 0.2s;
+}
+
+.stash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    color: #d4af37;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.stash-count {
+    background: #d4af37;
+    color: #111;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 0.7rem;
+    margin-left: 5px;
+    font-weight: 800;
+}
+
+.stash-body {
+    padding: 10px;
+    border-top: 1px solid #333;
+}
+
+.stash-upload {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.stash-type-select {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.stash-upload-btn {
+    background: #1a1500;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 5px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    transition: background 0.12s;
+}
+
+.stash-upload-btn:hover { background: #2a2000; }
+.stash-uploading { opacity: 0.6; cursor: not-allowed; }
+
+.stash-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.stash-item {
+    position: relative;
+    width: 80px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #111;
+    cursor: grab;
+    overflow: hidden;
+    transition: border-color 0.12s;
+}
+
+.stash-item:hover { border-color: #d4af37; }
+.stash-item:active { cursor: grabbing; }
+
+.stash-thumb {
+    width: 100%;
+    height: 60px;
+    object-fit: cover;
+    display: block;
+}
+
+.stash-item-footer {
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 2px;
+}
+
+.stash-item-name {
+    flex: 1;
+    font-size: 0.6rem;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stash-item-delete {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 0.65rem;
+    cursor: pointer;
+    padding: 1px 3px;
+    border-radius: 2px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.stash-item-delete:hover { color: #e74c3c; background: rgba(231,76,60,0.1); }
+
+.stash-type-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: rgba(0,0,0,0.7);
+    color: #d4af37;
+    font-size: 0.5rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stash-empty {
+    color: #444;
+    font-size: 0.8rem;
+    padding: 12px;
+    width: 100%;
+    text-align: center;
 }
 
 .delete-selected-btn {

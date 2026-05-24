@@ -9,6 +9,7 @@ use App\Events\Session\DrawingUpdateEvent;
 use App\Http\Requests\StoreDrawingRequest;
 use App\Models\Drawing;
 use App\Repositories\DrawingsRepository;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +31,11 @@ class DrawingsController extends Controller
     {
         try {
             $drawing = $drawingsRepository->storeDrawing($request->all());
-            event(new DrawingCreateEvent($drawing->data, $drawing->layer, $drawing->id));
+            try {
+                event(new DrawingCreateEvent($drawing->data, $drawing->layer, $drawing->id));
+            } catch (BroadcastException $e) {
+                Log::warning('Drawing created but broadcast failed', ['exception' => $e]);
+            }
             return response()->json(['id' => $drawing->id], Response::HTTP_CREATED);
         } catch (\Throwable $exception) {
             Log::error('Error storing drawing', ['exception' => $exception]);
@@ -43,7 +48,11 @@ class DrawingsController extends Controller
         try {
             $drawingData = $request->input('data');
             $drawingsRepository->updateDrawing($drawingId, $drawingData);
-            event(new DrawingUpdateEvent($drawingId, $drawingData));
+            try {
+                event(new DrawingUpdateEvent($drawingId, $drawingData));
+            } catch (BroadcastException $e) {
+                Log::warning('Drawing updated but broadcast failed', ['exception' => $e]);
+            }
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('Error updating drawing', ['exception' => $exception]);
@@ -59,7 +68,11 @@ class DrawingsController extends Controller
 
         try {
             $drawingsRepository->updateDrawingLayer($drawingId, $request->string('layer')->value());
-            event(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value()));
+            try {
+                event(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value()));
+            } catch (BroadcastException $e) {
+                Log::warning('Drawing layer changed but broadcast failed', ['exception' => $e]);
+            }
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('Error moving drawing to layer', ['exception' => $exception]);
@@ -71,7 +84,11 @@ class DrawingsController extends Controller
     {
         try {
             $drawingsRepository->deleteDrawing($drawingId);
-            event(new DrawingDeleteEvent($drawingId));
+            try {
+                event(new DrawingDeleteEvent($drawingId));
+            } catch (BroadcastException $e) {
+                Log::warning('Drawing deleted but broadcast failed', ['exception' => $e]);
+            }
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {
             Log::error('Error deleting drawing', ['exception' => $exception]);

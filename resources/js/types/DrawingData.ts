@@ -20,4 +20,6 @@ export type DrawingData = {
     lineCap?: string;
     lineJoin?: string;
     opacity?: number;
+    src?: string;
+    label?: string;
 };

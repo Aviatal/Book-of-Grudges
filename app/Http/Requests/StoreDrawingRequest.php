@@ -18,6 +18,7 @@ class StoreDrawingRequest extends FormRequest
             'data.y' => ['nullable', 'numeric'],
             'data.width' => ['nullable', 'numeric'],
             'data.height' => ['nullable', 'numeric'],
+            'data.src' => ['nullable', 'string'],
         ];
     }
 
