@@ -12,6 +12,7 @@ class UpdateTokenRequest extends FormRequest
             'name'    => ['nullable', 'string', 'max:255'],
             'hero_id' => ['nullable', 'exists:heroes,id'],
             'file'    => ['nullable', 'image'],
+            'sheet'   => ['nullable', 'string'],
         ];
     }
 

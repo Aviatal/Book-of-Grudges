@@ -24,6 +24,17 @@
                 <h3 class="text-xl font-bold text-[#c4a47c] uppercase tracking-wide border-b border-[#5e4128] pb-2">Dane Podstawowe</h3>
 
                 <div>
+                    <label class="warhammer-label">
+                        Nazwa Tokenu
+                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(uzupełniana automatycznie z pliku)</span>
+                    </label>
+                    <div class="relative">
+                        <i class="mdi mdi-skull absolute left-3 top-1/2 -translate-y-1/2 text-[#8b5a2b] z-10"></i>
+                        <input type="text" v-model="token.name" class="warhammer-input pl-11" placeholder="Wybierz plik, aby wypełnić automatycznie">
+                    </div>
+                </div>
+
+                <div>
                     <label class="warhammer-label">Bohater <span class="text-[#706f6c] normal-case font-normal">(opcjonalnie)</span></label>
                     <v-select
                         v-model="token.hero_id"
@@ -35,10 +46,10 @@
                     ></v-select>
                 </div>
 
-                <div v-if="token.name" class="text-sm text-[#8b5a2b]">
-                    <i class="mdi mdi-label-outline mr-1"></i>
-                    Podpis na mapie: <span class="text-[#c4a47c] font-bold">{{ token.name }}</span>
-                </div>
+                <NpcSheetEditor
+                    v-if="!token.hero_id"
+                    v-model="npcSheet"
+                />
             </div>
 
             <div class="space-y-6">
@@ -86,9 +97,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, StyleValue } from 'vue';
 import axios from 'axios';
-import { Token } from '@/types/Token';
+import { Token, NpcSheet } from '@/types/Token';
 import {useToast} from "vue-toast-notification";
 import {Hero} from "@/types/Hero";
+import NpcSheetEditor from '@/components/panel/NpcSheetEditor.vue';
 
 const props = defineProps<{
     heroes: Hero[];
@@ -101,6 +113,7 @@ const token = ref<Partial<Token>>({
     image: null,
     hero_id: null
 });
+const npcSheet = ref<NpcSheet | null>(null);
 
 const imagePreviewUrl = ref<string | null>(null);
 
@@ -153,6 +166,9 @@ const saveToken = async () => {
     formData.append('name', token.value.name ?? '');
     if (token.value.hero_id !== null && token.value.hero_id !== undefined) {
         formData.append('hero_id', token.value.hero_id.toString());
+    }
+    if (!token.value.hero_id && npcSheet.value) {
+        formData.append('sheet', JSON.stringify(npcSheet.value));
     }
 
     await axios.post(`/panel/tokens/store`, formData)

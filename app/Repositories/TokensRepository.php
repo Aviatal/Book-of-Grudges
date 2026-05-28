@@ -48,4 +48,14 @@ class TokensRepository
     {
         return Token::query()->upsert($tokens, 'id', ['x', 'y']);
     }
+
+    public function placeToken(int $tokenId, int $x, int $y): int
+    {
+        return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y, 'on_map' => true]);
+    }
+
+    public function removeTokenFromMap(int $tokenId): int
+    {
+        return Token::query()->where('id', $tokenId)->update(['on_map' => false]);
+    }
 }

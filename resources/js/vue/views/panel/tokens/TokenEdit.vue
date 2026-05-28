@@ -23,7 +23,10 @@
             <div class="md:col-span-2 space-y-6 bg-[#2b2a27] p-6 rounded-sm border border-[#8b5a2b] shadow-inner">
                 <h3 class="text-xl font-bold text-[#c4a47c] uppercase tracking-wide border-b border-[#5e4128] pb-2">Dane Podstawowe</h3>
                 <div>
-                    <label class="warhammer-label">Nazwa Tokenu</label>
+                    <label class="warhammer-label">
+                        Nazwa Tokenu
+                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(przy zmianie pliku uzupełniana automatycznie)</span>
+                    </label>
                     <div class="relative">
                         <i class="mdi mdi-skull absolute left-3 top-1/2 -translate-y-1/2 text-[#8b5a2b] z-10"></i>
                         <input type="text" v-model="token.name" class="warhammer-input pl-11" placeholder="np. Oko Tzeentcha">
@@ -41,6 +44,11 @@
                         class="custom-select w-full"
                     ></v-select>
                 </div>
+
+                <NpcSheetEditor
+                    v-if="!token.hero_id"
+                    v-model="npcSheet"
+                />
             </div>
 
             <div class="space-y-6">
@@ -86,11 +94,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, StyleValue } from 'vue';
+import { ref, onMounted, computed, StyleValue, watch } from 'vue';
 import axios from 'axios';
-import { Token } from '@/types/Token';
+import { Token, NpcSheet } from '@/types/Token';
 import {useToast} from "vue-toast-notification";
 import {Hero} from "@/types/Hero";
+import NpcSheetEditor from '@/components/panel/NpcSheetEditor.vue';
 
 const props = defineProps<{
     tokenId: number;
@@ -104,6 +113,7 @@ const token = ref<Partial<Token>>({
     image: null,
     hero_id: null
 });
+const npcSheet = ref<NpcSheet | null>(null);
 
 const imagePreviewUrl = ref<string | null>(null);
 
@@ -112,6 +122,7 @@ const fetchTokenData = async () => {
     try {
         const response = await axios.get(`/panel/tokens/get-token/${props.tokenId}`);
         token.value = response.data;
+        npcSheet.value = response.data.sheet ?? null;
     } catch (error) {
         console.error('Błąd podczas pobierania danych tokenu:', error);
     } finally {
@@ -179,6 +190,9 @@ const saveToken = async () => {
     }
     if (token.value.hero_id !== null && token.value.hero_id !== undefined) {
         formData.append('hero_id', token.value.hero_id.toString());
+    }
+    if (!token.value.hero_id) {
+        formData.append('sheet', npcSheet.value ? JSON.stringify(npcSheet.value) : '');
     }
     await axios.put(`/panel/tokens/${props.tokenId}/update`, formData)
         .then((response) => {

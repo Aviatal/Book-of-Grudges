@@ -51,8 +51,8 @@
                     </td>
                     <td class="warhammer-td italic text-[#c4a47c]">
                         <div class="flex flex-col">
-                            <span>{{ token.hero.name }}</span>
-                            <span v-if="token.hero.user" class="text-xs opacity-70">({{ token.hero.user.name }})</span>
+                            <span>{{ token.hero ? token.hero.name : 'NPC' }}</span>
+                            <span v-if="token.hero?.user" class="text-xs opacity-70">({{ token.hero.user.name }})</span>
                         </div>
                     </td>
                     <td class="warhammer-td text-right">

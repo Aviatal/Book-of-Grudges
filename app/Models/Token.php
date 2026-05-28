@@ -9,6 +9,9 @@ class Token extends Model
 {
     protected $guarded = ['id'];
     protected $appends = ['image_url'];
+    protected $casts = [
+        'sheet' => 'array',
+    ];
 
     public function hero(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

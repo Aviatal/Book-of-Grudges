@@ -53,13 +53,15 @@
             </div>
         </div>
 
-        <div class="chat-container shadow-lg" :class="{ 'chat-minimized': isChatMinimized }">
-            <div class="chat-header" @click="isChatMinimized = !isChatMinimized">
-                <span>📜 Komunikaty sesji</span>
-                <button class="minimize-btn">{{ isChatMinimized ? '▲' : '▼' }}</button>
-            </div>
-
-            <div v-if="!isChatMinimized" class="chat-messages" ref="messageContainer">
+        <FloatingPanel
+            panel-id="chat"
+            title="📜 Komunikaty sesji"
+            :default-pos="panelDefaults.chat.pos"
+            :default-size="panelDefaults.chat.size"
+            :min-width="260"
+            :min-height="160"
+        >
+            <div class="chat-messages" ref="messageContainer">
                 <template v-for="msg in messages" :key="msg.id">
                     <div v-if="msg.type === 'roll'" class="message-roll-card">
                         <div class="roll-card-header">
@@ -128,12 +130,12 @@
                 </template>
             </div>
 
-            <div v-if="isRolling && !isChatMinimized" class="dice-overlay">
+            <div v-if="isRolling" class="dice-overlay">
                 <div class="dice-overlay-die">🎲</div>
                 <div class="dice-overlay-label">Rzut na inicjatywę...</div>
             </div>
 
-            <div v-if="!isChatMinimized" class="chat-input-area">
+            <div class="chat-input-area">
                 <input
                     v-model="newMessage"
                     @keyup.enter="sendMessage"
@@ -142,16 +144,13 @@
                 />
                 <button @click="sendMessage">➤</button>
             </div>
-            <div v-if="!isChatMinimized" class="chat-actions">
-                <button class="roll-btn" @click="rollInitiative" :disabled="isRolling">
-                    🎲 Inicjatywa
-                </button>
+            <div class="chat-actions">
                 <button class="roll-btn" @click="toggleSkillPicker" :disabled="isRollingSkill" :class="{ active: showSkillPicker }">
                     🎯 Test umiejętności
                 </button>
             </div>
 
-            <div v-if="showSkillPicker && !isChatMinimized" class="skill-picker">
+            <div v-if="showSkillPicker" class="skill-picker">
                 <div class="skill-picker-modifiers">
                     <button
                         v-for="mod in MODIFIERS"
@@ -201,12 +200,19 @@
                     <div v-else class="skill-picker-info">Brak wyników</div>
                 </div>
             </div>
-        </div>
+        </FloatingPanel>
 
         <!-- Panel warstw -->
-        <div v-if="hasDrawingPermission" class="layers-panel shadow-lg">
-            <div class="layers-panel-title">🗂 Warstwy</div>
-
+        <FloatingPanel
+            v-if="hasDrawingPermission"
+            panel-id="layers"
+            title="🗂 Warstwy"
+            :default-pos="{ x: 10, y: 62 }"
+            :default-size="{ w: 220, h: 320 }"
+            :min-width="180"
+            :min-height="120"
+        >
+            <div class="layer-list-body">
             <div
                 v-for="layer in mapLayers"
                 :key="layer.id"
@@ -262,15 +268,21 @@
                     >{{ tokenLayerLocked ? '🔒' : '🔓' }}</button>
                 </div>
             </div>
-        </div>
+            </div><!-- /layer-list-body -->
+        </FloatingPanel>
 
         <!-- Schowek -->
-        <div v-if="hasDrawingPermission" class="stash-panel shadow-lg" :class="{ 'stash-open': showStash }">
-            <div class="stash-header" @click="showStash = !showStash">
-                <span>🗃 Schowek <span v-if="assets.length" class="stash-count">{{ assets.length }}</span></span>
-                <span>{{ showStash ? '▼' : '▲' }}</span>
-            </div>
-            <div v-if="showStash" class="stash-body">
+        <FloatingPanel
+            v-if="hasDrawingPermission"
+            panel-id="stash"
+            :title="`🗃 Schowek${assets.length ? ' (' + assets.length + ')' : ''}`"
+            :default-pos="panelDefaults.stash.pos"
+            :default-size="{ w: 360, h: 320 }"
+            :min-width="240"
+            :min-height="120"
+            start-minimized
+        >
+            <div class="stash-body">
                 <div class="stash-upload">
                     <select v-model="uploadAssetType" class="stash-type-select">
                         <option value="image">🖼 Obraz</option>
@@ -301,7 +313,67 @@
                     <div v-if="assets.length === 0" class="stash-empty">Brak zasobów</div>
                 </div>
             </div>
-        </div>
+        </FloatingPanel>
+
+        <!-- Schowek tokenów NPC -->
+        <FloatingPanel
+            v-if="hasDrawingPermission && npcTokens.length > 0"
+            panel-id="npc-stash"
+            :title="`🧟 Tokeny NPC (${npcTokens.length})`"
+            :default-pos="panelDefaults.npcStash.pos"
+            :default-size="{ w: 300, h: 420 }"
+            :min-width="220"
+            :min-height="120"
+            start-minimized
+        >
+            <div class="npc-stash-body">
+                <input
+                    v-model="npcSearch"
+                    class="npc-search"
+                    placeholder="🔍 Szukaj..."
+                    @click.stop
+                />
+                <div class="npc-stash-scroll">
+                    <div
+                        v-for="token in filteredNpcTokens"
+                        :key="token.id"
+                        class="npc-token-item"
+                        :class="{ 'npc-on-map': token.on_map }"
+                        :draggable="!token.on_map"
+                        :title="token.name"
+                        @dragstart="(e) => !token.on_map && onNpcTokenDragStart(e, token)"
+                    >
+                        <div class="npc-token-avatar">
+                            <img v-if="token.image" :src="token.image_url" :alt="token.name" />
+                            <span v-else class="npc-token-placeholder">🧟</span>
+                        </div>
+                        <div class="npc-token-info">
+                            <span class="npc-token-name">{{ token.name }}</span>
+                            <span v-if="token.on_map" class="npc-on-map-badge">📍 Na mapie</span>
+                        </div>
+                        <div class="npc-token-actions">
+                            <button
+                                class="npc-action-btn"
+                                title="Podgląd karty postaci"
+                                @click.stop="selectedNpcToken = token"
+                            >📋</button>
+                            <button
+                                class="npc-action-btn"
+                                title="Duplikuj token"
+                                @click.stop="duplicateNpcToken(token)"
+                            >⧉</button>
+                            <button
+                                v-if="token.on_map"
+                                class="npc-remove-btn"
+                                title="Zdejmij z mapy"
+                                @click.stop="removeNpcTokenFromMap(token)"
+                            >✕</button>
+                        </div>
+                    </div>
+                    <div v-if="filteredNpcTokens.length === 0" class="stash-empty">Brak wyników</div>
+                </div>
+            </div>
+        </FloatingPanel>
 
         <div class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
         <v-stage
@@ -413,10 +485,9 @@
                 :config="{ visible: tokenLayerVisible }"
                 @dragmove="handleTokenLayerDragMove"
                 @dragend="handleGroupDragEnd"
-                @click="handleTokenLayerClick"
             >
                 <v-group
-                    v-for="token in tokens"
+                    v-for="token in mapTokens"
                     :key="token.id"
                     :config="{
                         id: String(token.id),
@@ -456,6 +527,14 @@
                         fontStyle: 'bold',
                         shadowColor: 'black',
                         shadowBlur: 5
+                    }" />
+                    <!-- Znaczek karty postaci — tylko NPC z wypełnioną kartą, tylko dla MG -->
+                    <v-text v-if="hasDrawingPermission && !token.hero_id && token.sheet" :config="{
+                        text: '📋',
+                        fontSize: 14,
+                        x: 32,
+                        y: -58,
+                        listening: false
                     }" />
                 </v-group>
 
@@ -501,15 +580,33 @@
         </v-stage>
         </div>
     </div>
+
+    <!-- Karta postaci NPC (GM) -->
+    <NpcSheetPopup
+        v-if="selectedNpcToken && hasDrawingPermission"
+        :token="selectedNpcToken"
+        :can-roll="true"
+        @close="selectedNpcToken = null"
+    />
+
+    <!-- Tracker walki -->
+    <CombatTracker
+        :map-token-ids="mapTokens.map(t => t.id)"
+        :hero-id="props.heroId"
+        :has-drawing-permission="props.hasDrawingPermission"
+    />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import {Token} from "@/types/Token";
 import {DrawingData, DrawingLayerId} from "@/types/DrawingData";
 import {Message} from "@/types/Message";
 import PingItem from '../../components/session/PingItem.vue';
+import NpcSheetPopup from '../../components/session/NpcSheetPopup.vue';
+import CombatTracker from '../../components/session/CombatTracker.vue';
+import FloatingPanel from '../../components/session/FloatingPanel.vue';
 
 const props = defineProps<{
     heroId: number,
@@ -557,6 +654,14 @@ interface MapLayer {
         e.tokens.forEach(token => {
             moveToken(token.id, token.x, token.y);
         })
+    })
+    .listen('.token-placed', (e: { id: number; x: number; y: number }) => {
+        const token = tokens.value.find(t => t.id === e.id);
+        if (token) { token.x = e.x; token.y = e.y; token.on_map = true; }
+    })
+    .listen('.token-removed-from-map', (e: { id: number }) => {
+        const token = tokens.value.find(t => t.id === e.id);
+        if (token) { token.on_map = false; }
     });
 window.Echo.channel('drawings')
     .listen('.drawing-update', (e: DrawingEditEvent) => {
@@ -614,9 +719,22 @@ const selectedShapeId = ref<number | null>(null);
 const selectedDrawingIds = ref<number[]>([]);
 const drawingSelectionBox = ref({ x: 0, y: 0, width: 0, height: 0, visible: false });
 const assets = ref<Asset[]>([]);
-const showStash = ref(false);
+// Domyślne pozycje paneli — przy krawędziach ekranu, obliczone raz przy starcie
+const W = window.innerWidth;
+const H = window.innerHeight;
+const panelDefaults = {
+    // Czat: prawy dolny róg
+    chat:     { pos: { x: W - 360, y: H - 450 }, size: { w: 350, h: 440 } },
+    // Schowek assetów: prawy górny róg (zwinięty domyślnie)
+    stash:    { pos: { x: W - 370, y: 10 },       size: { w: 360, h: 300 } },
+    // Schowek NPC: lewy górny róg
+    npcStash: { pos: { x: 10, y: 50 },            size: { w: 280, h: 420 } },
+};
+
 const isUploadingAsset = ref(false);
 const uploadAssetType = ref<Asset['type']>('image');
+const npcSearch = ref('');
+const selectedNpcToken = ref<Token | null>(null);
 const loadedDrawingImages = ref<Record<number, HTMLImageElement>>({});
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
@@ -643,7 +761,6 @@ interface SkillOption {
 
 const messages = ref<Message[]>([]);
 const newMessage = ref('');
-const isChatMinimized = ref(false);
 const isRolling = ref(false);
 const isRollingSkill = ref(false);
 const showSkillPicker = ref(false);
@@ -660,6 +777,13 @@ const filteredSkills = computed(() => {
     return skills.value.filter(s =>
         !q || s.name.toLowerCase().includes(q) || (s.additional_name ?? '').toLowerCase().includes(q)
     );
+});
+
+const mapTokens  = computed(() => tokens.value.filter(t => t.on_map));
+const npcTokens  = computed(() => tokens.value.filter(t => !t.hero_id));
+const filteredNpcTokens = computed(() => {
+    const q = npcSearch.value.trim().toLowerCase();
+    return q ? npcTokens.value.filter(t => t.name.toLowerCase().includes(q)) : npcTokens.value;
 });
 
 const drawingsByLayer = computed<Record<DrawingLayerId, DrawingData[]>>(() => {
@@ -770,6 +894,44 @@ const deleteAsset = async (asset: Asset): Promise<void> => {
     }
 };
 
+const onNpcTokenDragStart = (e: DragEvent, token: Token): void => {
+    e.dataTransfer?.setData('application/npc-token', JSON.stringify({ id: token.id }));
+};
+
+const placeNpcToken = async (tokenId: number, x: number, y: number): Promise<void> => {
+    const token = tokens.value.find(t => t.id === tokenId);
+    if (!token) return;
+    token.x = x;
+    token.y = y;
+    token.on_map = true;
+    loadImage(token);
+    try {
+        await axios.patch(`/session/tokens/${tokenId}/place`, { x, y });
+    } catch (error: unknown) {
+        console.error('Błąd umieszczania tokenu NPC', error);
+        token.on_map = false;
+    }
+};
+
+const duplicateNpcToken = async (token: Token): Promise<void> => {
+    try {
+        const { data } = await axios.post<Token>(`/session/tokens/${token.id}/duplicate`);
+        tokens.value.push(data);
+    } catch (error: unknown) {
+        console.error('Błąd duplikowania tokenu NPC', error);
+    }
+};
+
+const removeNpcTokenFromMap = async (token: Token): Promise<void> => {
+    token.on_map = false;
+    try {
+        await axios.patch(`/session/tokens/${token.id}/remove-from-map`);
+    } catch (error: unknown) {
+        console.error('Błąd usuwania tokenu z mapy', error);
+        token.on_map = true;
+    }
+};
+
 const onAssetDragStart = (e: DragEvent, asset: Asset): void => {
     e.dataTransfer?.setData('application/asset', JSON.stringify({ id: asset.id, url: asset.file_url, type: asset.type, name: asset.name }));
 };
@@ -778,6 +940,20 @@ const onCanvasDragOver = (e: DragEvent): void => { e.preventDefault(); };
 
 const onCanvasDrop = async (e: DragEvent): Promise<void> => {
     e.preventDefault();
+
+    // Upuszczenie tokenu NPC ze schowka
+    const npcRaw = e.dataTransfer?.getData('application/npc-token');
+    if (npcRaw) {
+        const { id } = JSON.parse(npcRaw) as { id: number };
+        const stage = stageRef.value?.getNode();
+        if (!stage) return;
+        const stageBox = stage.container().getBoundingClientRect();
+        const dropX = (e.clientX - stageBox.left  - stagePos.value.x) / stageScale.value;
+        const dropY = (e.clientY - stageBox.top   - stagePos.value.y) / stageScale.value;
+        await placeNpcToken(id, Math.round(dropX), Math.round(dropY));
+        return;
+    }
+
     const raw = e.dataTransfer?.getData('application/asset');
     if (!raw) return;
 
@@ -1115,6 +1291,8 @@ const updateTokenPosition = async (event, token) => {
     }
 };
 const selectedIds = ref<number[]>([]);
+const mouseDownPos = ref<{ x: number; y: number } | null>(null);
+const mouseDownTarget = ref<any>(null);
 const selectionBox = ref({
     x: 0,
     y: 0,
@@ -1205,13 +1383,6 @@ const handleTokenLayerDragMove = (e: any): void => {
     draggedToken.y = y;
 };
 
-const handleTokenLayerClick = (e: any): void => {
-    const token = getTokenFromEvent(e);
-    if (token) {
-        selectedIds.value = [token.id];
-    }
-};
-
 const handleGroupDragEnd = async () => {
     const movedTokens = tokens.value
         .filter(t => selectedIds.value.includes(t.id))
@@ -1258,6 +1429,10 @@ const handleWheel = (e: any): void => {
 };
 
 const handleStageMouseDown = (e: any) => {
+    // Zapamiętujemy pozycję i cel mousedown, żeby wykryć kliknięcie w mouseup
+    mouseDownPos.value = { x: e.evt.clientX, y: e.evt.clientY };
+    mouseDownTarget.value = e.target;
+
     // Środkowy przycisk myszy → pan
     if (e.evt.button === 1) {
         isPanning.value  = true;
@@ -1516,11 +1691,41 @@ const scrollToBottom = () => {
     }, 50);
 };
 
-const handleStageMouseUp = async () => {
+const handleStageMouseUp = async (e: any) => {
     if (isPanning.value) {
         isPanning.value = false;
+        mouseDownPos.value = null;
         return;
     }
+
+    // Wykrycie kliknięcia: mousedown i mouseup w tym samym miejscu (ruch < 5px)
+    // Konva blokuje zdarzenie 'click' na węzłach draggable, dlatego wykrywamy sami
+    if (
+        props.hasDrawingPermission &&
+        mouseDownPos.value &&
+        e?.evt &&
+        Math.abs(e.evt.clientX - mouseDownPos.value.x) < 5 &&
+        Math.abs(e.evt.clientY - mouseDownPos.value.y) < 5 &&
+        mouseDownTarget.value &&
+        mouseDownTarget.value !== mouseDownTarget.value.getStage()
+    ) {
+        // Szukamy tokenu NPC w hierarchii Konvy
+        let node = mouseDownTarget.value;
+        let foundToken: Token | undefined;
+        while (node && node.getType && node.getType() !== 'Stage') {
+            if (node.getType() === 'Group' && node.id()) {
+                foundToken = tokens.value.find(t => t.id === parseInt(node.id()));
+                break;
+            }
+            node = node.getParent?.();
+        }
+        if (foundToken && foundToken.hero_id == null) {
+            selectedNpcToken.value = foundToken;
+        }
+    }
+    mouseDownPos.value = null;
+    mouseDownTarget.value = null;
+
     if (activeTool.value === 'select-draw') {
         handleDrawingSelectionEnd();
         return;
@@ -1629,34 +1834,9 @@ onUnmounted(() => {
 button { background: #333; color: white; border: 1px solid #555; padding: 5px 10px; cursor: pointer; }
 button.active { background: #d4af37; color: black; }
 
-.chat-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 350px;
-    height: 900px;
-    background: rgba(26, 26, 26, 0.9);
-    border: 1px solid #d4af37;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    z-index: 10002;
-    font-family: 'Crimson Text', serif;
-    overflow: hidden;
-}
+/* .chat-container — zastąpiony przez FloatingPanel */
 
-.chat-minimized { height: 40px; }
-
-.chat-header {
-    padding: 8px 15px;
-    background: #2a2a2a;
-    border-bottom: 1px solid #d4af37;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    color: #d4af37;
-    font-weight: bold;
-}
+/* Wewnętrzny layout czatu */
 
 .chat-messages {
     flex: 1;
@@ -2089,31 +2269,15 @@ button.active { background: #d4af37; color: black; }
 .skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
 .skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
 
-/* ── Layers panel ── */
-.layers-panel {
-    position: fixed;
-    top: 80px;
-    left: 20px;
-    z-index: 10001;
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid #d4af37;
-    border-radius: 8px;
-    padding: 8px 6px;
+/* ── Layers panel — zastąpiony przez FloatingPanel ── */
+/* Treść wewnątrz panelu warstw */
+.layer-list-body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-width: 170px;
-}
-
-.layers-panel-title {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: #d4af37;
-    text-transform: uppercase;
-    padding: 0 4px 4px;
-    border-bottom: 1px solid #333;
-    margin-bottom: 2px;
+    padding: 6px;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .layer-row {
@@ -2235,48 +2399,11 @@ button.active { background: #d4af37; color: black; }
 
 .zoom-label:hover { color: #d4af37; }
 
-/* ── Schowek ── */
-.stash-panel {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10001;
-    background: rgba(0, 0, 0, 0.82);
-    border: 1px solid #d4af37;
-    border-radius: 10px;
-    min-width: 320px;
-    max-width: 700px;
-    font-family: 'Crimson Text', serif;
-    transition: max-height 0.2s;
-}
-
-.stash-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 14px;
-    color: #d4af37;
-    font-weight: 700;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.stash-count {
-    background: #d4af37;
-    color: #111;
-    border-radius: 10px;
-    padding: 1px 6px;
-    font-size: 0.7rem;
-    margin-left: 5px;
-    font-weight: 800;
-}
-
+/* ── Schowek — zastąpiony przez FloatingPanel ── */
 .stash-body {
     padding: 10px;
-    border-top: 1px solid #333;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .stash-upload {
@@ -2408,5 +2535,157 @@ button.active { background: #d4af37; color: black; }
     background: #5a1010;
     color: #ff6b6b;
     border-color: #e74c3c;
+}
+
+/* ── Schowek tokenów NPC — zastąpiony przez FloatingPanel ── */
+.npc-stash-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 6px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.npc-search {
+    width: 100%;
+    background: #111;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    color: #e4d8b4;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.npc-search:focus {
+    border-color: #d4af37;
+}
+
+.npc-search::placeholder {
+    color: #555;
+}
+
+.npc-stash-scroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a transparent;
+}
+
+.npc-stash-scroll::-webkit-scrollbar { width: 4px; }
+.npc-stash-scroll::-webkit-scrollbar-track { background: transparent; }
+.npc-stash-scroll::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
+
+.npc-token-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 7px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    cursor: grab;
+}
+
+.npc-token-item[draggable="false"],
+.npc-token-item.npc-on-map {
+    cursor: default;
+    opacity: 0.75;
+}
+
+.npc-token-item:not(.npc-on-map):hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: #d4af37;
+}
+
+.npc-token-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid #5e4128;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1b1b18;
+}
+
+.npc-token-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.npc-token-placeholder {
+    font-size: 1.1rem;
+}
+
+.npc-token-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.npc-token-name {
+    font-size: 0.78rem;
+    color: #e4d8b4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.npc-on-map-badge {
+    font-size: 0.65rem;
+    color: #d4af37;
+}
+
+.npc-token-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.npc-action-btn {
+    background: none;
+    border: none;
+    color: #8b5a2b;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.npc-action-btn:hover {
+    color: #d4af37;
+}
+
+.npc-remove-btn {
+    background: none;
+    border: none;
+    color: #8b5a2b;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.npc-remove-btn:hover {
+    color: #e74c3c;
 }
 </style>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssetsController;
+use App\Http\Controllers\CombatController;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\ChatController;
@@ -94,6 +95,10 @@ Route::middleware('auth')->group(function (){
             Route::get('/', [TokensController::class, 'getTokens'])->name('tokens.get-tokens');
             Route::patch('/{token}/move', [SessionController::class, 'moveToken'])->name('tokens.move-token');
             Route::patch('/bulk-move', [SessionController::class, 'bulkMove']);
+            Route::patch('/{token}/place', [SessionController::class, 'placeToken'])->name('tokens.place');
+            Route::patch('/{token}/remove-from-map', [SessionController::class, 'removeTokenFromMap'])->name('tokens.remove-from-map');
+            Route::post('/{token}/duplicate', [SessionController::class, 'duplicateToken'])->name('tokens.duplicate');
+            Route::post('/{token}/roll', [CombatController::class, 'rollNpcTest'])->name('tokens.roll-npc-test');
         });
         Route::group(['prefix' => 'drawings'], function () {
             Route::get('/', [DrawingsController::class, 'getDrawings'])->name('drawings.get-drawings');
@@ -103,6 +108,14 @@ Route::middleware('auth')->group(function (){
             Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
         });
         Route::get('/assets', [AssetsController::class, 'index'])->name('session.assets.index');
+        Route::group(['prefix' => 'combat'], function () {
+            Route::get('/', [CombatController::class, 'state']);
+            Route::post('/start', [CombatController::class, 'start']);
+            Route::post('/roll-npc', [CombatController::class, 'rollNpcInitiative']);
+            Route::post('/roll-hero', [CombatController::class, 'rollHeroInitiative']);
+            Route::patch('/turn', [CombatController::class, 'setTurn']);
+            Route::delete('/', [CombatController::class, 'end']);
+        });
         Route::group(['prefix' => 'chat'], function () {
             Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
             Route::post('/send', [ChatController::class, 'sendMessage'])->name('messages.send-message');
