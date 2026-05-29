@@ -1,6 +1,11 @@
 <template>
     <div>
         <template v-if="!isLoading && hero">
+            <div class="session-btn-bar">
+                <a href="/session" class="session-link-btn">
+                    🗺 Przejdź do sesji
+                </a>
+            </div>
             <hero-section
                 :hero="hero"
                 @update-characteristics="refreshCharacteristic"
@@ -230,6 +235,34 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.session-btn-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+}
+
+.session-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1.1rem;
+    background: #1c1510;
+    border: 1px solid #8b5a2b;
+    border-radius: 6px;
+    color: #d4af37;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: ui-serif, Georgia, serif;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, border-color 0.15s;
+}
+.session-link-btn:hover {
+    background: #2c1e0c;
+    border-color: #d4af37;
+    color: #f4d03f;
+}
+
 .create-hero-btn {
     background: linear-gradient(145deg, #d4af37 0%, #f4d03f 100%);
     color: #2a2926;

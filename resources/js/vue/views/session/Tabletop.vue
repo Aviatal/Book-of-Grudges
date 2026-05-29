@@ -61,6 +61,15 @@
             :min-width="260"
             :min-height="160"
         >
+            <template #header-actions>
+                <a
+                    :href="`/karta-postaci/${heroId}`"
+                    target="_blank"
+                    rel="noopener"
+                    class="hero-sheet-link"
+                    title="Otwórz kartę bohatera w nowej karcie"
+                >📋</a>
+            </template>
             <div class="chat-messages" ref="messageContainer">
                 <template v-for="msg in messages" :key="msg.id">
                     <div v-if="msg.type === 'roll'" class="message-roll-card">
@@ -1835,6 +1844,21 @@ button { background: #333; color: white; border: 1px solid #555; padding: 5px 10
 button.active { background: #d4af37; color: black; }
 
 /* .chat-container — zastąpiony przez FloatingPanel */
+
+/* Link do karty bohatera w nagłówku czatu */
+.hero-sheet-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #7a5035;
+    text-decoration: none;
+    padding: 2px 4px;
+    border-radius: 3px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+.hero-sheet-link:hover { color: #d4af37; }
 
 /* Wewnętrzny layout czatu */
 
