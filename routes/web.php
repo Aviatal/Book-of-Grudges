@@ -1,13 +1,19 @@
 <?php
 
+use App\Http\Controllers\AssetsController;
+use App\Http\Controllers\CombatController;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DrawingsController;
 use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\Panel\PurchaseController;
 use App\Http\Controllers\ProfessionsController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SkillsAndTalentsController;
+use App\Http\Controllers\TokensController;
 use App\Http\Controllers\WeaponsController;
 use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
@@ -82,6 +88,49 @@ Route::middleware('auth')->group(function (){
         Route::get('/get-races', [CharactersController::class, 'getRaces'])->name('create-character.get-rolled-profession');
     });
 
+    Route::group(['prefix' => 'session'], function () {
+        Route::get('/', [SessionController::class, 'index'])->name('session.index');
+        Route::post('/ping', [SessionController::class, 'pingPlayers'])->name('session.ping-players');
+        Route::group(['prefix' => 'tokens'], function () {
+            Route::get('/', [TokensController::class, 'getTokens'])->name('tokens.get-tokens');
+            Route::patch('/{token}/move', [SessionController::class, 'moveToken'])->name('tokens.move-token');
+            Route::patch('/bulk-move', [SessionController::class, 'bulkMove']);
+            Route::patch('/{token}/place', [SessionController::class, 'placeToken'])->name('tokens.place');
+            Route::patch('/{token}/remove-from-map', [SessionController::class, 'removeTokenFromMap'])->name('tokens.remove-from-map');
+            Route::post('/{token}/duplicate', [SessionController::class, 'duplicateToken'])->name('tokens.duplicate');
+            Route::post('/{token}/roll', [CombatController::class, 'rollNpcTest'])->name('tokens.roll-npc-test');
+        });
+        Route::group(['prefix' => 'drawings'], function () {
+            Route::get('/', [DrawingsController::class, 'getDrawings'])->name('drawings.get-drawings');
+            Route::post('/store', [DrawingsController::class, 'storeDrawing'])->name('drawings.store-drawing');
+            Route::patch('/{drawingId}', [DrawingsController::class, 'updateDrawing'])->name('drawings.update-drawing');
+            Route::patch('/{drawingId}/layer', [DrawingsController::class, 'moveDrawingToLayer'])->name('drawings.move-to-layer');
+            Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
+        });
+        Route::get('/assets', [AssetsController::class, 'index'])->name('session.assets.index');
+        Route::group(['prefix' => 'heroes'], function () {
+            Route::get('/{hero}/proxy', [CombatController::class, 'heroProxySheet']);
+            Route::post('/{hero}/roll', [CombatController::class, 'heroProxyRoll']);
+        });
+        Route::group(['prefix' => 'combat'], function () {
+            Route::get('/', [CombatController::class, 'state']);
+            Route::post('/start', [CombatController::class, 'start']);
+            Route::post('/roll-npc', [CombatController::class, 'rollNpcInitiative']);
+            Route::post('/roll-hero', [CombatController::class, 'rollHeroInitiative']);
+            Route::post('/roll-hero-proxy', [CombatController::class, 'rollHeroAsGm']);
+            Route::patch('/turn', [CombatController::class, 'setTurn']);
+            Route::delete('/', [CombatController::class, 'end']);
+        });
+        Route::group(['prefix' => 'chat'], function () {
+            Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');
+            Route::post('/send', [ChatController::class, 'sendMessage'])->name('messages.send-message');
+            Route::post('/roll-initiative', [ChatController::class, 'rollInitiative'])->name('messages.roll-initiative');
+            Route::get('/skills', [ChatController::class, 'getSkillsForRoll'])->name('messages.skills');
+            Route::post('/roll-skill', [ChatController::class, 'rollSkill'])->name('messages.roll-skill');
+            Route::post('/roll-characteristic', [ChatController::class, 'rollCharacteristic'])->name('messages.roll-characteristic');
+        });
+    });
+
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
 });
 
@@ -99,5 +148,22 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
     Route::prefix('purchases')->group(function () {
         Route::get('/', [PurchaseController::class, 'index'])->name('panel.purchases.make-purchase-form');
         Route::post('/', [PurchaseController::class, 'sendPurchase'])->name('panel.purchases.sen-purchase');
+    });
+
+    Route::prefix('assets')->group(function () {
+        Route::post('/upload', [AssetsController::class, 'upload'])->name('panel.assets.upload');
+        Route::delete('/{id}', [AssetsController::class, 'delete'])->name('panel.assets.delete');
+    });
+
+    Route::prefix('tokens')->group(function () {
+        Route::get('/', [TokensController::class, 'index'])->name('panel.tokens.index');
+        Route::get('/create', [TokensController::class, 'create'])->name('panel.tokens.create');
+        Route::post('/store', [TokensController::class, 'store'])->name('panel.tokens.store');
+        Route::get('/{id}/edit', [TokensController::class, 'edit'])->name('panel.tokens.edit');
+        Route::put('/{id}/update', [TokensController::class, 'update'])->name('panel.tokens.update');
+        Route::delete('/{id}/delete', [TokensController::class, 'delete'])->name('panel.tokens.delete');
+
+        Route::get('/get-tokens', [TokensController::class, 'getTokens'])->name('panel.tokens.get-tokens');
+        Route::get('/get-token/{token}', [TokensController::class, 'getToken'])->name('panel.tokens.get-token');
     });
 });

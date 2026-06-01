@@ -2,7 +2,9 @@ import './bootstrap';
 
 import { createApp } from 'vue';
 import {createVuetify} from "vuetify";
+import VueKonva from 'vue-konva';
 import CharacterSheet from "./vue/views/character-sheet/CharacterSheet.vue";
+import Tabletop from "./vue/views/session/Tabletop.vue";
 import WeaponsIndex from "./vue/views/weapons/WeaponsIndex.vue";
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-bootstrap.css';
@@ -22,6 +24,9 @@ import Purchases from "./vue/views/panel/purchases/Purchases.vue";
 import SpendFortunePoint from "./vue/components/SpendFortunePoint.vue";
 import SpendFatePoint from "./vue/components/SpendFatePoint.vue";
 import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsManagement.vue";
+import TokensManagement from "@/views/panel/tokens/TokensManagement.vue";
+import TokenCreate from "@/views/panel/tokens/TokenCreate.vue";
+import TokenEdit from "@/views/panel/tokens/TokenEdit.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 import '@mdi/font/css/materialdesignicons.css'
@@ -69,7 +74,8 @@ window.customSwal = customSwal;
 
 const app = createApp({})
     .use(vuetify)
-    .use(ToastPlugin);
+    .use(ToastPlugin)
+    .use(VueKonva);
 
 app.config.globalProperties.$calculatePrice = (price) => {
     let priceInGold = price / 240;
@@ -92,6 +98,7 @@ app.component('v-select', VueSelect);
 //FRONT
 app.component('create-hero-view', CreateHeroView)
 app.component('character-sheet', CharacterSheet);
+app.component('tabletop', Tabletop);
 app.component('weapons-index', WeaponsIndex);
 app.component('armors-index', ArmorsIndex);
 app.component('skills-index', SkillsIndex);
@@ -106,5 +113,8 @@ app.component('footer-text', FooterText);
 app.component('experience-management', ExperienceManagement)
 app.component('fortune-points-management', FortunePointsManagement)
 app.component('purchases', Purchases)
+app.component('tokens-management', TokensManagement)
+app.component('token-create', TokenCreate)
+app.component('token-edit', TokenEdit)
 
 app.mount('#app');

@@ -52,6 +52,13 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('panel.tokens.index') }}"
+                           class="text-[#e4d8b4] hover:text-[#d4af37]"
+                        >
+                            Tokeny
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('home') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">
                             Front
                         </a>
