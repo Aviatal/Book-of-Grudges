@@ -616,8 +616,9 @@
     />
 
     <HeroProxyPopup
-        v-if="selectedHeroToken && hasDrawingPermission"
+        v-if="selectedHeroToken"
         :token="selectedHeroToken"
+        :is-gm="Boolean(hasDrawingPermission)"
         @close="selectedHeroToken = null"
     />
 
@@ -1758,7 +1759,6 @@ const handleStageMouseUp = async (e: any) => {
     // Wykrycie kliknięcia: mousedown i mouseup w tym samym miejscu (ruch < 5px)
     // Konva blokuje zdarzenie 'click' na węzłach draggable, dlatego wykrywamy sami
     if (
-        props.hasDrawingPermission &&
         mouseDownPos.value &&
         e?.evt &&
         Math.abs(e.evt.clientX - mouseDownPos.value.x) < 5 &&
@@ -1766,7 +1766,7 @@ const handleStageMouseUp = async (e: any) => {
         mouseDownTarget.value &&
         mouseDownTarget.value !== mouseDownTarget.value.getStage()
     ) {
-        // Szukamy tokenu NPC w hierarchii Konvy
+        // Szukamy tokenu w hierarchii Konvy
         let node = mouseDownTarget.value;
         let foundToken: Token | undefined;
         while (node && node.getType && node.getType() !== 'Stage') {
@@ -1777,10 +1777,15 @@ const handleStageMouseUp = async (e: any) => {
             node = node.getParent?.();
         }
         if (foundToken) {
-            if (foundToken.hero_id == null) {
-                selectedNpcToken.value = foundToken;
-            } else {
-                // Żeton bohatera gracza — MG może grać zastępczo
+            if (props.hasDrawingPermission) {
+                // MG: widzi kartę każdego tokenu
+                if (foundToken.hero_id == null) {
+                    selectedNpcToken.value = foundToken;
+                } else {
+                    selectedHeroToken.value = foundToken;
+                }
+            } else if (foundToken.hero_id === props.heroId) {
+                // Gracz: tylko własny żeton
                 selectedHeroToken.value = foundToken;
             }
         }

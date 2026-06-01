@@ -10,7 +10,7 @@
                     </div>
                     <div>
                         <div class="hp-name">{{ token.name }}</div>
-                        <div class="hp-subtitle">Zastępstwo MG</div>
+                        <div class="hp-subtitle">{{ isGm ? 'Zastępstwo MG' : 'Twoja postać' }}</div>
                     </div>
                 </div>
                 <button class="hp-close" @click="$emit('close')">✕</button>
@@ -63,7 +63,7 @@
 
                 <!-- ── Pasek rzutu ────────────────────────────────────────── -->
                 <section class="hp-section hp-roll-bar">
-                    <h4 class="hp-section-title">Rzut za gracza</h4>
+                    <h4 class="hp-section-title">{{ isGm ? 'Rzuć za gracza' : 'Rzuć test' }}</h4>
                     <div class="hp-roll-controls">
                         <label class="hp-control-label">
                             <span>Modyfikator</span>
@@ -82,7 +82,7 @@
                         <span v-if="rolledLabel" class="hp-feedback">✓ {{ rolledLabel }}</span>
                         <span v-if="isRolling" class="hp-feedback rolling">🎲</span>
                     </div>
-                    <p class="hp-hint">Kliknij cechę lub umiejętność, by rzucić test w imieniu gracza</p>
+                    <p class="hp-hint">Kliknij cechę lub umiejętność, by rzucić test</p>
                 </section>
 
             </template>
@@ -95,7 +95,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { Token } from '@/types/Token';
 
-const props = defineProps<{ token: Token }>();
+const props = defineProps<{ token: Token; isGm?: boolean }>();
 defineEmits<{ (e: 'close'): void }>();
 
 // ── Typy ─────────────────────────────────────────────────────────────────────
