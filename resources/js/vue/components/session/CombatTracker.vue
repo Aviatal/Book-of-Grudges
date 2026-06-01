@@ -128,7 +128,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import FloatingPanel from './FloatingPanel.vue';
 
-// Combat tracker: prawy górny róg, obok trackerów
+// Combat tracker: prawy górny róg
 const combatDefaultPos = { x: window.innerWidth - 280, y: 10 };
 
 // ── Typy ─────────────────────────────────────────────────────────────────────

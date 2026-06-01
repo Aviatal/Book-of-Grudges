@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\Session\CombatEvent;
 use App\Events\Session\MessageSentEvent;
+use App\Models\Hero;
 use App\Models\Token;
 use App\Repositories\ChatRepository;
 use Illuminate\Http\JsonResponse;
@@ -210,6 +211,84 @@ class CombatController extends Controller
         broadcast(new CombatEvent('ended', null));
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    // ── GET /session/heroes/{hero}/proxy ─────────────────────────────────────
+    // MG pobiera dane bohatera gracza (cechy + umiejętności) do podmieniania
+    public function heroProxySheet(Hero $hero): JsonResponse
+    {
+        $hero->load(['characteristic', 'skills']);
+
+        $characteristics = [];
+        foreach ($hero->characteristic as $char) {
+            $characteristics[$char->short_name] =
+                $char->pivot->start_value + $char->pivot->advancement;
+        }
+
+        $skills = $hero->skills->map(fn($skill) => [
+            'id'             => $skill->id,
+            'name'           => $skill->pivot->additional_skill_name ?? $skill->name,
+            'characteristic' => $skill->characteristic,
+            'value'          => $characteristics[$skill->characteristic] ?? null,
+            'hurdled'        => (bool) $skill->pivot->hurdled,
+        ])->sortBy('name')->values()->toArray();
+
+        return response()->json([
+            'id'              => $hero->id,
+            'name'            => $hero->name,
+            'characteristics' => $characteristics,
+            'skills'          => $skills,
+        ]);
+    }
+
+    // ── POST /session/heroes/{hero}/roll ──────────────────────────────────────
+    // MG rzuca test cechy / umiejętności za bohatera gracza
+    public function heroProxyRoll(Request $request, Hero $hero): JsonResponse
+    {
+        $request->validate([
+            'characteristic' => ['required', 'string', 'max:10'],
+            'label'          => ['nullable', 'string', 'max:80'],
+            'modifier'       => ['integer', 'min:-40', 'max:40'],
+            'half'           => ['boolean'],
+        ]);
+
+        $hero->load('characteristic');
+        $char = $hero->characteristic[$request->input('characteristic')] ?? null;
+
+        if (!$char) {
+            return response()->json(
+                ['error' => 'Brak cechy: ' . $request->input('characteristic')],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+
+        $rawValue  = $char->pivot->start_value + $char->pivot->advancement;
+        $modifier  = $request->integer('modifier', 0);
+        $half      = $request->boolean('half', false);
+        $label     = $request->input('label', $request->input('characteristic'));
+        $base      = $half ? intdiv($rawValue, 2) : $rawValue;
+        $effective = max(0, $base + $modifier);
+
+        $roll   = random_int(1, 100);
+        $passed = $roll <= $effective;
+
+        $text = json_encode([
+            'skill'                => $label,
+            'characteristic'       => $request->input('characteristic'),
+            'characteristic_value' => $rawValue,
+            'effective_value'      => $effective,
+            'modifier'             => $modifier,
+            'half'                 => $half,
+            'roll'                 => $roll,
+            'passed'               => $passed,
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+        // Wiadomość pod imieniem bohatera, user_id gracza lub MG jako fallback
+        $userId  = $hero->user?->id ?? $request->user()->id;
+        $message = $this->chatRepository->saveMessage($userId, $hero->name, $text, 'skill_test');
+        broadcast(new MessageSentEvent($message));
+
+        return response()->json(['message' => $message], Response::HTTP_CREATED);
     }
 
     // ── POST /session/tokens/{token}/roll ────────────────────────────────────

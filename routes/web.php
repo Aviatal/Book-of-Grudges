@@ -108,6 +108,10 @@ Route::middleware('auth')->group(function (){
             Route::delete('/{drawingId}', [DrawingsController::class, 'deleteDrawing'])->name('drawings.delete-drawing');
         });
         Route::get('/assets', [AssetsController::class, 'index'])->name('session.assets.index');
+        Route::group(['prefix' => 'heroes'], function () {
+            Route::get('/{hero}/proxy', [CombatController::class, 'heroProxySheet']);
+            Route::post('/{hero}/roll', [CombatController::class, 'heroProxyRoll']);
+        });
         Route::group(['prefix' => 'combat'], function () {
             Route::get('/', [CombatController::class, 'state']);
             Route::post('/start', [CombatController::class, 'start']);

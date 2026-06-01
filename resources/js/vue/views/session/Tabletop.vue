@@ -598,6 +598,12 @@
         @close="selectedNpcToken = null"
     />
 
+    <HeroProxyPopup
+        v-if="selectedHeroToken && hasDrawingPermission"
+        :token="selectedHeroToken"
+        @close="selectedHeroToken = null"
+    />
+
     <!-- Tracker walki -->
     <CombatTracker
         :map-token-ids="mapTokens.map(t => t.id)"
@@ -614,6 +620,7 @@ import {DrawingData, DrawingLayerId} from "@/types/DrawingData";
 import {Message} from "@/types/Message";
 import PingItem from '../../components/session/PingItem.vue';
 import NpcSheetPopup from '../../components/session/NpcSheetPopup.vue';
+import HeroProxyPopup from '../../components/session/HeroProxyPopup.vue';
 import CombatTracker from '../../components/session/CombatTracker.vue';
 import FloatingPanel from '../../components/session/FloatingPanel.vue';
 
@@ -728,22 +735,23 @@ const selectedShapeId = ref<number | null>(null);
 const selectedDrawingIds = ref<number[]>([]);
 const drawingSelectionBox = ref({ x: 0, y: 0, width: 0, height: 0, visible: false });
 const assets = ref<Asset[]>([]);
-// Domyślne pozycje paneli — przy krawędziach ekranu, obliczone raz przy starcie
+// Domyślne pozycje paneli — przy krawędziach, staggerowane pionowo (header ~36px)
 const W = window.innerWidth;
 const H = window.innerHeight;
 const panelDefaults = {
-    // Czat: prawy dolny róg
+    // Czat: prawy dolny róg, rozwinięty
     chat:     { pos: { x: W - 360, y: H - 450 }, size: { w: 350, h: 440 } },
-    // Schowek assetów: prawy górny róg (zwinięty domyślnie)
-    stash:    { pos: { x: W - 370, y: 10 },       size: { w: 360, h: 300 } },
-    // Schowek NPC: lewy górny róg
-    npcStash: { pos: { x: 10, y: 50 },            size: { w: 280, h: 420 } },
+    // Schowek assetów: prawy górny, poniżej walki (walka ~36px + 10px odstęp)
+    stash:    { pos: { x: W - 370, y: 56 },       size: { w: 360, h: 300 } },
+    // Schowek NPC: lewy górny, poniżej warstw (warstwy ~36px + 10px odstęp)
+    npcStash: { pos: { x: 10, y: 56 },            size: { w: 280, h: 420 } },
 };
 
 const isUploadingAsset = ref(false);
 const uploadAssetType = ref<Asset['type']>('image');
 const npcSearch = ref('');
-const selectedNpcToken = ref<Token | null>(null);
+const selectedNpcToken  = ref<Token | null>(null);
+const selectedHeroToken = ref<Token | null>(null);
 const loadedDrawingImages = ref<Record<number, HTMLImageElement>>({});
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
@@ -1728,8 +1736,13 @@ const handleStageMouseUp = async (e: any) => {
             }
             node = node.getParent?.();
         }
-        if (foundToken && foundToken.hero_id == null) {
-            selectedNpcToken.value = foundToken;
+        if (foundToken) {
+            if (foundToken.hero_id == null) {
+                selectedNpcToken.value = foundToken;
+            } else {
+                // Żeton bohatera gracza — MG może grać zastępczo
+                selectedHeroToken.value = foundToken;
+            }
         }
     }
     mouseDownPos.value = null;

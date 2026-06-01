@@ -32,8 +32,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 
-// Globalny licznik z-index współdzielony przez wszystkie instancje
-let zCounter = 1000;
+// Globalny licznik z-index — startujemy powyżej toolbara (10001)
+let zCounter = 10010;
 
 type ResizeDir = 'nw' | 'ne' | 'sw' | 'se';
 
