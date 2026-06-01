@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function (){
             Route::post('/start', [CombatController::class, 'start']);
             Route::post('/roll-npc', [CombatController::class, 'rollNpcInitiative']);
             Route::post('/roll-hero', [CombatController::class, 'rollHeroInitiative']);
+            Route::post('/roll-hero-proxy', [CombatController::class, 'rollHeroAsGm']);
             Route::patch('/turn', [CombatController::class, 'setTurn']);
             Route::delete('/', [CombatController::class, 'end']);
         });
@@ -126,6 +127,7 @@ Route::middleware('auth')->group(function (){
             Route::post('/roll-initiative', [ChatController::class, 'rollInitiative'])->name('messages.roll-initiative');
             Route::get('/skills', [ChatController::class, 'getSkillsForRoll'])->name('messages.skills');
             Route::post('/roll-skill', [ChatController::class, 'rollSkill'])->name('messages.roll-skill');
+            Route::post('/roll-characteristic', [ChatController::class, 'rollCharacteristic'])->name('messages.roll-characteristic');
         });
     });
 

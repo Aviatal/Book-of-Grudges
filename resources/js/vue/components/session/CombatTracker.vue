@@ -60,7 +60,12 @@
 
                     <!-- Nazwa + szczegóły rzutu -->
                     <div class="combat-info">
-                        <span class="combat-name">{{ p.name }}</span>
+                        <div class="combat-name-row">
+                            <span class="combat-name">{{ p.name }}</span>
+                            <span class="combat-type-badge" :class="p.is_npc ? 'badge-npc' : 'badge-hero'">
+                                {{ p.is_npc ? 'NPC' : 'G' }}
+                            </span>
+                        </div>
                         <span v-if="p.initiative !== null" class="combat-init-detail">
                             Zr{{ p.zr }}&nbsp;+&nbsp;[{{ p.roll }}]
                         </span>
@@ -68,28 +73,35 @@
 
                     <!-- Inicjatywa lub akcja rzutu -->
                     <div class="combat-right">
-                        <!-- Ma inicjatywę → pokaż wartość -->
                         <span v-if="p.initiative !== null" class="combat-init-value">
                             {{ p.initiative }}
                         </span>
                         <template v-else>
-                            <!-- NPC bez inicjatywy → MG może rzucić per token -->
+                            <!-- NPC: przycisk MG -->
                             <button
                                 v-if="p.is_npc && canDraw"
-                                class="combat-roll-btn"
+                                class="combat-roll-btn btn-npc"
                                 :disabled="isSubmitting"
                                 title="Rzuć inicjatywę NPC"
                                 @click="rollNpcToken(p.token_id)"
                             >🎲</button>
-                            <!-- Mój bohater → przycisk rzutu -->
+                            <!-- Bohater: gracz rzuca sam -->
                             <button
                                 v-else-if="!p.is_npc && p.hero_id === heroId"
-                                class="combat-roll-btn"
+                                class="combat-roll-btn btn-hero-self"
                                 :disabled="isSubmitting"
-                                title="Rzuć na inicjatywę"
+                                title="Rzuć swoją inicjatywę"
                                 @click="rollHeroInitiative"
                             >🎲 Rzuć</button>
-                            <!-- Inni czekają -->
+                            <!-- Bohater: MG rzuca zastępczo (inny kolor!) -->
+                            <button
+                                v-else-if="!p.is_npc && canDraw"
+                                class="combat-roll-btn btn-hero-proxy"
+                                :disabled="isSubmitting"
+                                title="Rzuć inicjatywę za gracza (zastępstwo)"
+                                @click="rollHeroAsGm(p.token_id)"
+                            >🎲 Zastęp.</button>
+                            <!-- Oczekiwanie na gracza -->
                             <span v-else class="combat-pending">⋯</span>
                         </template>
                     </div>
@@ -225,6 +237,19 @@ const rollNpcInitiative = async (): Promise<void> => {
         state.value = data;
     } catch (e) {
         console.error('Błąd rzutu na inicjatywę NPC', e);
+    } finally {
+        isSubmitting.value = false;
+    }
+};
+
+const rollHeroAsGm = async (tokenId: number): Promise<void> => {
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
+    try {
+        const { data } = await axios.post<CombatState>('/session/combat/roll-hero-proxy', { token_id: tokenId });
+        state.value = data;
+    } catch (e) {
+        console.error('Błąd rzutu inicjatywy za bohatera', e);
     } finally {
         isSubmitting.value = false;
     }
@@ -439,13 +464,20 @@ onUnmounted(() => {
 }
 .row-active .combat-avatar { border-color: #d4af37; }
 
-/* Informacje o uczestniiku */
+/* Informacje o uczestniku */
 .combat-info {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 1px;
+}
+
+.combat-name-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
 }
 
 .combat-name {
@@ -455,8 +487,22 @@ onUnmounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 .row-active .combat-name { color: #fae484; }
+
+/* Odznaki NPC / Gracz */
+.combat-type-badge {
+    flex-shrink: 0;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 1px 4px;
+    border-radius: 2px;
+    line-height: 1.4;
+}
+.badge-npc  { background: #3d1a10; color: #c47a5a; border: 1px solid #5e2a18; }
+.badge-hero { background: #0e2035; color: #7ab3d4; border: 1px solid #1a4060; }
 
 .combat-init-detail {
     font-size: 0.6rem;
@@ -482,18 +528,40 @@ onUnmounted(() => {
 .row-active .combat-init-value { color: #fae484; font-size: 1.15rem; }
 
 .combat-roll-btn {
-    background: #1c1208;
-    border: 1px solid #8b5a2b;
-    color: #d4af37;
-    font-size: 0.7rem;
-    padding: 3px 7px;
+    font-size: 0.68rem;
+    padding: 3px 6px;
     border-radius: 3px;
     cursor: pointer;
     font-family: inherit;
+    border: 1px solid;
     transition: background 0.12s;
+    white-space: nowrap;
 }
-.combat-roll-btn:hover:not(:disabled) { background: #2c1e0c; }
 .combat-roll-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* NPC — złoto/brąz */
+.btn-npc {
+    background: #1c1208;
+    border-color: #8b5a2b;
+    color: #d4af37;
+}
+.btn-npc:hover:not(:disabled) { background: #2c1e0c; }
+
+/* Gracz rzuca sam — zielony */
+.btn-hero-self {
+    background: #0d2010;
+    border-color: #2d6b3a;
+    color: #6dbf7d;
+}
+.btn-hero-self:hover:not(:disabled) { background: #142e1a; }
+
+/* MG zastępczo za gracza — niebieski, wyraźnie inny */
+.btn-hero-proxy {
+    background: #0e1e30;
+    border-color: #1a5080;
+    color: #7ab3d4;
+}
+.btn-hero-proxy:hover:not(:disabled) { background: #162a40; }
 
 .combat-pending {
     font-size: 1rem;

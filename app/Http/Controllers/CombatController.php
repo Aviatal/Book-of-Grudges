@@ -122,6 +122,52 @@ class CombatController extends Controller
         return response()->json($state);
     }
 
+    // ── POST /session/combat/roll-hero-proxy ─────────────────────────────────
+    // MG rzuca inicjatywę za bohatera gracza (zastępstwo)
+    public function rollHeroAsGm(Request $request): JsonResponse
+    {
+        $request->validate(['token_id' => ['required', 'integer']]);
+
+        $state = Cache::get(self::CACHE_KEY);
+        if (!$state || !($state['active'] ?? false)) {
+            return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
+        }
+
+        $tokenId = $request->integer('token_id');
+        $rolled  = false;
+        $rolledP = null;
+
+        foreach ($state['participants'] as &$p) {
+            if (!$p['is_npc'] && (int) $p['token_id'] === $tokenId && $p['initiative'] === null) {
+                $roll            = random_int(1, 10);
+                $p['roll']       = $roll;
+                $p['initiative'] = $p['zr'] + $roll;
+                $rolled          = true;
+                $rolledP         = $p;
+            }
+        }
+        unset($p);
+
+        if (!$rolled) {
+            return response()->json(
+                ['error' => 'Już rzucono lub brak uczestnika'],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+
+        $state['participants'] = $this->sortParticipants($state['participants']);
+        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state));
+
+        if ($rolledP) {
+            $text    = "🎲 Rzut na inicjatywę: Zr ({$rolledP['zr']}) + k10 [{$rolledP['roll']}] = {$rolledP['initiative']}";
+            $message = $this->chatRepository->saveMessage($request->user()->id, $rolledP['name'], $text, 'roll');
+            broadcast(new MessageSentEvent($message));
+        }
+
+        return response()->json($state);
+    }
+
     // ── POST /session/combat/roll-hero ───────────────────────────────────────
     public function rollHeroInitiative(Request $request): JsonResponse
     {

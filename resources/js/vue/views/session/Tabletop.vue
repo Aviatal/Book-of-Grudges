@@ -176,6 +176,23 @@
                         @click="skillHalf = !skillHalf"
                     >½ Połowa cechy</button>
                 </div>
+                <!-- Cechy — bezpośredni rzut -->
+                <div v-if="Object.keys(heroCharacteristics).length" class="char-roll-section">
+                    <div class="char-roll-label">Cechy</div>
+                    <div class="char-roll-grid">
+                        <button
+                            v-for="(val, key) in heroCharacteristics"
+                            :key="key"
+                            class="char-roll-btn"
+                            :disabled="isRollingSkill"
+                            @click="rollCharacteristic(String(key))"
+                        >
+                            <span class="char-roll-key">{{ key }}</span>
+                            <span class="char-roll-val">{{ val }}</span>
+                        </button>
+                    </div>
+                </div>
+
                 <input
                     v-model="skillSearch"
                     class="skill-picker-search"
@@ -784,8 +801,9 @@ const showSkillPicker = ref(false);
 const skillSearch = ref('');
 const skillModifier = ref(0);
 const skillHalf = ref(false);
-const skills = ref<SkillOption[]>([]);
-const isLoadingSkills = ref(false);
+const skills             = ref<SkillOption[]>([]);
+const heroCharacteristics = ref<Record<string, number>>({});
+const isLoadingSkills    = ref(false);
 const MODIFIERS = [-40, -30, -20, -10, 0, 10, 20, 30, 40];
 const messageContainer = ref<HTMLElement | null>(null);
 
@@ -1648,13 +1666,35 @@ const toggleSkillPicker = async () => {
     if (showSkillPicker.value && skills.value.length === 0) {
         isLoadingSkills.value = true;
         try {
-            const { data } = await axios.get<SkillOption[]>('/session/chat/skills');
-            skills.value = data;
+            const { data } = await axios.get<{ characteristics: Record<string, number>; skills: SkillOption[] }>('/session/chat/skills');
+            heroCharacteristics.value = data.characteristics ?? {};
+            skills.value = data.skills ?? [];
         } catch (e) {
             console.error('Błąd pobierania umiejętności', e);
         } finally {
             isLoadingSkills.value = false;
         }
+    }
+};
+
+const rollCharacteristic = async (characteristic: string) => {
+    if (isRollingSkill.value) return;
+    isRollingSkill.value  = true;
+    showSkillPicker.value = false;
+    playDiceSound();
+    try {
+        await axios.post('/session/chat/roll-characteristic', {
+            characteristic,
+            modifier: skillModifier.value,
+            half:     skillHalf.value,
+        });
+        scrollToBottom();
+    } catch (e) {
+        console.error('Błąd rzutu na cechę', e);
+    } finally {
+        skillModifier.value  = 0;
+        skillHalf.value      = false;
+        isRollingSkill.value = false;
     }
 };
 
@@ -2123,6 +2163,57 @@ button.active { background: #d4af37; color: black; }
 
 .half-btn:hover { border-color: #555; color: #ccc; }
 .half-active { border-color: #7b68ee !important; color: #9d91f0 !important; background: #0e0d1a !important; }
+
+/* ── Sekcja cech w pickerze ── */
+.char-roll-section {
+    padding: 6px 8px 2px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.char-roll-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8b5a2b;
+    margin-bottom: 5px;
+}
+
+.char-roll-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.char-roll-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1c1510;
+    border: 1px solid #3b3a36;
+    border-radius: 3px;
+    padding: 3px 6px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    min-width: 38px;
+}
+.char-roll-btn:hover:not(:disabled) { border-color: #d4af37; background: #2c1e0c; }
+.char-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.char-roll-key {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #8b5a2b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.char-roll-val {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #d4af37;
+    font-variant-numeric: tabular-nums;
+}
 
 .skill-picker-search {
     margin: 8px;

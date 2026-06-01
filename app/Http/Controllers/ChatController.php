@@ -63,6 +63,28 @@ class ChatController extends Controller
         }
     }
 
+    public function rollCharacteristic(Request $request): JsonResponse
+    {
+        $request->validate([
+            'characteristic' => ['required', 'string', 'max:10'],
+            'modifier'       => ['integer', 'min:-40', 'max:40'],
+            'half'           => ['boolean'],
+        ]);
+
+        try {
+            $message = $this->chatService->rollCharacteristic(
+                $request->user(),
+                $request->input('characteristic'),
+                $request->integer('modifier'),
+                $request->boolean('half'),
+            );
+            return response()->json(['message' => $message], Response::HTTP_CREATED);
+        } catch (\Throwable $exception) {
+            Log::error('Error during characteristic roll', ['exception' => $exception]);
+            return response()->json(['error' => 'Wystąpił błąd podczas rzutu na cechę'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function rollSkill(Request $request): JsonResponse
     {
         $request->validate([
