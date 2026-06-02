@@ -46,9 +46,26 @@
                     ></v-select>
                 </div>
 
+                <div v-if="!token.hero_id" class="copy-from-row">
+                    <label class="warhammer-label flex items-center gap-2">
+                        <i class="mdi mdi-content-copy"></i> Skopiuj z innego tokenu
+                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(opcjonalnie — nadpisze kartę poniżej)</span>
+                    </label>
+                    <v-select
+                        v-model="copyFromTokenId"
+                        :options="npcTokens"
+                        :reduce="(t: NpcTokenOption) => t.id"
+                        label="name"
+                        placeholder="Wybierz token do skopiowania danych..."
+                        class="custom-select w-full"
+                        @option:selected="applyCopyFrom"
+                    ></v-select>
+                </div>
+
                 <NpcSheetEditor
                     v-if="!token.hero_id"
                     v-model="npcSheet"
+                    :key="npcSheetKey"
                 />
             </div>
 
@@ -102,6 +119,8 @@ import {useToast} from "vue-toast-notification";
 import {Hero} from "@/types/Hero";
 import NpcSheetEditor from '@/components/panel/NpcSheetEditor.vue';
 
+interface NpcTokenOption { id: number; name: string; }
+
 const props = defineProps<{
     heroes: Hero[];
 }>();
@@ -114,6 +133,34 @@ const token = ref<Partial<Token>>({
     hero_id: null
 });
 const npcSheet = ref<NpcSheet | null>(null);
+const npcTokens = ref<NpcTokenOption[]>([]);
+const copyFromTokenId = ref<number | null>(null);
+const npcSheetKey = ref(0);
+
+const loadNpcTokens = async () => {
+    try {
+        const res = await axios.get('/panel/tokens/get-tokens');
+        npcTokens.value = (res.data as Token[])
+            .filter(t => !t.hero_id && t.sheet !== null)
+            .map(t => ({ id: t.id, name: t.name }));
+    } catch {}
+};
+
+const applyCopyFrom = async (option: NpcTokenOption) => {
+    try {
+        const res = await axios.get(`/panel/tokens/get-token/${option.id}`);
+        const sourceToken = res.data as Token;
+        if (sourceToken.sheet) {
+            npcSheet.value = JSON.parse(JSON.stringify(sourceToken.sheet));
+            npcSheetKey.value++;
+            toast.success(`Skopiowano dane z tokenu „${sourceToken.name}"`);
+        }
+    } catch {
+        toast.error('Nie udało się pobrać danych tokenu');
+    } finally {
+        copyFromTokenId.value = null;
+    }
+};
 
 const imagePreviewUrl = ref<string | null>(null);
 
@@ -189,6 +236,9 @@ const cancel = () => {
     window.history.back();
 };
 
+onMounted(() => {
+    loadNpcTokens();
+});
 </script>
 
 <style scoped>
@@ -284,6 +334,34 @@ const cancel = () => {
     border-color: #8b5a2b;
     background-color: #1b1b18;
 }
+
+.copy-from-row {
+    border-top: 1px solid #3b3a36;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.custom-select :deep(.vs__dropdown-toggle) {
+    background: #1b1b18;
+    border: 1px solid #8b5a2b;
+    border-radius: 2px;
+    padding: 0 6px;
+    min-height: 36px;
+}
+.custom-select :deep(.vs__search),
+.custom-select :deep(.vs__selected) { color: #e4d8b4; font-size: 0.85rem; margin: 0; padding: 2px 4px; }
+.custom-select :deep(.vs__search::placeholder) { color: #5e4128; }
+.custom-select :deep(.vs__open-indicator) { fill: #8b5a2b; }
+.custom-select :deep(.vs__clear) { fill: #8b5a2b; }
+.custom-select :deep(.vs__dropdown-menu) {
+    background: #2b2a27;
+    border: 1px solid #5e4128;
+    border-top: none;
+    color: #e4d8b4;
+    font-size: 0.85rem;
+}
+.custom-select :deep(.vs__dropdown-option) { padding: 6px 10px; color: #c4a47c; }
+.custom-select :deep(.vs__dropdown-option--highlight) { background: #5e4128; color: #e4d8b4; }
 
 /* Okrągły podgląd Tokena */
 .token-preview-circ {

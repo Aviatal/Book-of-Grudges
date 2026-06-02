@@ -45,9 +45,26 @@
                     ></v-select>
                 </div>
 
+                <div v-if="!token.hero_id" class="copy-from-row">
+                    <label class="warhammer-label flex items-center gap-2">
+                        <i class="mdi mdi-content-copy"></i> Skopiuj z innego tokenu
+                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(opcjonalnie — nadpisze kartę poniżej)</span>
+                    </label>
+                    <v-select
+                        v-model="copyFromTokenId"
+                        :options="npcTokens"
+                        :reduce="(t: NpcTokenOption) => t.id"
+                        label="name"
+                        placeholder="Wybierz token do skopiowania danych..."
+                        class="custom-select w-full"
+                        @option:selected="applyCopyFrom"
+                    ></v-select>
+                </div>
+
                 <NpcSheetEditor
                     v-if="!token.hero_id"
                     v-model="npcSheet"
+                    :key="npcSheetKey"
                 />
             </div>
 
@@ -101,6 +118,8 @@ import {useToast} from "vue-toast-notification";
 import {Hero} from "@/types/Hero";
 import NpcSheetEditor from '@/components/panel/NpcSheetEditor.vue';
 
+interface NpcTokenOption { id: number; name: string; }
+
 const props = defineProps<{
     tokenId: number;
     heroes: Hero[];
@@ -114,6 +133,34 @@ const token = ref<Partial<Token>>({
     hero_id: null
 });
 const npcSheet = ref<NpcSheet | null>(null);
+const npcTokens = ref<NpcTokenOption[]>([]);
+const copyFromTokenId = ref<number | null>(null);
+const npcSheetKey = ref(0);
+
+const loadNpcTokens = async () => {
+    try {
+        const res = await axios.get('/panel/tokens/get-tokens');
+        npcTokens.value = (res.data as Token[])
+            .filter(t => !t.hero_id && t.sheet !== null && t.id !== props.tokenId)
+            .map(t => ({ id: t.id, name: t.name }));
+    } catch {}
+};
+
+const applyCopyFrom = async (option: NpcTokenOption) => {
+    try {
+        const res = await axios.get(`/panel/tokens/get-token/${option.id}`);
+        const sourceToken = res.data as Token;
+        if (sourceToken.sheet) {
+            npcSheet.value = JSON.parse(JSON.stringify(sourceToken.sheet));
+            npcSheetKey.value++;
+            toast.success(`Skopiowano dane z tokenu „${sourceToken.name}"`);
+        }
+    } catch {
+        toast.error('Nie udało się pobrać danych tokenu');
+    } finally {
+        copyFromTokenId.value = null;
+    }
+};
 
 const imagePreviewUrl = ref<string | null>(null);
 
@@ -217,7 +264,7 @@ const cancel = () => {
 
 onMounted(() => {
     fetchTokenData();
-    console.log(props.heroes)
+    loadNpcTokens();
 });
 </script>
 
