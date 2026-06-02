@@ -7,7 +7,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Laravel\Facades\Image;
 use Storage;
-use function PHPUnit\Framework\fileExists;
 
 readonly class TokenService
 {
@@ -45,7 +44,7 @@ readonly class TokenService
     public function deleteToken(int $tokenId): bool
     {
         $token = $this->tokensRepository->getToken($tokenId);
-        if ($token->getAttribute('image') && fileExists("tokens/" . $token->getAttribute('image'))) {
+        if ($token->getAttribute('image') && File::exists("tokens/" . $token->getAttribute('image'))) {
             $this->deleteImage($token->getAttribute('image'));
         }
         return $this->tokensRepository->deleteToken($token);
@@ -105,7 +104,7 @@ readonly class TokenService
         $fileName = uniqid("$tokenId-", true) .  '.webp';
         File::ensureDirectoryExists(public_path('tokens'));
         Storage::disk('public')->put("tokens/$fileName", $encoded);
-        if (fileExists("tokens/$oldFileName")) {
+        if (File::exists("tokens/$oldFileName")) {
             $this->deleteImage($oldFileName);
         }
         return $fileName;
