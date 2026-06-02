@@ -131,6 +131,24 @@
                             </div>
                         </div>
                     </div>
+                    <div v-else-if="msg.type === 'dice_roll'" class="message-dice-card">
+                        <div class="dice-card-header">
+                            <span class="dice-card-icon">🎲</span>
+                            <span class="dice-card-notation">{{ parseDiceRoll(msg.text)?.notation }}</span>
+                            <span class="dice-card-time">{{ formatDate(msg.created_at) }}</span>
+                        </div>
+                        <div class="dice-card-author">{{ msg.author_name }}</div>
+                        <div class="dice-card-results">
+                            <span
+                                v-for="(r, i) in parseDiceRoll(msg.text)?.results ?? []"
+                                :key="i"
+                                class="dice-card-die"
+                            >{{ r }}</span>
+                        </div>
+                        <div v-if="(parseDiceRoll(msg.text)?.count ?? 0) > 1" class="dice-card-total">
+                            = {{ parseDiceRoll(msg.text)?.total }}
+                        </div>
+                    </div>
                     <div v-else class="message">
                         <span class="msg-author">[{{ msg.author_name }}]</span>
                         <span class="msg-content">{{ msg.text }}</span>
@@ -157,6 +175,33 @@
                 <button class="roll-btn" @click="toggleSkillPicker" :disabled="isRollingSkill" :class="{ active: showSkillPicker }">
                     🎯 Test umiejętności
                 </button>
+                <button class="roll-btn" @click="showDicePicker = !showDicePicker; if(showDicePicker) showSkillPicker = false" :disabled="isRollingDice" :class="{ active: showDicePicker }">
+                    🎲 Rzut kośćmi
+                </button>
+            </div>
+
+            <div v-if="showDicePicker" class="dice-picker">
+                <div class="dice-picker-count">
+                    <span class="dice-picker-label">Liczba kostek</span>
+                    <div class="dice-count-btns">
+                        <button
+                            v-for="n in [1,2,3,4,5]"
+                            :key="n"
+                            class="dice-count-btn"
+                            :class="{ active: diceCount === n }"
+                            @click="diceCount = n"
+                        >{{ n }}</button>
+                    </div>
+                </div>
+                <div class="dice-picker-dice">
+                    <button
+                        v-for="sides in [4,6,8,10,12,20,100]"
+                        :key="sides"
+                        class="dice-type-btn"
+                        :disabled="isRollingDice"
+                        @click="rollDice(sides)"
+                    >k{{ sides }}</button>
+                </div>
             </div>
 
             <div v-if="showSkillPicker" class="skill-picker">
@@ -799,6 +844,9 @@ const newMessage = ref('');
 const isRolling = ref(false);
 const isRollingSkill = ref(false);
 const showSkillPicker = ref(false);
+const showDicePicker = ref(false);
+const diceCount = ref(1);
+const isRollingDice = ref(false);
 const skillSearch = ref('');
 const skillModifier = ref(0);
 const skillHalf = ref(false);
@@ -1717,6 +1765,37 @@ const rollSkill = async (skillId: number) => {
         skillModifier.value = 0;
         skillHalf.value = false;
         isRollingSkill.value = false;
+    }
+};
+
+const rollDice = async (sides: number) => {
+    if (isRollingDice.value) return;
+    isRollingDice.value = true;
+    showDicePicker.value = false;
+    playDiceSound();
+    try {
+        await axios.post('/session/chat/roll-dice', { count: diceCount.value, sides });
+        scrollToBottom();
+    } catch (e) {
+        console.error('Błąd rzutu kośćmi', e);
+    } finally {
+        isRollingDice.value = false;
+    }
+};
+
+interface DiceRollPayload {
+    notation: string;
+    count: number;
+    sides: number;
+    results: number[];
+    total: number;
+}
+
+const parseDiceRoll = (text: string): DiceRollPayload | null => {
+    try {
+        return JSON.parse(text) as DiceRollPayload;
+    } catch {
+        return null;
     }
 };
 
@@ -2820,5 +2899,141 @@ button.active { background: #d4af37; color: black; }
 
 .npc-remove-btn:hover {
     color: #e74c3c;
+}
+
+/* ── Dice picker ── */
+.dice-picker {
+    background: #0d0d0d;
+    border-top: 1px solid #333;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dice-picker-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8b5a2b;
+}
+
+.dice-picker-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dice-count-btns {
+    display: flex;
+    gap: 3px;
+}
+
+.dice-count-btn {
+    min-width: 28px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    border: 1px solid #2a2a2a;
+    background: #141414;
+    color: #777;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.dice-count-btn:hover { border-color: #555; color: #ccc; }
+.dice-count-btn.active { border-color: #d4af37; background: #1a1500; color: #d4af37; }
+
+.dice-picker-dice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.dice-type-btn {
+    flex: 1;
+    min-width: 40px;
+    padding: 6px 4px;
+    border-radius: 4px;
+    border: 1px solid #3b3a36;
+    background: #1c1510;
+    color: #d4af37;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    text-align: center;
+}
+
+.dice-type-btn:hover:not(:disabled) { border-color: #d4af37; background: #2c1e0c; }
+.dice-type-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Karta wiadomości dice_roll ── */
+.message-dice-card {
+    background: linear-gradient(135deg, #0f0f1a 0%, #141428 100%);
+    border: 1px solid #2a2a5a;
+    border-radius: 6px;
+    margin: 6px 8px;
+    padding: 8px 10px;
+}
+
+.dice-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+}
+
+.dice-card-icon { font-size: 0.9rem; }
+
+.dice-card-notation {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7b68ee;
+    flex: 1;
+}
+
+.dice-card-time {
+    font-size: 0.65rem;
+    color: #555;
+}
+
+.dice-card-author {
+    font-size: 0.72rem;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.dice-card-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.dice-card-die {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    background: #1a1a3a;
+    border: 1px solid #4a4a8a;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #a0a0ff;
+    font-variant-numeric: tabular-nums;
+}
+
+.dice-card-total {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #d4af37;
+    text-align: right;
 }
 </style>

@@ -128,6 +128,7 @@ Route::middleware('auth')->group(function (){
             Route::get('/skills', [ChatController::class, 'getSkillsForRoll'])->name('messages.skills');
             Route::post('/roll-skill', [ChatController::class, 'rollSkill'])->name('messages.roll-skill');
             Route::post('/roll-characteristic', [ChatController::class, 'rollCharacteristic'])->name('messages.roll-characteristic');
+            Route::post('/roll-dice', [ChatController::class, 'rollDice'])->name('messages.roll-dice');
         });
     });
 

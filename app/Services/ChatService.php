@@ -20,7 +20,7 @@ class ChatService
 
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text);
 
-        broadcast(new MessageSentEvent($message));
+        $this->tryBroadcast($message);
 
         return $message;
     }
@@ -40,7 +40,7 @@ class ChatService
 
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'roll');
 
-        broadcast(new MessageSentEvent($message));
+        $this->tryBroadcast($message);
 
         return $message;
     }
@@ -119,7 +119,34 @@ class ChatService
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, 'skill_test');
-        broadcast(new MessageSentEvent($message));
+        $this->tryBroadcast($message);
+
+        return $message;
+    }
+
+    public function rollDice(User $user, int $count, int $sides): Message
+    {
+        $hero = $user->hero()->first();
+        $authorName = $hero?->name ?? $user->name;
+
+        $results = [];
+        for ($i = 0; $i < $count; $i++) {
+            $results[] = random_int(1, $sides);
+        }
+        $total = array_sum($results);
+
+        $notation = "{$count}k{$sides}";
+
+        $text = json_encode([
+            'notation' => $notation,
+            'count'    => $count,
+            'sides'    => $sides,
+            'results'  => $results,
+            'total'    => $total,
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'dice_roll');
+        $this->tryBroadcast($message);
 
         return $message;
     }
@@ -156,9 +183,17 @@ class ChatService
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'skill_test');
-
-        broadcast(new MessageSentEvent($message));
+        $this->tryBroadcast($message);
 
         return $message;
+    }
+
+    private function tryBroadcast(Message $message): void
+    {
+        try {
+            broadcast(new MessageSentEvent($message));
+        } catch (\Throwable) {
+            // wiadomość jest zapisana w bazie — brak WebSocket nie blokuje odpowiedzi
+        }
     }
 }

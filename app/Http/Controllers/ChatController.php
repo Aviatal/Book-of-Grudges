@@ -85,6 +85,26 @@ class ChatController extends Controller
         }
     }
 
+    public function rollDice(Request $request): JsonResponse
+    {
+        $request->validate([
+            'count' => ['required', 'integer', 'min:1', 'max:20'],
+            'sides' => ['required', 'integer', 'in:4,6,8,10,12,20,100'],
+        ]);
+
+        try {
+            $message = $this->chatService->rollDice(
+                $request->user(),
+                $request->integer('count'),
+                $request->integer('sides'),
+            );
+            return response()->json(['message' => $message], Response::HTTP_CREATED);
+        } catch (\Throwable $exception) {
+            Log::error('Error during dice roll', ['exception' => $exception]);
+            return response()->json(['error' => 'Wystąpił błąd podczas rzutu kośćmi'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function rollSkill(Request $request): JsonResponse
     {
         $request->validate([
