@@ -14,6 +14,13 @@
             <span v-if="state" class="combat-round-badge">Runda {{ state.round }}</span>
             <button
                 v-if="state && canDraw"
+                class="combat-header-board"
+                :class="{ active: boardOpen }"
+                title="Otwórz/zamknij planszę walki dla wszystkich"
+                @click="emit('toggle-board')"
+            >🗺</button>
+            <button
+                v-if="state && canDraw"
                 class="combat-header-end"
                 title="Zakończ walkę"
                 @click="endCombat"
@@ -164,13 +171,18 @@ interface CombatState {
     participants:  CombatParticipant[];
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// ── Props + Emits ─────────────────────────────────────────────────────────────
 
 const props = defineProps<{
     mapTokenIds:          number[];
     heroId:               number;
+    boardOpen:            boolean;
     // Blade przekazuje PHP true jako "1" — akceptujemy number i boolean
     hasDrawingPermission: boolean | number;
+}>();
+
+const emit = defineEmits<{
+    (e: 'toggle-board'): void;
 }>();
 
 // ── Stan reaktywny ───────────────────────────────────────────────────────────
@@ -311,6 +323,8 @@ onMounted(async () => {
         .listen('.combat', (e: { type: string; state: CombatState | null }) => {
             if (e.type === 'ended') {
                 state.value = null;
+            } else if (e.type === 'board-updated' || e.type === 'board-visibility') {
+                // Pozycje planszy / widoczność — nie wpływają na stan walki
             } else {
                 state.value = e.state;
             }
@@ -335,6 +349,20 @@ onUnmounted(() => {
     color: #d4af37;
     letter-spacing: 0.05em;
 }
+
+.combat-header-board {
+    background: none;
+    border: none;
+    color: #7a6a4a;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 3px;
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+}
+.combat-header-board:hover { color: #d4af37; }
+.combat-header-board.active { color: #d4af37; background: rgba(212,175,55,0.1); }
 
 .combat-header-end {
     background: none;

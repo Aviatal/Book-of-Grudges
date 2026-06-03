@@ -14,8 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CombatController extends Controller
 {
-    private const CACHE_KEY = 'combat_state';
-    private const CACHE_TTL = 3600; // 1 godzina
+    private const string CACHE_KEY              = 'combat_state';
+    private const string BOARD_CACHE_KEY        = 'combat_board_positions';
+    private const string BOARD_VISIBLE_CACHE_KEY = 'combat_board_visible';
+    private const int CACHE_TTL              = 3600; // 1 godzina
 
     public function __construct(private readonly ChatRepository $chatRepository) {}
 
@@ -248,12 +250,56 @@ class CombatController extends Controller
         return response()->json($state);
     }
 
+    // ── GET /session/combat/board-visible ───────────────────────────────────
+    public function boardVisible(): JsonResponse
+    {
+        return response()->json(['is_open' => (bool) Cache::get(self::BOARD_VISIBLE_CACHE_KEY, false)]);
+    }
+
+    // ── POST /session/combat/board-toggle ────────────────────────────────────
+    public function toggleBoard(Request $request): JsonResponse
+    {
+        $request->validate(['is_open' => ['required', 'boolean']]);
+
+        $isOpen = $request->boolean('is_open');
+        Cache::put(self::BOARD_VISIBLE_CACHE_KEY, $isOpen, self::CACHE_TTL);
+        broadcast(new CombatEvent('board-visibility', ['is_open' => $isOpen]));
+
+        return response()->json(['is_open' => $isOpen]);
+    }
+
+    // ── GET /session/combat/board ────────────────────────────────────────────
+    public function boardPositions(): JsonResponse
+    {
+        $positions = Cache::get(self::BOARD_CACHE_KEY, []);
+        return response()->json($positions);
+    }
+
+    // ── POST /session/combat/board ───────────────────────────────────────────
+    public function updateBoardPositions(Request $request): JsonResponse
+    {
+        $request->validate([
+            'positions'           => ['required', 'array'],
+            'positions.*.token_id' => ['required', 'integer'],
+            'positions.*.x'        => ['required', 'numeric'],
+            'positions.*.y'        => ['required', 'numeric'],
+        ]);
+
+        $positions = $request->input('positions');
+        Cache::put(self::BOARD_CACHE_KEY, $positions, self::CACHE_TTL);
+        broadcast(new CombatEvent('board-updated', ['positions' => $positions]));
+
+        return response()->json($positions);
+    }
+
     // ── DELETE /session/combat ───────────────────────────────────────────────
     public function end(): JsonResponse
     {
         // Nadpisujemy stan jako nieaktywny zamiast kasować klucz —
         // Cache::forget może zawodzić na Windows (blokady pliku).
         Cache::put(self::CACHE_KEY, ['active' => false], 60);
+        Cache::forget(self::BOARD_CACHE_KEY);
+        Cache::put(self::BOARD_VISIBLE_CACHE_KEY, false, 60);
         broadcast(new CombatEvent('ended', null));
 
         return response()->json(null, Response::HTTP_NO_CONTENT);

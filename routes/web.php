@@ -120,6 +120,10 @@ Route::middleware('auth')->group(function (){
             Route::post('/roll-hero-proxy', [CombatController::class, 'rollHeroAsGm']);
             Route::patch('/turn', [CombatController::class, 'setTurn']);
             Route::delete('/', [CombatController::class, 'end']);
+            Route::get('/board', [CombatController::class, 'boardPositions']);
+            Route::post('/board', [CombatController::class, 'updateBoardPositions']);
+            Route::get('/board-visible', [CombatController::class, 'boardVisible']);
+            Route::post('/board-toggle', [CombatController::class, 'toggleBoard']);
         });
         Route::group(['prefix' => 'chat'], function () {
             Route::get('/', [ChatController::class, 'getMessages'])->name('messages.get-messages');

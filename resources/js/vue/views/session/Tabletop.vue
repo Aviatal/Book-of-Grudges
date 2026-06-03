@@ -446,7 +446,14 @@
             </div>
         </FloatingPanel>
 
-        <div class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
+        <CombatBoard
+            v-if="showCombatBoard"
+            :can-draw="hasDrawingPermission"
+            :tokens="tokens"
+            :hero-id="heroId"
+        />
+
+        <div v-show="!showCombatBoard" class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
         <v-stage
             ref="stageRef"
             :config="stageConfig"
@@ -672,6 +679,8 @@
         :map-token-ids="mapTokens.map(t => t.id)"
         :hero-id="props.heroId"
         :has-drawing-permission="props.hasDrawingPermission"
+        :board-open="showCombatBoard"
+        @toggle-board="onToggleBoard"
     />
 </template>
 
@@ -685,6 +694,7 @@ import PingItem from '../../components/session/PingItem.vue';
 import NpcSheetPopup from '../../components/session/NpcSheetPopup.vue';
 import HeroProxyPopup from '../../components/session/HeroProxyPopup.vue';
 import CombatTracker from '../../components/session/CombatTracker.vue';
+import CombatBoard from '../../components/session/CombatBoard.vue';
 import FloatingPanel from '../../components/session/FloatingPanel.vue';
 
 const props = defineProps<{
@@ -788,6 +798,7 @@ const moveToken = (tokenId: number, x: number, y: number) => {
     }
 }
 
+const showCombatBoard = ref(false);
 const tokens = ref<Token[]>([]);
 const loadedImages = ref<Record<number, HTMLImageElement>>({});
 const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping' | 'fog'>('select');
@@ -1924,7 +1935,18 @@ const handleWindowMouseUp = (e: MouseEvent): void => {
     if (e.button === 1) isPanning.value = false;
 };
 
-onMounted(() => {
+const onToggleBoard = async (): Promise<void> => {
+    const next = !showCombatBoard.value;
+    try {
+        await axios.post('/session/combat/board-toggle', { is_open: next });
+    } catch (e) {
+        console.error('Błąd przełączania planszy', e);
+        // Fallback lokalny — przynajmniej MG widzi
+        showCombatBoard.value = next;
+    }
+};
+
+onMounted(async () => {
     fetchDrawings();
     fetchTokens();
     fetchMessages();
@@ -1932,6 +1954,21 @@ onMounted(() => {
     window.addEventListener('resize', updateSize);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('mouseup', handleWindowMouseUp);
+
+    // Pobierz stan widoczności planszy (np. po odświeżeniu strony)
+    try {
+        const { data } = await axios.get<{ is_open: boolean }>('/session/combat/board-visible');
+        showCombatBoard.value = data.is_open;
+    } catch { /* ignoruj — domyślnie false */ }
+
+    window.Echo.channel('combat')
+        .listen('.combat', (e: { type: string; state: { is_open?: boolean } | null }) => {
+            if (e.type === 'board-visibility') {
+                showCombatBoard.value = e.state?.is_open ?? false;
+            } else if (e.type === 'ended') {
+                showCombatBoard.value = false;
+            }
+        });
 });
 onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
@@ -1939,6 +1976,7 @@ onUnmounted(() => {
     window.removeEventListener('mouseup', handleWindowMouseUp);
     window.Echo.leaveChannel('token-move');
     window.Echo.leaveChannel('session-chat');
+    window.Echo.leaveChannel('combat');
 });
 </script>
 
