@@ -1534,6 +1534,11 @@ const handleStageMouseDown = (e: any) => {
         isPanning.value  = true;
         lastPanPos.value = { x: e.evt.clientX, y: e.evt.clientY };
         e.evt.preventDefault();
+        // Anuluj drag Konvy — bez tego kliknięcie środkowym na draggable node (np. kafelek mapy)
+        // uruchamia drag elementu zamiast pana sceny
+        if (e.target !== e.target.getStage()) {
+            e.target.stopDrag();
+        }
         return;
     }
     if (activeTool.value === 'eraser') {
