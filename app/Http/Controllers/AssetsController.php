@@ -26,7 +26,7 @@ class AssetsController extends Controller
 
         try {
             $file = $request->file('file');
-            $path = $file->store('assets', 'public');
+            $path = $file->store('assets', config('filesystems.media'));
 
             $asset = Asset::create([
                 'name'      => $request->input('name') ?? $file->getClientOriginalName(),
@@ -45,7 +45,7 @@ class AssetsController extends Controller
     {
         try {
             $asset = Asset::findOrFail($id);
-            Storage::disk('public')->delete($asset->file_path);
+            Storage::disk(config('filesystems.media'))->delete($asset->file_path);
             $asset->delete();
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Throwable $exception) {

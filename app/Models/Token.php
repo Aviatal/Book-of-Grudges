@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Token extends Model
 {
@@ -22,7 +23,10 @@ class Token extends Model
     {
         return Attribute::make(
             get: function () {
-                return asset('/tokens/' . $this->image);
+                if (!$this->image) {
+                    return null;
+                }
+                return Storage::disk(config('filesystems.media'))->url('tokens/' . $this->image);
             }
         );
     }

@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'media' => env('MEDIA_DISK', 'public'),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -41,7 +43,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => public_path(),
-            'url' => env('APP_URL').'/public',
+            'url' => env('APP_URL'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

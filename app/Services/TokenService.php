@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Repositories\TokensRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
-use Storage;
 
 readonly class TokenService
 {
@@ -44,7 +44,7 @@ readonly class TokenService
     public function deleteToken(int $tokenId): bool
     {
         $token = $this->tokensRepository->getToken($tokenId);
-        if ($token->getAttribute('image') && File::exists("tokens/" . $token->getAttribute('image'))) {
+        if ($token->getAttribute('image')) {
             $this->deleteImage($token->getAttribute('image'));
         }
         return $this->tokensRepository->deleteToken($token);
@@ -56,7 +56,7 @@ readonly class TokenService
         $newImage = null;
         if ($original->getAttribute('image')) {
             $newFilename = uniqid('dup-', true) . '.webp';
-            Storage::disk('public')->copy('tokens/' . $original->getAttribute('image'), 'tokens/' . $newFilename);
+            $this->mediaDisk()->copy('tokens/' . $original->getAttribute('image'), 'tokens/' . $newFilename);
             $newImage = $newFilename;
         }
 
@@ -96,21 +96,26 @@ readonly class TokenService
         return $baseName . ' ' . ($max + 1);
     }
 
+    private function mediaDisk(): \Illuminate\Contracts\Filesystem\Filesystem
+    {
+        return Storage::disk(config('filesystems.media'));
+    }
+
     private function storeTokenImage(UploadedFile $file, ?int $tokenId = null, string $oldFileName = ''): string
     {
         $image = Image::decode($file);
         $image->cover(128, 128);
         $encoded = $image->encodeUsingFileExtension('webp', quality: 80);
-        $fileName = uniqid("$tokenId-", true) .  '.webp';
-        File::ensureDirectoryExists(public_path('tokens'));
-        Storage::disk('public')->put("tokens/$fileName", $encoded);
-        if (File::exists("tokens/$oldFileName")) {
+        $fileName = uniqid("$tokenId-", true) . '.webp';
+        $this->mediaDisk()->put("tokens/$fileName", $encoded);
+        if ($oldFileName) {
             $this->deleteImage($oldFileName);
         }
         return $fileName;
     }
+
     private function deleteImage(string $filename): void
     {
-        Storage::disk('public')->delete("tokens/$filename");
+        $this->mediaDisk()->delete("tokens/$filename");
     }
 }
