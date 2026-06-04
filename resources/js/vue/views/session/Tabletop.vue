@@ -63,7 +63,7 @@
         >
             <template #header-actions>
                 <a
-                    :href="`/karta-postaci/${heroId}`"
+                    :href="`/karta-postaci/${userId}`"
                     target="_blank"
                     rel="noopener"
                     class="hero-sheet-link"
@@ -698,6 +698,7 @@ import CombatBoard from '../../components/session/CombatBoard.vue';
 import FloatingPanel from '../../components/session/FloatingPanel.vue';
 
 const props = defineProps<{
+    userId: number,
     heroId: number,
     hasDrawingPermission: boolean
 }>();
