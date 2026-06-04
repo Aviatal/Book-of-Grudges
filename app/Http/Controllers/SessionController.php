@@ -7,6 +7,7 @@ use App\Events\Session\MoveTokenEvent;
 use App\Events\Session\PingPlayersEvent;
 use App\Events\Session\TokenPlaceEvent;
 use App\Events\Session\TokenRemoveFromMapEvent;
+use App\Events\Session\TokenScaleEvent;
 use App\Services\TokenService;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Support\Facades\Log;
@@ -68,6 +69,19 @@ class SessionController extends Controller
             Log::warning('Token removed from map but broadcast failed', ['exception' => $e]);
         }
         return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    public function scaleToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
+    {
+        $scale = (float) $request->input('scale', 1.0);
+        $scale = max(0.1, min(10.0, $scale));
+        $tokensRepository->scaleToken($token->id, $scale);
+        try {
+            broadcast(new TokenScaleEvent($token->id, $scale))->toOthers();
+        } catch (BroadcastException $e) {
+            Log::warning('Token scaled but broadcast failed', ['exception' => $e]);
+        }
+        return response()->json(['id' => $token->id, 'scale' => $scale]);
     }
 
     public function duplicateToken(Token $token, TokenService $tokenService): \Illuminate\Http\JsonResponse

@@ -58,4 +58,9 @@ class TokensRepository
     {
         return Token::query()->where('id', $tokenId)->update(['on_map' => false]);
     }
+
+    public function scaleToken(int $tokenId, float $scale): int
+    {
+        return Token::query()->where('id', $tokenId)->update(['scale' => $scale]);
+    }
 }

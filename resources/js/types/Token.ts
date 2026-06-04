@@ -27,6 +27,7 @@ export interface Token {
     name: string,
     x: number,
     y: number,
+    scale: number,
     color: string,
     image: string | null | Blob | File,
     image_url: string,

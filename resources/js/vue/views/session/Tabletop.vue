@@ -571,8 +571,11 @@
                         id: String(token.id),
                         x: token.x,
                         y: token.y,
+                        scaleX: token.scale ?? 1,
+                        scaleY: token.scale ?? 1,
                         draggable: hasDrawingPermission && !tokenLayerLocked && activeLayerId === 'tokens'
                     }"
+                    @transformend="(e: any) => handleTokenTransformEnd(e, token)"
                 >
                     <v-circle v-if="selectedIds.includes(token.id)" :config="{
                         radius: 55,
@@ -631,10 +634,7 @@
             <v-layer>
                 <v-transformer
                     ref="transformerNode"
-                    :config="{
-                        visible: activeTool === 'select-draw' && selectedDrawingIds.length === 1 && hasDrawingPermission,
-                        enabledAnchors: ['top-center','top-left','middle-left','bottom-left','bottom-center','bottom-right','middle-right','top-right']
-                    }"
+                    :config="transformerConfig"
                 />
                 <!-- Selection box dla rysunków -->
                 <v-rect v-if="drawingSelectionBox.visible" :config="{
@@ -752,6 +752,10 @@ interface MapLayer {
     .listen('.token-removed-from-map', (e: { id: number }) => {
         const token = tokens.value.find(t => t.id === e.id);
         if (token) { token.on_map = false; }
+    })
+    .listen('.scale', (e: { id: number; scale: number }) => {
+        const token = tokens.value.find(t => t.id === e.id);
+        if (token) { token.scale = e.scale; }
     });
 window.Echo.channel('drawings')
     .listen('.drawing-update', (e: DrawingEditEvent) => {
@@ -912,6 +916,15 @@ const colors = [
 
 const transformerNode = ref();
 const stageRef = ref();
+const selectedTokenIds = ref<number[]>([]);
+
+const transformerConfig = computed(() => ({
+    visible: props.hasDrawingPermission &&
+             activeTool.value === 'select-draw' &&
+             (selectedDrawingIds.value.length === 1 || selectedTokenIds.value.length > 0),
+    keepRatio: selectedTokenIds.value.length > 0,
+    enabledAnchors: ['top-center', 'top-left', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right', 'middle-right', 'top-right'],
+}));
 const mapLayers = ref<MapLayer[]>([
     { id: 'map', name: '🗺 Mapa', color: '#2e7d32', visible: true, locked: false },
     { id: 'gm', name: '👁 Warstwa MG', color: '#8e24aa', visible: true, locked: false },
@@ -1182,6 +1195,7 @@ const moveSelectedDrawingToLayer = async (targetLayerId: DrawingLayerId): Promis
 const clearDrawingSelection = (): void => {
     selectedDrawingIds.value = [];
     selectedShapeId.value = null;
+    selectedTokenIds.value = [];
     if (transformerNode.value) {
         transformerNode.value.getNode().nodes([]);
     }
@@ -1337,6 +1351,22 @@ const handleTransformEnd = async (e: any, draw: any) => {
     };
 
     await axios.patch(`/session/drawings/${node.id()}`, updatedData);
+};
+
+const handleTokenTransformEnd = async (e: any, token: Token): Promise<void> => {
+    // Konva odpala transformend osobno dla każdego node'a dołączonego do transformera
+    const node = e.target;
+    token.x = node.x();
+    token.y = node.y();
+    token.scale = node.scaleX(); // keepRatio: true, więc scaleX === scaleY
+    try {
+        await Promise.all([
+            axios.patch(`/session/tokens/${token.id}/scale`, { scale: token.scale }),
+            axios.patch(`/session/tokens/${token.id}/move`, { x: Math.round(token.x), y: Math.round(token.y) }),
+        ]);
+    } catch (err) {
+        console.error('Błąd zapisu transformacji tokenu', err);
+    }
 };
 
 const stageScale = ref(1);
@@ -1545,10 +1575,12 @@ const handleStageMouseDown = (e: any) => {
         return;
     }
     if (activeTool.value === 'select-draw') {
-        // Klik w puste miejsce — zacznij box-select i wyczyść selekcję
+        // Klik w puste miejsce — wyczyść selekcję; box-select tylko dla warstw rysunków
         if (e.target === e.target.getStage()) {
             clearDrawingSelection();
-            handleDrawingSelectionStart(e);
+            if (activeLayerId.value !== 'tokens') {
+                handleDrawingSelectionStart(e);
+            }
         }
         return;
     }
@@ -1642,7 +1674,9 @@ const handleStageMouseMove = (e: any) => {
         return;
     }
     if (activeTool.value === 'select-draw') {
-        handleDrawingSelectionMove(e);
+        if (activeLayerId.value !== 'tokens') {
+            handleDrawingSelectionMove(e);
+        }
         return;
     }
     if (!isDrawing.value || activeTool.value === 'select') {
@@ -1873,7 +1907,31 @@ const handleStageMouseUp = async (e: any) => {
             node = node.getParent?.();
         }
         if (foundToken) {
-            if (props.hasDrawingPermission) {
+            // W trybie edycji + warstwa tokenów: zaznacz token do transformera zamiast otwierać kartę
+            if (activeTool.value === 'select-draw' && activeLayerId.value === 'tokens' && props.hasDrawingPermission) {
+                const stage = stageRef.value?.getNode();
+                const groupNode = stage?.findOne(`#${foundToken.id}`);
+                if (groupNode && transformerNode.value) {
+                    // Shift+klik — toggle w multi-selekcji
+                    if (e?.evt?.shiftKey) {
+                        const idx = selectedTokenIds.value.indexOf(foundToken.id);
+                        if (idx >= 0) {
+                            selectedTokenIds.value.splice(idx, 1);
+                        } else {
+                            selectedTokenIds.value.push(foundToken.id);
+                        }
+                    } else {
+                        selectedTokenIds.value = [foundToken.id];
+                    }
+                    selectedDrawingIds.value = [];
+                    selectedShapeId.value = null;
+                    const groupNodes = selectedTokenIds.value
+                        .map(id => stage?.findOne(`#${id}`))
+                        .filter(Boolean);
+                    transformerNode.value.getNode().nodes(groupNodes);
+                    transformerNode.value.getNode().getLayer().batchDraw();
+                }
+            } else if (props.hasDrawingPermission) {
                 // MG: widzi kartę każdego tokenu
                 if (foundToken.hero_id == null) {
                     selectedNpcToken.value = foundToken;
@@ -1890,7 +1948,9 @@ const handleStageMouseUp = async (e: any) => {
     mouseDownTarget.value = null;
 
     if (activeTool.value === 'select-draw') {
-        handleDrawingSelectionEnd();
+        if (activeLayerId.value !== 'tokens') {
+            handleDrawingSelectionEnd();
+        }
         return;
     }
     if (isDrawing.value) {

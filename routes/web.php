@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function (){
             Route::patch('/{token}/place', [SessionController::class, 'placeToken'])->name('tokens.place');
             Route::patch('/{token}/remove-from-map', [SessionController::class, 'removeTokenFromMap'])->name('tokens.remove-from-map');
             Route::post('/{token}/duplicate', [SessionController::class, 'duplicateToken'])->name('tokens.duplicate');
+            Route::patch('/{token}/scale', [SessionController::class, 'scaleToken'])->name('tokens.scale');
             Route::post('/{token}/roll', [CombatController::class, 'rollNpcTest'])->name('tokens.roll-npc-test');
         });
         Route::group(['prefix' => 'drawings'], function () {
