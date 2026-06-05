@@ -111,6 +111,27 @@
                 />
             </div>
 
+            <!-- Zdolności -->
+            <div v-if="activeTab === 'talents'" class="tab-content">
+                <div v-if="sheet.talents.length" class="chips-list">
+                    <div v-for="(t, i) in sheet.talents" :key="i" class="item-chip">
+                        <span class="chip-name">{{ talentName(t.talent_id) }}</span>
+                        <button type="button" class="chip-remove" @click="removeTalent(i)">✕</button>
+                    </div>
+                </div>
+                <p v-else class="empty-hint">Brak zdolności — dodaj poniżej.</p>
+                <v-select
+                    :options="availableTalents"
+                    :reduce="(t: TalentOption) => t.id"
+                    label="name"
+                    placeholder="Dodaj zdolność z bazy..."
+                    :model-value="null"
+                    @option:selected="(t: TalentOption) => addTalent(t.id)"
+                    class="custom-select add-select"
+                    :loading="loadingTalents"
+                />
+            </div>
+
             <!-- Notatki -->
             <div v-if="activeTab === 'notes'" class="tab-content">
                 <textarea
@@ -132,18 +153,20 @@ import { NpcSheet } from '@/types/Token';
 interface WeaponOption { id: number; name: string; }
 interface ArmorOption  { id: number; name: string; category: string; }
 interface SkillOption  { id: number; name: string; }
+interface TalentOption { id: number; name: string; }
 
 const props = defineProps<{ modelValue: NpcSheet | null }>();
 const emit = defineEmits<{ (e: 'update:modelValue', value: NpcSheet): void }>();
 
 const open      = ref(false);
-const activeTab = ref<'characteristics' | 'weapons' | 'armor' | 'skills' | 'notes'>('characteristics');
+const activeTab = ref<'characteristics' | 'weapons' | 'armor' | 'skills' | 'talents' | 'notes'>('characteristics');
 
 const tabs = [
     { key: 'characteristics', label: 'Cechy' },
     { key: 'weapons',         label: 'Broń' },
     { key: 'armor',           label: 'Pancerz' },
     { key: 'skills',          label: 'Umiejętności' },
+    { key: 'talents',         label: 'Zdolności' },
     { key: 'notes',           label: 'Notatki' },
 ] as const;
 
@@ -153,9 +176,11 @@ const characteristicKeys = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd', 'A
 const allWeapons = ref<WeaponOption[]>([]);
 const allArmors  = ref<ArmorOption[]>([]);
 const allSkills  = ref<SkillOption[]>([]);
+const allTalents = ref<TalentOption[]>([]);
 const loadingWeapons = ref(false);
 const loadingArmors  = ref(false);
 const loadingSkills  = ref(false);
+const loadingTalents = ref(false);
 
 // Filter already-added items out of selects
 const availableWeapons = computed(() =>
@@ -167,14 +192,18 @@ const availableArmors = computed(() =>
 const availableSkills = computed(() =>
     allSkills.value.filter(s => !sheet.skills.some(ss => ss.skill_id === s.id))
 );
+const availableTalents = computed(() =>
+    allTalents.value.filter(t => !sheet.talents.some(st => st.talent_id === t.id))
+);
 
 // Resolve name / label by ID for chip display
-const weaponName = (id: number) => allWeapons.value.find(w => w.id === id)?.name ?? `Broń #${id}`;
-const armorLabel = (id: number) => {
+const weaponName  = (id: number) => allWeapons.value.find(w => w.id === id)?.name ?? `Broń #${id}`;
+const armorLabel  = (id: number) => {
     const a = allArmors.value.find(a => a.id === id);
     return a ? `${a.category} - ${a.name}` : `Pancerz #${id}`;
 };
-const skillName  = (id: number) => allSkills.value.find(s => s.id === id)?.name ?? `Umiejętność #${id}`;
+const skillName   = (id: number) => allSkills.value.find(s => s.id === id)?.name ?? `Umiejętność #${id}`;
+const talentName  = (id: number) => allTalents.value.find(t => t.id === id)?.name ?? `Zdolność #${id}`;
 
 // ---- Sheet state ----
 const makeEmptySheet = (): NpcSheet => ({
@@ -182,6 +211,7 @@ const makeEmptySheet = (): NpcSheet => ({
     weapons: [],
     armor: [],
     skills: [],
+    talents: [],
     notes: '',
 });
 
@@ -189,6 +219,7 @@ const sheet = reactive<NpcSheet>(
     props.modelValue ? JSON.parse(JSON.stringify(props.modelValue)) : makeEmptySheet()
 );
 characteristicKeys.forEach(k => { if (!(k in sheet.characteristics)) sheet.characteristics[k] = null; });
+if (!sheet.talents) (sheet as any).talents = [];
 
 watch(sheet, val => emit('update:modelValue', JSON.parse(JSON.stringify(val))), { deep: true });
 
@@ -218,7 +249,15 @@ const loadSkills = async () => {
     } catch {} finally { loadingSkills.value = false; }
 };
 
-onMounted(() => { loadWeapons(); loadArmors(); loadSkills(); });
+const loadTalents = async () => {
+    loadingTalents.value = true;
+    try {
+        const res = await axios.get('/zdolnosci/get-talents');
+        allTalents.value = (res.data as any[]).map(t => ({ id: t.id, name: t.name }));
+    } catch {} finally { loadingTalents.value = false; }
+};
+
+onMounted(() => { loadWeapons(); loadArmors(); loadSkills(); loadTalents(); });
 
 // ---- CRUD ----
 const setChar = (key: string, raw: string) => {
@@ -234,6 +273,9 @@ const removeArmor = (i: number) => sheet.armor.splice(i, 1);
 
 const addSkill = (id: number) => { if (!sheet.skills.some(s => s.skill_id === id)) sheet.skills.push({ skill_id: id }); };
 const removeSkill = (i: number) => sheet.skills.splice(i, 1);
+
+const addTalent = (id: number) => { if (!sheet.talents.some(t => t.talent_id === id)) sheet.talents.push({ talent_id: id }); };
+const removeTalent = (i: number) => sheet.talents.splice(i, 1);
 </script>
 
 <style scoped>

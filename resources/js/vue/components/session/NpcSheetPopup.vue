@@ -110,6 +110,26 @@
                     </div>
                 </section>
 
+                <!-- Talents -->
+                <section v-if="resolvedTalents.length" class="popup-section">
+                    <h4 class="section-title">Zdolności</h4>
+                    <div class="talents-list">
+                        <div
+                            v-for="(t, i) in resolvedTalents"
+                            :key="i"
+                            class="talent-item"
+                            :class="{ expanded: expandedTalents.has(i), 'no-desc': !t.description }"
+                            @click="t.description && toggleTalent(i)"
+                        >
+                            <div class="talent-header">
+                                <span class="talent-name">{{ t.name }}</span>
+                                <i v-if="t.description" class="mdi talent-chevron" :class="expandedTalents.has(i) ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
+                            </div>
+                            <div v-if="t.description && expandedTalents.has(i)" class="talent-desc">{{ t.description }}</div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Notes -->
                 <section v-if="sheet.notes" class="popup-section">
                     <h4 class="section-title">Notatki</h4>
@@ -146,13 +166,19 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
-import { Token, NpcSheet } from '@/types/Token';
+import { Token, NpcSheet, NpcTalent } from '@/types/Token';
 
 const props = defineProps<{ token: Token; canRoll?: boolean }>();
 defineEmits<{ (e: 'close'): void }>();
 
-const sheet     = computed<NpcSheet | null>(() => props.token.sheet ?? null);
-const loading   = ref(true);
+const sheet          = computed<NpcSheet | null>(() => props.token.sheet ?? null);
+const loading        = ref(true);
+const expandedTalents = ref<Set<number>>(new Set());
+
+const toggleTalent = (i: number) => {
+    if (expandedTalents.value.has(i)) expandedTalents.value.delete(i);
+    else expandedTalents.value.add(i);
+};
 const modifier  = ref(0);
 const half      = ref(false);
 const isRolling = ref(false);
@@ -184,10 +210,12 @@ const charKeys = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd', 'A', 'Żyw',
 interface DbWeapon { id: number; name: string; power: number; add_hero_power: boolean; traits: Record<string, { name: string }> | { name: string }[] }
 interface DbArmor  { id: number; name: string; category: string; armor_points: number | null; locations: { name: string }[] }
 interface DbSkill  { id: number; name: string; characteristic: string }
+interface DbTalent { id: number; name: string; description: string }
 
 const dbWeapons = ref<DbWeapon[]>([]);
 const dbArmors  = ref<DbArmor[]>([]);
 const dbSkills  = ref<DbSkill[]>([]);
+const dbTalents = ref<DbTalent[]>([]);
 
 const sb = computed<number>(() => {
     const k = sheet.value?.characteristics?.['K'];
@@ -235,13 +263,21 @@ const resolvedSkills = computed(() =>
     })
 );
 
+const resolvedTalents = computed(() =>
+    (sheet.value?.talents ?? []).map(t => {
+        const db = dbTalents.value.find(d => d.id === t.talent_id);
+        return { name: db?.name ?? `Zdolność #${t.talent_id}`, description: db?.description ?? '' };
+    })
+);
+
 // ---- Load ----
 onMounted(async () => {
     try {
-        const [wRes, aRes, sRes] = await Promise.all([
+        const [wRes, aRes, sRes, tRes] = await Promise.all([
             axios.get('/bronie/get-weapons'),
             axios.get('/opancerzenie/get-armors'),
             axios.get('/umiejetnosci/get-skills'),
+            axios.get('/zdolnosci/get-talents'),
         ]);
 
         dbWeapons.value = [
@@ -256,6 +292,7 @@ onMounted(async () => {
         ] as DbArmor[];
 
         dbSkills.value = sRes.data as DbSkill[];
+        dbTalents.value = tRes.data as DbTalent[];
     } finally {
         loading.value = false;
     }
@@ -415,6 +452,38 @@ onMounted(async () => {
 .skill-name { font-size: 0.8rem; color: #c4a47c; }
 .skill-char { font-size: 0.68rem; color: #8b5a2b; font-weight: bold; }
 .skill-value { font-size: 0.82rem; font-weight: bold; color: #d4af37; }
+
+/* Talents */
+.talents-list { display: flex; flex-direction: column; gap: 0.3rem; }
+.talent-item {
+    background: #2b2a27;
+    border: 1px solid #5e4128;
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+.talent-item.no-desc { cursor: default; }
+.talent-item:not(.no-desc):hover { border-color: #8b5a2b; }
+.talent-item.expanded { border-color: #8b5a2b; }
+.talent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.6rem;
+    gap: 0.5rem;
+}
+.talent-name { font-size: 0.85rem; font-weight: bold; color: #c4a47c; }
+.talent-chevron { font-size: 0.9rem; color: #5e4128; flex-shrink: 0; }
+.talent-item.expanded .talent-chevron { color: #8b5a2b; }
+.talent-desc {
+    font-size: 0.78rem;
+    color: #a09070;
+    line-height: 1.5;
+    padding: 0 0.6rem 0.5rem;
+    border-top: 1px solid #3b3a36;
+    padding-top: 0.4rem;
+}
 
 /* Notes */
 .notes-text { font-size: 0.85rem; color: #c4a47c; white-space: pre-wrap; line-height: 1.5; }

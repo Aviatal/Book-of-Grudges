@@ -14,11 +14,16 @@ export interface NpcSkill {
     // wartość = sheet.characteristics[skill.characteristic] — brak osobnego pola
 }
 
+export interface NpcTalent {
+    talent_id: number;
+}
+
 export interface NpcSheet {
     characteristics: Record<string, number | null>;
     weapons: NpcWeapon[];
     armor: NpcArmorPiece[];
     skills: NpcSkill[];
+    talents: NpcTalent[];
     notes: string;
 }
 
