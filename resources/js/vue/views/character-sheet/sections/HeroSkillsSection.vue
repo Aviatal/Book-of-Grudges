@@ -54,7 +54,7 @@
                                     <input type="checkbox" checked @change="updateSkill(item ,'hurdled', 0, true)">
                                 </template>
                                 <template v-slot:item.test="{ item }">
-                                    {{ characteristic[item.characteristic].pivot.current_value }}
+                                    {{ characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement }}
                                 </template>
                                 <template v-slot:item.additional_skill_name="{ item }">
                                     <v-text-field
@@ -110,7 +110,7 @@
                                 no-data-text="Jesteś wcieleniem Sigmara! Posiadasz wszystkie umiejętności!"
                             >
                                 <template v-slot:item.test="{ item }">
-                                    {{ Math.floor(characteristic[item.characteristic].pivot.current_value / 2) }}
+                                    {{ Math.floor((characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement) / 2) }}
                                 </template>
                                 <template v-slot:item.add="{ item }">
                                     <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="simple-button">
