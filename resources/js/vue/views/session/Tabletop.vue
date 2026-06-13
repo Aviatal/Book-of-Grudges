@@ -1559,8 +1559,9 @@ const handleStageMouseDown = (e: any) => {
     mouseDownPos.value = { x: e.evt.clientX, y: e.evt.clientY };
     mouseDownTarget.value = e.target;
 
-    // Środkowy przycisk myszy → pan
+    // Środkowy przycisk myszy → pan (tylko MG)
     if (e.evt.button === 1) {
+        if (!hasDrawingPermission) return;
         isPanning.value  = true;
         lastPanPos.value = { x: e.evt.clientX, y: e.evt.clientY };
         e.evt.preventDefault();

@@ -28,6 +28,7 @@ class SessionController extends Controller
 
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         $tokensRepository->moveToken($token->getAttribute('id'), $request->input('x'), $request->input('y'));
         broadcast(new MoveTokenEvent($token->getAttribute('id'), $token->getAttribute('x'), $token->getAttribute('y')))->toOthers();
         return response()->json($token);
@@ -35,6 +36,7 @@ class SessionController extends Controller
 
     public function bulkMove(Request $request, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         $tokensRepository->moveMultipleToken($request->input('tokens'));
         broadcast(new MoveBatchTokenEvent($request->input('tokens')))->toOthers();
         return response()->json('OK', Response::HTTP_OK);
@@ -48,6 +50,7 @@ class SessionController extends Controller
 
     public function placeToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         $request->validate(['x' => 'required|numeric', 'y' => 'required|numeric']);
         $x = (int) $request->input('x');
         $y = (int) $request->input('y');
@@ -62,6 +65,7 @@ class SessionController extends Controller
 
     public function removeTokenFromMap(Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         $tokensRepository->removeTokenFromMap($token->id);
         try {
             broadcast(new TokenRemoveFromMapEvent($token->id))->toOthers();
@@ -73,6 +77,7 @@ class SessionController extends Controller
 
     public function scaleToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         $scale = (float) $request->input('scale', 1.0);
         $scale = max(0.1, min(10.0, $scale));
         $tokensRepository->scaleToken($token->id, $scale);
@@ -86,6 +91,7 @@ class SessionController extends Controller
 
     public function duplicateToken(Token $token, TokenService $tokenService): \Illuminate\Http\JsonResponse
     {
+        abort_unless(auth()->user()?->is_admin, 403);
         try {
             $newToken = $tokenService->duplicateToken($token->id);
             return response()->json($newToken->append('image_url'));
