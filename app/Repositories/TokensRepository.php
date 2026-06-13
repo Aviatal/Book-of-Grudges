@@ -40,7 +40,7 @@ class TokensRepository
         return $token->delete();
     }
 
-    public function moveToken(int $tokenId, int $x, int $y): int
+    public function moveToken(int $tokenId, float $x, float $y): int
     {
         return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y]);
     }
@@ -49,7 +49,7 @@ class TokensRepository
         return Token::query()->upsert($tokens, 'id', ['x', 'y']);
     }
 
-    public function placeToken(int $tokenId, int $x, int $y): int
+    public function placeToken(int $tokenId, float $x, float $y): int
     {
         return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y, 'on_map' => true]);
     }
