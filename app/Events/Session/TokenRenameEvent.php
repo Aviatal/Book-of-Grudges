@@ -2,7 +2,7 @@
 
 namespace App\Events\Session;
 
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -20,7 +20,7 @@ class TokenRenameEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('token-move'),
+            new PrivateChannel('token-move'),
         ];
     }
 

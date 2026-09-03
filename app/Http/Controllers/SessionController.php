@@ -29,22 +29,69 @@ class SessionController extends Controller
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
         abort_unless(auth()->user()?->is_admin, 403);
-        $tokensRepository->moveToken($token->getAttribute('id'), $request->input('x'), $request->input('y'));
-        broadcast(new MoveTokenEvent($token->getAttribute('id'), $token->getAttribute('x'), $token->getAttribute('y')))->toOthers();
-        return response()->json($token);
+
+        $data = $request->validate([
+            'x' => ['required', 'numeric'],
+            'y' => ['required', 'numeric'],
+        ]);
+
+        $x = (float) $data['x'];
+        $y = (float) $data['y'];
+
+        $tokensRepository->moveToken($token->getAttribute('id'), $x, $y);
+
+        try {
+            broadcast(new MoveTokenEvent($token->getAttribute('id'), $x, $y))->toOthers();
+        } catch (BroadcastException $e) {
+            Log::warning('Token moved but broadcast failed', ['exception' => $e]);
+        }
+
+        return response()->json(['id' => $token->getAttribute('id'), 'x' => $x, 'y' => $y]);
     }
 
     public function bulkMove(Request $request, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
         abort_unless(auth()->user()?->is_admin, 403);
-        $tokensRepository->moveMultipleToken($request->input('tokens'));
-        broadcast(new MoveBatchTokenEvent($request->input('tokens')))->toOthers();
+
+        $data = $request->validate([
+            'tokens'      => ['required', 'array', 'min:1'],
+            'tokens.*.id' => ['required', 'integer'],
+            'tokens.*.x'  => ['required', 'numeric'],
+            'tokens.*.y'  => ['required', 'numeric'],
+        ]);
+
+        // Bierzemy wyłącznie id/x/y — reszta pól z klienta (name/hero_id/image) jest ignorowana
+        $tokens = array_map(static fn (array $t): array => [
+            'id' => (int) $t['id'],
+            'x'  => (float) $t['x'],
+            'y'  => (float) $t['y'],
+        ], $data['tokens']);
+
+        $tokensRepository->moveMultipleToken($tokens);
+
+        try {
+            broadcast(new MoveBatchTokenEvent($tokens))->toOthers();
+        } catch (BroadcastException $e) {
+            Log::warning('Tokens bulk-moved but broadcast failed', ['exception' => $e]);
+        }
+
         return response()->json('OK', Response::HTTP_OK);
     }
 
     public function pingPlayers(Request $request): \Illuminate\Http\JsonResponse
     {
-        broadcast(new PingPlayersEvent($request->all()))->toOthers();
+        $data = $request->validate([
+            'x'     => ['required', 'numeric'],
+            'y'     => ['required', 'numeric'],
+            'color' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        try {
+            broadcast(new PingPlayersEvent($data))->toOthers();
+        } catch (BroadcastException $e) {
+            Log::warning('Ping broadcast failed', ['exception' => $e]);
+        }
+
         return response()->json('OK', Response::HTTP_OK);
     }
 

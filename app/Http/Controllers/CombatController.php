@@ -36,6 +36,8 @@ class CombatController extends Controller
     // ── POST /session/combat/start ───────────────────────────────────────────
     public function start(Request $request): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate([
             'token_ids'   => ['required', 'array', 'min:1'],
             'token_ids.*' => ['integer'],
@@ -87,6 +89,8 @@ class CombatController extends Controller
     //              brak token_id → rzut dla wszystkich nierolniętych NPC
     public function rollNpcInitiative(Request $request): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $state = Cache::get(self::CACHE_KEY);
         if (!$state) {
             return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
@@ -128,6 +132,8 @@ class CombatController extends Controller
     // MG rzuca inicjatywę za bohatera gracza (zastępstwo)
     public function rollHeroAsGm(Request $request): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate(['token_id' => ['required', 'integer']]);
 
         $state = Cache::get(self::CACHE_KEY);
@@ -219,6 +225,8 @@ class CombatController extends Controller
     // ── PATCH /session/combat/turn ───────────────────────────────────────────
     public function setTurn(Request $request): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate(['direction' => ['required', 'in:next,prev']]);
 
         $state = Cache::get(self::CACHE_KEY);
@@ -259,6 +267,8 @@ class CombatController extends Controller
     // ── POST /session/combat/board-toggle ────────────────────────────────────
     public function toggleBoard(Request $request): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate(['is_open' => ['required', 'boolean']]);
 
         $isOpen = $request->boolean('is_open');
@@ -285,7 +295,29 @@ class CombatController extends Controller
             'positions.*.y'        => ['required', 'numeric'],
         ]);
 
-        $positions = $request->input('positions');
+        $incoming = $request->input('positions');
+        $user     = $request->user();
+
+        if ($user?->is_admin) {
+            // MG zapisuje pełny układ planszy
+            $positions = $incoming;
+        } else {
+            // Gracz może przesunąć wyłącznie żeton własnego bohatera — resztę bierzemy z cache
+            $heroId          = (int) $user?->hero()->value('id');
+            $allowedTokenIds = Token::query()->where('hero_id', $heroId)->pluck('id')->all();
+
+            $merged = collect(Cache::get(self::BOARD_CACHE_KEY, []))
+                ->keyBy('token_id');
+
+            foreach ($incoming as $pos) {
+                if (in_array((int) $pos['token_id'], $allowedTokenIds, true)) {
+                    $merged[$pos['token_id']] = $pos;
+                }
+            }
+
+            $positions = $merged->values()->all();
+        }
+
         Cache::put(self::BOARD_CACHE_KEY, $positions, self::CACHE_TTL);
         broadcast(new CombatEvent('board-updated', ['positions' => $positions]));
 
@@ -295,6 +327,8 @@ class CombatController extends Controller
     // ── DELETE /session/combat ───────────────────────────────────────────────
     public function end(): JsonResponse
     {
+        $this->abortUnlessGm();
+
         // Nadpisujemy stan jako nieaktywny zamiast kasować klucz —
         // Cache::forget może zawodzić na Windows (blokady pliku).
         Cache::put(self::CACHE_KEY, ['active' => false], 60);
@@ -309,6 +343,8 @@ class CombatController extends Controller
     // MG pobiera dane bohatera gracza (cechy + umiejętności) do podmieniania
     public function heroProxySheet(Hero $hero): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $hero->load(['characteristic', 'skills']);
 
         $characteristics = [];
@@ -337,6 +373,8 @@ class CombatController extends Controller
     // MG rzuca test cechy / umiejętności za bohatera gracza
     public function heroProxyRoll(Request $request, Hero $hero): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate([
             'characteristic' => ['required', 'string', 'max:10'],
             'label'          => ['nullable', 'string', 'max:80'],
@@ -387,6 +425,8 @@ class CombatController extends Controller
     // MG rzuca test cechy / umiejętności za NPC
     public function rollNpcTest(Request $request, Token $token): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate([
             'characteristic' => ['required', 'string', 'max:10'],
             'label'          => ['nullable', 'string', 'max:80'],

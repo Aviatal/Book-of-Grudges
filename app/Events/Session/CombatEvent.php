@@ -2,7 +2,7 @@
 
 namespace App\Events\Session;
 
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -23,7 +23,7 @@ class CombatEvent implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
-        return [new Channel('combat')];
+        return [new PrivateChannel('combat')];
     }
 
     public function broadcastAs(): string

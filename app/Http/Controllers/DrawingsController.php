@@ -29,10 +29,11 @@ class DrawingsController extends Controller
 
     public function storeDrawing(StoreDrawingRequest $request, DrawingsRepository $drawingsRepository): JsonResponse
     {
+        $this->abortUnlessGm();
         try {
             $drawing = $drawingsRepository->storeDrawing($request->all());
             try {
-                event(new DrawingCreateEvent($drawing->data, $drawing->type, $drawing->layer, $drawing->id));
+                broadcast(new DrawingCreateEvent($drawing->data, $drawing->type, $drawing->layer, $drawing->id))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing created but broadcast failed', ['exception' => $e]);
             }
@@ -45,11 +46,12 @@ class DrawingsController extends Controller
 
     public function updateDrawing(StoreDrawingRequest $request, int $drawingId, DrawingsRepository $drawingsRepository): JsonResponse
     {
+        $this->abortUnlessGm();
         try {
             $drawingData = $request->input('data');
             $drawingsRepository->updateDrawing($drawingId, $drawingData);
             try {
-                event(new DrawingUpdateEvent($drawingId, $drawingData));
+                broadcast(new DrawingUpdateEvent($drawingId, $drawingData))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing updated but broadcast failed', ['exception' => $e]);
             }
@@ -62,6 +64,8 @@ class DrawingsController extends Controller
 
     public function moveDrawingToLayer(Request $request, int $drawingId, DrawingsRepository $drawingsRepository): JsonResponse
     {
+        $this->abortUnlessGm();
+
         $request->validate([
             'layer' => ['required', 'string', 'in:' . implode(',', Drawing::LAYERS)],
         ]);
@@ -69,7 +73,7 @@ class DrawingsController extends Controller
         try {
             $drawingsRepository->updateDrawingLayer($drawingId, $request->string('layer')->value());
             try {
-                event(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value()));
+                broadcast(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value()))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing layer changed but broadcast failed', ['exception' => $e]);
             }
@@ -82,10 +86,11 @@ class DrawingsController extends Controller
 
     public function deleteDrawing(int $drawingId, DrawingsRepository $drawingsRepository): JsonResponse
     {
+        $this->abortUnlessGm();
         try {
             $drawingsRepository->deleteDrawing($drawingId);
             try {
-                event(new DrawingDeleteEvent($drawingId));
+                broadcast(new DrawingDeleteEvent($drawingId))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing deleted but broadcast failed', ['exception' => $e]);
             }

@@ -319,7 +319,7 @@ onMounted(async () => {
     }
 
     // Nasłuchuj na zmiany w czasie rzeczywistym
-    window.Echo.channel('combat')
+    window.Echo.private('combat')
         .listen('.combat', (e: { type: string; state: CombatState | null }) => {
             if (e.type === 'ended') {
                 state.value = null;
@@ -332,7 +332,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-    window.Echo.leaveChannel('combat');
+    window.Echo.leave('combat');
 });
 </script>
 

@@ -18,6 +18,11 @@ class Admin
         if (\Auth::user() && \Auth::user()->getAttribute('is_admin')) {
             return $next($request);
         }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
         return redirect(url('/'));
     }
 }

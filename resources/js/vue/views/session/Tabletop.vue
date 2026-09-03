@@ -477,7 +477,7 @@
                             image: loadedDrawingImages[draw.id],
                             stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : undefined,
                             strokeWidth: selectedDrawingIds.includes(draw.id) ? 3 : 0,
-                            draggable: !layer.locked && (activeTool === 'select-draw' || activeTool === 'select')
+                            draggable: hasDrawingPermission && !layer.locked && (activeTool === 'select-draw' || activeTool === 'select')
                         }"
                         @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @dragmove="(e) => handleImageDragMove(e, draw)"
@@ -507,7 +507,7 @@
                             id: String(draw.id),
                             stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
                             strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 3) + 2 : draw.strokeWidth,
-                            draggable: !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
+                            draggable: hasDrawingPermission && !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
                         @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @dragend="(e) => handleTransformEnd(e, draw)"
@@ -519,7 +519,7 @@
                             id: String(draw.id),
                             stroke: selectedDrawingIds.includes(draw.id) ? '#00a1ff' : draw.stroke,
                             strokeWidth: selectedDrawingIds.includes(draw.id) ? (draw.strokeWidth ?? 2) + 2 : draw.strokeWidth,
-                            draggable: !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
+                            draggable: hasDrawingPermission && !layer.locked && activeTool === 'select-draw' && selectedDrawingIds.length <= 1
                         }"
                         @click="(e) => handleShapeClick(e, draw.id, layer.id)"
                         @transformend="(e) => handleTransformEnd(e, draw)"
@@ -714,10 +714,10 @@ interface DrawingEditEvent {
 }
 
 interface PingData {
-    id: number
+    id?: number
     x: number,
     y: number,
-    color: number,
+    color?: string,
 }
 
 interface Asset {
@@ -735,65 +735,71 @@ interface MapLayer {
     locked: boolean;
 }
 
-    window.Echo.channel('token-move')
-    .listen('.move', (e: MoveTokenEvent) => {
-        moveToken(e.id, e.x, e.y);
-    })
-    .listen('.batch-move', (e: { tokens: MoveTokenEvent[] }) => {
-        console.log('Received batch move event:', e);
-        e.tokens.forEach(token => {
-            moveToken(token.id, token.x, token.y);
-        })
-    })
-    .listen('.token-placed', (e: { id: number; x: number; y: number }) => {
-        const token = tokens.value.find(t => t.id === e.id);
-        if (token) { token.x = e.x; token.y = e.y; token.on_map = true; }
-    })
-    .listen('.token-removed-from-map', (e: { id: number }) => {
-        const token = tokens.value.find(t => t.id === e.id);
-        if (token) { token.on_map = false; }
-    })
-    .listen('.scale', (e: { id: number; scale: number }) => {
-        const token = tokens.value.find(t => t.id === e.id);
-        if (token) { token.scale = e.scale; }
-    });
-window.Echo.channel('drawings')
-    .listen('.drawing-update', (e: DrawingEditEvent) => {
-        let drawing = drawings.value.find(d => d.id === e.drawingId);
-        if (drawing) {
-            Object.assign(drawing, e.data);
-        }
-    })
-    .listen('.drawing-create', (e: { id: number; type: string; data: DrawingData; layer: DrawingLayerId }) => {
-        const drawing: DrawingData = { ...e.data, id: e.id, type: e.type, layer: e.layer === 'gm' ? 'gm' : 'map' };
-        drawings.value.push(drawing);
-        loadDrawingImage(drawing);
-    })
-    .listen('.drawing-delete', (e: { drawingId: number }) => {
-        drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
-    })
-    .listen('.drawing-layer-changed', (e: { drawingId: number; layer: DrawingLayerId }) => {
-        const drawing = drawings.value.find(d => d.id === e.drawingId);
-        if (drawing) {
-            drawing.layer = e.layer;
-        }
-    })
-    .listen('.ping', (e: { newPing: PingData }) => {
-        const newPing = {
-            id: Date.now(),
-            x: e.newPing.x,
-            y: e.newPing.y,
-            color: pingColor.value
-        };
+// Nazwy kanałów realtime — subskrybowane w onMounted, opuszczane w onUnmounted
+const REALTIME_CHANNELS = ['token-move', 'drawings', 'session-chat', 'combat'] as const;
 
-        createPing(newPing);
-    });
-// todo:: Webhooks
-window.Echo.channel('session-chat')
-    .listen('.message-sent', (e: any) => {
-        messages.value.push(e.message);
-        scrollToBottom();
-    });
+const subscribeRealtime = (): void => {
+    window.Echo.private('token-move')
+        .listen('.move', (e: MoveTokenEvent) => {
+            moveToken(e.id, e.x, e.y);
+        })
+        .listen('.batch-move', (e: { tokens: MoveTokenEvent[] }) => {
+            e.tokens.forEach(token => {
+                moveToken(token.id, token.x, token.y);
+            });
+        })
+        .listen('.token-placed', (e: { id: number; x: number; y: number }) => {
+            const token = tokens.value.find(t => t.id === e.id);
+            if (token) { token.x = e.x; token.y = e.y; token.on_map = true; }
+        })
+        .listen('.token-removed-from-map', (e: { id: number }) => {
+            const token = tokens.value.find(t => t.id === e.id);
+            if (token) { token.on_map = false; }
+        })
+        .listen('.scale', (e: { id: number; scale: number }) => {
+            const token = tokens.value.find(t => t.id === e.id);
+            if (token) { token.scale = e.scale; }
+        });
+
+    window.Echo.private('drawings')
+        .listen('.drawing-update', (e: DrawingEditEvent) => {
+            const drawing = drawings.value.find(d => d.id === e.drawingId);
+            if (drawing) {
+                Object.assign(drawing, e.data);
+            }
+        })
+        .listen('.drawing-create', (e: { id: number; type: string; data: DrawingData; layer: DrawingLayerId }) => {
+            // Ignoruj echo własnych rysunków (broadcast leci ->toOthers, ale na wszelki wypadek)
+            if (drawings.value.some(d => d.id === e.id)) return;
+            const drawing: DrawingData = { ...e.data, id: e.id, type: e.type, layer: e.layer === 'gm' ? 'gm' : 'map' };
+            drawings.value.push(drawing);
+            loadDrawingImage(drawing);
+        })
+        .listen('.drawing-delete', (e: { drawingId: number }) => {
+            drawings.value = drawings.value.filter(d => d.id !== e.drawingId);
+            pruneDrawingImages([e.drawingId]);
+        })
+        .listen('.drawing-layer-changed', (e: { drawingId: number; layer: DrawingLayerId }) => {
+            const drawing = drawings.value.find(d => d.id === e.drawingId);
+            if (drawing) {
+                drawing.layer = e.layer;
+            }
+        })
+        .listen('.ping', (e: { newPing: PingData }) => {
+            createPing({
+                id: Date.now(),
+                x: e.newPing.x,
+                y: e.newPing.y,
+                color: e.newPing.color ?? '#00a1ff',
+            });
+        });
+
+    window.Echo.private('session-chat')
+        .listen('.message-sent', (e: any) => {
+            messages.value.push(e.message);
+            scrollToBottom();
+        });
+};
 
 const moveToken = (tokenId: number, x: number, y: number) => {
     const token = tokens.value.find(t => t.id === tokenId);
@@ -809,7 +815,9 @@ const loadedImages = ref<Record<number, HTMLImageElement>>({});
 const activeTool = ref<'select' | 'pen' | 'rect' | 'circle' | 'select-draw' | 'eraser' | 'ping' | 'fog'>('select');
 const drawings = ref<DrawingData[]>([]);
 const isDrawing = ref(false);
-const history = ref<any[]>([]);
+// Id kształtu aktualnie rysowanego lokalnie — nie polegamy na "ostatnim w tablicy",
+// bo broadcast z innego klienta może w międzyczasie dopchnąć swój kształt na koniec.
+const drawingInProgressId = ref<number | null>(null);
 const selectedShapeId = ref<number | null>(null);
 const selectedDrawingIds = ref<number[]>([]);
 const drawingSelectionBox = ref({ x: 0, y: 0, width: 0, height: 0, visible: false });
@@ -900,8 +908,6 @@ const drawingsByLayer = computed<Record<DrawingLayerId, DrawingData[]>>(() => {
 });
 
 const fogEnabled = computed(() => drawings.value.some(d => d.type === 'fog_meta'));
-const fogRevealShapes = computed(() => drawings.value.filter(d => d.type === 'fog'));
-const fogHideShapes = computed(() => drawings.value.filter(d => d.type === 'fog_hide'));
 const fogShapes = computed(() => drawings.value.filter(d => d.type === 'fog' || d.type === 'fog_hide'));
 const fogShapesOrdered = computed(() =>
     fogShapes.value.slice().sort((a, b) => a.id - b.id)
@@ -965,6 +971,11 @@ const loadDrawingImage = (drawing: DrawingData): void => {
     const img = new window.Image();
     img.src = drawing.src;
     img.onload = () => { loadedDrawingImages.value[drawing.id] = img; };
+};
+
+// Zwolnij zbuforowane bitmapy usuniętych rysunków (inaczej rosną w długiej sesji)
+const pruneDrawingImages = (removedIds: number[]): void => {
+    removedIds.forEach(id => { delete loadedDrawingImages.value[id]; });
 };
 
 const fetchAssets = async (): Promise<void> => {
@@ -1125,8 +1136,9 @@ const handleShapeClick = (e: any, shapeId: number, layerId: DrawingLayerId) => {
     if (activeTool.value === 'eraser') {
         if (layer?.locked) return;
         drawings.value = drawings.value.filter(d => d.id !== shapeId);
+        pruneDrawingImages([shapeId]);
         selectedShapeId.value = null;
-        transformerNode.value.getNode().nodes([]);
+        transformerNode.value?.getNode().nodes([]);
         axios.delete(`/session/drawings/${shapeId}`).catch((error: unknown) => {
             console.error('Błąd usuwania rysunku', error);
         });
@@ -1163,10 +1175,6 @@ const handleShapeClick = (e: any, shapeId: number, layerId: DrawingLayerId) => {
             transformerNode.value.getNode().getLayer().batchDraw();
         }
     }
-};
-
-const canEditLayer = (layer: MapLayer): boolean => {
-    return !layer.locked && activeLayerId.value === layer.id;
 };
 
 const setActiveLayer = (layerId: DrawingLayerId | 'tokens'): void => {
@@ -1253,6 +1261,7 @@ const bulkDeleteSelectedDrawings = async (): Promise<void> => {
     const idsToDelete = [...selectedDrawingIds.value];
     clearDrawingSelection();
     drawings.value = drawings.value.filter(d => !idsToDelete.includes(d.id));
+    pruneDrawingImages(idsToDelete);
     await Promise.all(
         idsToDelete.map(id =>
             axios.delete(`/session/drawings/${id}`).catch((error: unknown) => {
@@ -1401,21 +1410,6 @@ const updateSize = () => {
     stageSize.value.height = window.innerHeight;
 };
 
-
-// Aktualizacja pozycji po przeciągnięciu
-const updateTokenPosition = async (event, token) => {
-    const { x, y } = event.target.attrs;
-
-    token.x = x;
-    token.y = y;
-
-    try {
-        await axios.patch(`/session/tokens/${token.id}/move`, { x, y });
-        console.log(`Token ${token.name} zapisany na pozycji: ${x}, ${y}`);
-    } catch (error) {
-        console.error("Błąd zapisu:", error);
-    }
-};
 const selectedIds = ref<number[]>([]);
 const mouseDownPos = ref<{ x: number; y: number } | null>(null);
 const mouseDownTarget = ref<any>(null);
@@ -1559,9 +1553,8 @@ const handleStageMouseDown = (e: any) => {
     mouseDownPos.value = { x: e.evt.clientX, y: e.evt.clientY };
     mouseDownTarget.value = e.target;
 
-    // Środkowy przycisk myszy → pan (tylko MG)
+    // Środkowy przycisk myszy → pan
     if (e.evt.button === 1) {
-        if (!hasDrawingPermission) return;
         isPanning.value  = true;
         lastPanPos.value = { x: e.evt.clientX, y: e.evt.clientY };
         e.evt.preventDefault();
@@ -1594,8 +1587,10 @@ const handleStageMouseDown = (e: any) => {
         if (!fogEnabled.value) { toggleFog(); }
         const pos = e.target.getStage().getRelativePointerPosition();
         isDrawing.value = true;
+        const tempId = Date.now();
+        drawingInProgressId.value = tempId;
         drawings.value.push({
-            id: Date.now(),
+            id: tempId,
             type: fogMode.value === 'reveal' ? 'fog' : 'fog_hide',
             layer: 'map' as DrawingLayerId,
             x: pos.x, y: pos.y, width: 0, height: 0,
@@ -1610,8 +1605,10 @@ const handleStageMouseDown = (e: any) => {
 
     if (activeTool.value === 'pen') {
         isDrawing.value = true;
+        const tempId = Date.now();
+        drawingInProgressId.value = tempId;
         drawings.value.push({
-            id: Date.now(),
+            id: tempId,
             type: 'pen',
             layer: drawingLayer,
             points: [pos.x, pos.y],
@@ -1630,8 +1627,10 @@ const handleStageMouseDown = (e: any) => {
         } as DrawingData);
     } else if (activeTool.value === 'rect') {
         isDrawing.value = true;
+        const tempId = Date.now();
+        drawingInProgressId.value = tempId;
         drawings.value.push({
-            id: Date.now(),
+            id: tempId,
             type: 'rect',
             layer: drawingLayer,
             x: pos.x,
@@ -1686,7 +1685,8 @@ const handleStageMouseMove = (e: any) => {
     }
 
     const pos = e.target.getStage().getRelativePointerPosition();
-    const lastShape = drawings.value[drawings.value.length - 1];
+    const lastShape = drawings.value.find(d => d.id === drawingInProgressId.value);
+    if (!lastShape) return;
 
     if (activeTool.value === 'pen') {
         lastShape.points = lastShape.points.concat([pos.x, pos.y]);
@@ -1956,7 +1956,9 @@ const handleStageMouseUp = async (e: any) => {
     }
     if (isDrawing.value) {
         isDrawing.value = false;
-        const lastShape = drawings.value[drawings.value.length - 1];
+        const lastShape = drawings.value.find(d => d.id === drawingInProgressId.value);
+        drawingInProgressId.value = null;
+        if (!lastShape) { handleSelectionEnd(); return; }
         const tempId = lastShape.id;
         // Pomijamy zbyt małe kształty (klik bez przeciągnięcia)
         if ((lastShape.type === 'fog' || lastShape.type === 'fog_hide') && Math.abs(lastShape.width) < 5 && Math.abs(lastShape.height) < 5) {
@@ -2014,13 +2016,15 @@ const onToggleBoard = async (): Promise<void> => {
 };
 
 onMounted(async () => {
-    fetchDrawings();
-    fetchTokens();
-    fetchMessages();
-    fetchAssets();
+    fetchDrawings().catch((e: unknown) => console.error('Błąd pobierania rysunków', e));
+    fetchTokens().catch((e: unknown) => console.error('Błąd pobierania tokenów', e));
+    fetchMessages().catch((e: unknown) => console.error('Błąd pobierania wiadomości', e));
+    fetchAssets().catch((e: unknown) => console.error('Błąd pobierania zasobów', e));
     window.addEventListener('resize', updateSize);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('mouseup', handleWindowMouseUp);
+
+    subscribeRealtime();
 
     // Pobierz stan widoczności planszy (np. po odświeżeniu strony)
     try {
@@ -2028,7 +2032,7 @@ onMounted(async () => {
         showCombatBoard.value = data.is_open;
     } catch { /* ignoruj — domyślnie false */ }
 
-    window.Echo.channel('combat')
+    window.Echo.private('combat')
         .listen('.combat', (e: { type: string; state: { is_open?: boolean } | null }) => {
             if (e.type === 'board-visibility') {
                 showCombatBoard.value = e.state?.is_open ?? false;
@@ -2041,9 +2045,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('mouseup', handleWindowMouseUp);
-    window.Echo.leaveChannel('token-move');
-    window.Echo.leaveChannel('session-chat');
-    window.Echo.leaveChannel('combat');
+    REALTIME_CHANNELS.forEach(channel => window.Echo.leave(channel));
 });
 </script>
 

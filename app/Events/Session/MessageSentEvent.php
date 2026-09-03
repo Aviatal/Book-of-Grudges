@@ -3,7 +3,7 @@
 namespace App\Events\Session;
 
 use App\Models\Message;
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -18,7 +18,7 @@ class MessageSentEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('session-chat'),
+            new PrivateChannel('session-chat'),
         ];
     }
 

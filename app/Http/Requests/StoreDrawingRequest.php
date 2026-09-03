@@ -9,10 +9,14 @@ class StoreDrawingRequest extends FormRequest
 {
     public function rules(): array
     {
+        // Przy tworzeniu (POST /store) type jest wymagany; przy PATCH aktualizujemy tylko data.
+        $typeRequired = $this->isMethod('post') ? 'required' : 'sometimes';
+
         return [
-            'type'  => ['in:' . implode(',', Drawing::DRAWING_TYPES)],
+            'type'  => [$typeRequired, 'string', 'in:' . implode(',', Drawing::DRAWING_TYPES)],
             'layer' => ['nullable', 'string', 'in:' . implode(',', Drawing::LAYERS)],
-            'data.type' => ['in:' . implode(',', Drawing::DRAWING_TYPES)],
+            'data'  => ['sometimes', 'array'],
+            'data.type' => ['nullable', 'string', 'in:' . implode(',', Drawing::DRAWING_TYPES)],
             'data.points' => ['nullable', 'array'],
             'data.x' => ['nullable', 'numeric'],
             'data.y' => ['nullable', 'numeric'],

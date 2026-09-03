@@ -2,7 +2,7 @@
 
 namespace App\Events\Session;
 
-use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -15,17 +15,17 @@ class MoveTokenEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $id, public int $x, public int $y) {}
+    public function __construct(public int $id, public float $x, public float $y) {}
 
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, Channel>
+     * @return array<int, PrivateChannel>
      */
     public function broadcastOn(): array
     {
         return [
-            new Channel('token-move'),
+            new PrivateChannel('token-move'),
         ];
     }
 
