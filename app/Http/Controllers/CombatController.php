@@ -62,7 +62,6 @@ class CombatController extends Controller
                 'token_id'   => $token->id,
                 'name'       => $token->name,
                 'image_url'  => $token->image ? $token->image_url : null,
-                'color'      => $token->color,
                 'is_npc'     => $isNpc,
                 'hero_id'    => $token->hero_id,
                 'zr'         => $zr,
@@ -340,10 +339,11 @@ class CombatController extends Controller
     }
 
     // ── GET /session/heroes/{hero}/proxy ─────────────────────────────────────
-    // MG pobiera dane bohatera gracza (cechy + umiejętności) do podmieniania
+    // MG pobiera dane bohatera gracza (cechy + umiejętności) do podmieniania;
+    // gracz pobiera w ten sam sposób dane WŁASNEGO bohatera, żeby rzucać testy z mapy
     public function heroProxySheet(Hero $hero): JsonResponse
     {
-        $this->abortUnlessGm();
+        $this->authorizeHeroAccess($hero);
 
         $hero->load(['characteristic', 'skills']);
 
@@ -370,10 +370,10 @@ class CombatController extends Controller
     }
 
     // ── POST /session/heroes/{hero}/roll ──────────────────────────────────────
-    // MG rzuca test cechy / umiejętności za bohatera gracza
+    // MG rzuca test cechy / umiejętności za bohatera gracza; gracz rzuca sam za siebie
     public function heroProxyRoll(Request $request, Hero $hero): JsonResponse
     {
-        $this->abortUnlessGm();
+        $this->authorizeHeroAccess($hero);
 
         $request->validate([
             'characteristic' => ['required', 'string', 'max:10'],
@@ -473,6 +473,13 @@ class CombatController extends Controller
     }
 
     // ────────────────────────────────────────────────────────────────────────
+    // MG ma dostęp do każdego bohatera; gracz wyłącznie do własnego
+    private function authorizeHeroAccess(Hero $hero): void
+    {
+        $user = auth()->user();
+        abort_unless($user?->is_admin || $hero->user_id === $user?->id, 403);
+    }
+
     private function sortParticipants(array $participants): array
     {
         usort($participants, static function (array $a, array $b): int {

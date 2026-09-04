@@ -156,7 +156,6 @@ interface CombatParticipant {
     token_id:   number;
     name:       string;
     image_url:  string | null;
-    color:      string;
     is_npc:     boolean;
     hero_id:    number | null;
     zr:         number;

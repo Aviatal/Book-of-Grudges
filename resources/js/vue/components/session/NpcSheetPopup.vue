@@ -142,13 +142,13 @@
                     <div class="roll-controls">
                         <label class="roll-control-label">
                             <span>Modyfikator</span>
-                            <div class="modifier-stepper">
+                            <span class="modifier-stepper">
                                 <button @click="modifier = Math.max(-40, modifier - 10)">−</button>
                                 <span class="modifier-val" :class="{ positive: modifier > 0, negative: modifier < 0 }">
                                     {{ modifier > 0 ? '+' : '' }}{{ modifier }}
                                 </span>
                                 <button @click="modifier = Math.min(40, modifier + 10)">+</button>
-                            </div>
+                            </span>
                         </label>
                         <label class="half-label">
                             <input type="checkbox" v-model="half" />
@@ -166,7 +166,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
-import { Token, NpcSheet, NpcTalent } from '@/types/Token';
+import { Token, NpcSheet } from '@/types/Token';
+import { loadNpcCatalogs, type DbWeapon, type DbArmor, type DbSkill, type DbTalent } from './npcCatalogCache';
 
 const props = defineProps<{ token: Token; canRoll?: boolean }>();
 defineEmits<{ (e: 'close'): void }>();
@@ -206,12 +207,7 @@ const rollTest = async (characteristic: string, label: string): Promise<void> =>
 
 const charKeys = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd', 'A', 'Żyw', 'Mag'];
 
-// ---- Raw data from DB ----
-interface DbWeapon { id: number; name: string; power: number; add_hero_power: boolean; traits: Record<string, { name: string }> | { name: string }[] }
-interface DbArmor  { id: number; name: string; category: string; armor_points: number | null; locations: { name: string }[] }
-interface DbSkill  { id: number; name: string; characteristic: string }
-interface DbTalent { id: number; name: string; description: string }
-
+// ---- Raw data from DB (broń/pancerz/umiejętności/zdolności — wspólny cache modułowy) ----
 const dbWeapons = ref<DbWeapon[]>([]);
 const dbArmors  = ref<DbArmor[]>([]);
 const dbSkills  = ref<DbSkill[]>([]);
@@ -273,26 +269,13 @@ const resolvedTalents = computed(() =>
 // ---- Load ----
 onMounted(async () => {
     try {
-        const [wRes, aRes, sRes, tRes] = await Promise.all([
-            axios.get('/bronie/get-weapons'),
-            axios.get('/opancerzenie/get-armors'),
-            axios.get('/umiejetnosci/get-skills'),
-            axios.get('/zdolnosci/get-talents'),
-        ]);
-
-        dbWeapons.value = [
-            ...Object.values(wRes.data.ranged ?? {}),
-            ...Object.values(wRes.data.cold   ?? {}),
-        ] as DbWeapon[];
-
-        dbArmors.value = [
-            ...Object.values(aRes.data.leather ?? {}),
-            ...Object.values(aRes.data.mail    ?? {}),
-            ...Object.values(aRes.data.plate   ?? {}),
-        ] as DbArmor[];
-
-        dbSkills.value = sRes.data as DbSkill[];
-        dbTalents.value = tRes.data as DbTalent[];
+        const catalogs = await loadNpcCatalogs();
+        dbWeapons.value = catalogs.weapons;
+        dbArmors.value  = catalogs.armors;
+        dbSkills.value  = catalogs.skills;
+        dbTalents.value = catalogs.talents;
+    } catch (e) {
+        console.error('Błąd ładowania katalogów broni/pancerzy/umiejętności/zdolności', e);
     } finally {
         loading.value = false;
     }

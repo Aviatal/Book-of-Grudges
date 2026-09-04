@@ -21,7 +21,9 @@ class SessionController extends Controller
 {
     public function index(Request $request, HeroesRepository $heroesRepository)
     {
-        $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier())->id;
+        // GM może nie mieć własnej postaci — getHero() zwraca wtedy null; 0 nigdy nie
+        // dopasuje się do prawdziwego hero_id, więc "to mój token" po prostu nigdy nie zajdzie
+        $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier())?->id ?? 0;
         $hasDrawingPermission = $request->user()->is_admin;
         return view('Pages.session.index', compact('heroId', 'hasDrawingPermission'));
     }

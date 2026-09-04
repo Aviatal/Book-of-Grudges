@@ -124,8 +124,8 @@ const onMouseMove = (e: MouseEvent) => {
     const minW = props.minWidth  ?? 220;
     const minH = props.minHeight ?? 120;
 
-    let newW = resStartW;
-    let newH = resStartH;
+    let newW: number;
+    let newH: number;
     let newX = resStartPosX;
     let newY = resStartPosY;
 
@@ -180,6 +180,11 @@ const load = () => {
         if (d.w         != null) size.value.w     = d.w;
         if (d.h         != null) size.value.h     = d.h;
         if (d.minimized != null) minimized.value  = d.minimized;
+
+        // Zapisana pozycja mogła powstać przy większym oknie / innym monitorze —
+        // sprowadź panel z powrotem w widoczny obszar, żeby nie "zniknął" poza ekranem.
+        pos.value.x = Math.max(0, Math.min(window.innerWidth  - 60, pos.value.x));
+        pos.value.y = Math.max(0, Math.min(window.innerHeight - 32, pos.value.y));
     } catch { /* nieprawidłowy JSON — ignoruj */ }
 };
 

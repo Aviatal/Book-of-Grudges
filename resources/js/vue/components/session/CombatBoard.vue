@@ -15,7 +15,7 @@
                         'chip-npc':    p.is_npc,
                     }"
                 >
-                    <img v-if="p.image_url" :src="p.image_url" class="chip-avatar" />
+                    <img v-if="p.image_url" :src="p.image_url" :alt="p.name" class="chip-avatar" />
                     <span v-else class="chip-letter">{{ p.name.charAt(0) }}</span>
                     <span class="chip-name">{{ p.name }}</span>
                     <span v-if="p.initiative !== null" class="chip-init">{{ p.initiative }}</span>
@@ -89,7 +89,6 @@ interface CombatParticipant {
     token_id:   number;
     name:       string;
     image_url:  string | null;
-    color:      string;
     is_npc:     boolean;
     hero_id:    number | null;
     initiative: number | null;
@@ -173,9 +172,7 @@ const tokenStyle = (tokenId: number) => {
 // ── Uprawnienia do przeciągania ───────────────────────────────────────────────
 
 const canDragToken = (p: CombatParticipant): boolean => {
-    if (props.canDraw) return true;
-    if (!p.is_npc && p.hero_id === props.heroId) return true;
-    return false;
+    return props.canDraw || (!p.is_npc && p.hero_id === props.heroId);
 };
 
 // ── Drag & Drop — document-level listenery ────────────────────────────────────
@@ -254,7 +251,11 @@ const onTokenClick = (tokenId: number): void => {
     if (!token) return;
 
     if (token.hero_id) {
-        selectedHeroToken.value = token;
+        // MG widzi każdą kartę; gracz — tylko własnego bohatera (backend i tak by to zablokował,
+        // ale bez tego warunku gracz dostawałby pustą, nic nieznaczącą kartę po kliknięciu cudzego tokenu)
+        if (props.canDraw || token.hero_id === props.heroId) {
+            selectedHeroToken.value = token;
+        }
     } else if (props.canDraw) {
         selectedNpcToken.value = token;
     }

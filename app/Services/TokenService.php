@@ -69,6 +69,8 @@ readonly class TokenService
             'on_map'  => false,
             'x'       => $original->getAttribute('x'),
             'y'       => $original->getAttribute('y'),
+            'scale'   => $original->getAttribute('scale'),
+            'sheet'   => $original->getAttribute('sheet'),
         ]);
     }
 
