@@ -1,79 +1,62 @@
 @extends('Layout.master')
 
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card" style="background-color: #333; color: #D4A373; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);">
-                    <div class="card-header" style="background-color: #222; color: #D4A373; text-align: center; padding: 1rem;">
-                        Zaloguj
+    <div class="flex items-center justify-center px-8 py-16">
+        <div class="relative w-full max-w-[440px] p-1" style="border: 1px solid var(--border-frame); background: var(--bg-inset-alt)">
+            <span class="absolute -top-px -left-px w-2.5 h-2.5" style="border-top: 2px solid var(--gold); border-left: 2px solid var(--gold)"></span>
+            <span class="absolute -top-px -right-px w-2.5 h-2.5" style="border-top: 2px solid var(--gold); border-right: 2px solid var(--gold)"></span>
+            <span class="absolute -bottom-px -left-px w-2.5 h-2.5" style="border-bottom: 2px solid var(--gold); border-left: 2px solid var(--gold)"></span>
+            <span class="absolute -bottom-px -right-px w-2.5 h-2.5" style="border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold)"></span>
+
+            <div class="text-center px-8 pt-9 pb-7.5" style="border: 1px solid var(--border-subtle); background: var(--bg-panel-gradient)">
+                <div class="w-24 h-24 mx-auto mb-4.5 rounded-lg overflow-hidden" style="box-shadow: 0 4px 14px rgba(0,0,0,.7)">
+                    <img src="{{ asset('images/logo-mark.png') }}" alt="Book of Grudges" class="w-full h-full object-cover">
+                </div>
+                <h1 class="font-heading text-2xl font-bold tracking-[.14em] m-0" style="color: var(--gold)">BOOK OF GRUDGES</h1>
+                <div class="italic my-4" style="color: var(--text-faint)">Wpisz się do księgi</div>
+
+                <form method="POST" action="{{ route('login') }}" class="text-left">
+                    @csrf
+
+                    <label class="block mb-3.5">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">E-MAIL</span>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                        @error('email')
+                            <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label class="block mb-4">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">{{ __('Password') }}</span>
+                        <input id="password" type="password" name="password" required autocomplete="current-password"
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                        @error('password')
+                            <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <div class="flex items-center justify-between mb-5.5">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer" style="color: var(--text-muted)">
+                            <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}
+                                   class="appearance-none w-3.5 h-3.5 inline-block border border-[var(--border-accent)] bg-[var(--bg-inset)] checked:bg-[var(--gold)] checked:border-[var(--gold)] cursor-pointer">
+                            Zapamiętaj mnie
+                        </label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}" class="text-sm" style="color: var(--text-faint)">Zapomniałem hasła</a>
+                        @endif
                     </div>
 
-                    <div class="card-body" style="padding: 2rem;">
-                        <form method="POST" action="{{ route('login') }}">
-                            @csrf
+                    <button type="submit" class="w-full py-3 font-heading text-[13px] font-semibold tracking-[.18em] cursor-pointer"
+                            style="border: 1px solid var(--border-accent); background: linear-gradient(#3a2b17,#241b10); color: var(--gold-bright)">
+                        ZALOGUJ
+                    </button>
+                </form>
 
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="email" class="col-form-label" style="color: #D4A373;">E-mail</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto;">
-                                    @error('email')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="password" class="col-form-label" style="color: #D4A373;">{{ __('Password') }}</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password" style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto;">
-                                    @error('password')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }} style="background-color: #444; border: 1px solid #D4A373; margin: 0 auto;">
-                                        <label class="form-check-label" for="remember" style="color: #D4A373;">
-                                             Zapamiętaj mnie
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-0">
-                                <div class="col-12" style="text-align: center;">
-                                    <button type="submit" class="btn btn-primary" style="background-color: #D4A373; color: #222; border: none; padding: 0.75rem 1.5rem; border-radius: 4px;">
-                                        Zaloguj
-                                    </button>
-
-                                    @if (Route::has('password.request'))
-                                        <a class="btn btn-link" href="{{ route('password.request') }}" style="color: #D4A373;">
-                                            Zapomniałem hasło
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </form>
-
-                        <hr style="border-top: 1px solid #666; margin-top: 2rem;">
-                        <div class="row mt-3">
-                            <div class="col-12 text-center">
-                                <p style="color: #D4A373; font-size: 0.9rem;">Nie masz jeszcze konta? <a href="{{ route('register') }}" style="text-decoration: none; color: #D4A373;">Zarejestruj się</a></p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="mt-5 pt-4.5 text-sm" style="border-top: 1px solid var(--border-subtle); color: var(--text-faint)">
+                    Nie masz jeszcze konta? <a href="{{ route('register') }}" style="color: var(--gold)">Zarejestruj się</a>
                 </div>
             </div>
         </div>

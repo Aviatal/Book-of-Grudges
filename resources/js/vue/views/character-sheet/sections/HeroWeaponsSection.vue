@@ -1,32 +1,13 @@
 <template>
-    <div class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-        <div
-            @click="toggleOpen"
-            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
-        >
-            <h2 class="font-semibold text-xl text-[#e4d8b4]">Broń</h2>
-            <svg
-                :class="isOpen ? 'rotate-180' : ''"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
-            >
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        </div>
-
-        <transition name="fade">
-            <div v-show="isOpen" class="mt-4">
+    <div>
+            <div class="mt-4">
                 <div class="flex justify-end items-center mb-4">
                     <add-weapon-modal
                         :hero-id="heroId"
                         v-on:weapon-added="handleNewWeapon"
                     ></add-weapon-modal>
                 </div>
-                <div class="weapon-category-header">Broń Biała</div>
+                <div class="section-label"><span>BROŃ BIAŁA</span><span class="section-label-line"></span></div>
                 <v-data-table
                     :headers="coldWeaponHeaders"
                     :items="coldWeapons"
@@ -80,11 +61,9 @@
                     </template>
                 </v-data-table>
             </div>
-        </transition>
 
-        <transition name="fade">
-            <div v-show="isOpen" class="mt-4">
-                <div class="weapon-category-header">Broń Strzelecka</div>
+            <div class="mt-4">
+                <div class="section-label"><span>BROŃ STRZELECKA</span><span class="section-label-line"></span></div>
                 <v-data-table
                     :headers="rangedWeaponHeaders"
                     :items="rangedWeapons"
@@ -143,7 +122,6 @@
                     </template>
                 </v-data-table>
             </div>
-        </transition>
     </div>
 </template>
 <script setup lang="ts">
@@ -169,7 +147,6 @@ const emits = defineEmits<{
 }>();
 const toast = useToast();
 
-const isOpen = ref<boolean>(false);
 const coldWeaponHeaders = ref<TableHeader[]>([
     {title: 'Broń', align: 'start', sortable: false, value: 'name'},
     {title: 'Nazwa', align: 'start', sortable: false, value: 'additional_weapon_name'},
@@ -195,7 +172,6 @@ const hasBrawlTalent = computed(() => props.talentsData.some(talent => talent.na
 const hasStrongStrikeTalent = computed(() => props.talentsData.some(talent => talent.name === "Silny cios") ?? false);
 const hasSharpshooterTalent = computed(() => props.talentsData.some(talent => talent.name === "Strzał precyzyjny") ?? false);
 
-const toggleOpen = ():boolean => isOpen.value = !isOpen.value;
 const handleNewWeapon = (newWeapon: Weapon): void => {
     if (!newWeapon.is_ranged) {
         coldWeapons.value.push(newWeapon)
@@ -273,88 +249,101 @@ const weaponPower = (weapon: Weapon) => {
 }
 </script>
 <style scoped>
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 14px;
+}
+
+.section-label span:first-child {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: var(--text-faint);
+}
+
+.section-label-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-default), transparent);
+}
+
+.trait-pill {
+    display: inline-block;
+    border: 1px solid var(--border-frame);
+    background: #221d16;
+    color: var(--text-muted-alt);
+    padding: 3px 9px;
+    font-size: 13px;
+    letter-spacing: .03em;
+}
+
 .custom-table {
-    background-color: #2b2a27 !important;
-    border: 1px solid #8b5a2b !important;
-    color: #e4d8b4 !important;
+    background-color: var(--bg-inset) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-body) !important;
 }
 
 .custom-table .v-data-table thead {
-    background-color: #8b5a2b !important;
+    background-color: var(--bg-panel) !important;
 }
 
 .custom-table .v-data-table th {
-    background-color: #8b5a2b !important;
-    color: #2b2a27 !important;
-    font-weight: bold;
+    background-color: var(--bg-panel) !important;
+    color: var(--text-faint) !important;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: .1em;
     text-transform: uppercase;
     padding: 12px 16px !important;
-    border-bottom: 2px solid #704214 !important;
+    border-bottom: 2px solid var(--border-accent) !important;
 }
 
 .custom-table .v-data-table tbody tr {
-    background-color: #3b3a36 !important;
+    background-color: var(--bg-panel) !important;
 }
 
 .custom-table .v-data-table tbody tr:nth-child(even) {
-    background-color: #2b2a27 !important;
+    background-color: var(--bg-inset) !important;
 }
 
 .custom-table .v-data-table th:hover {
-    background-color: #704214 !important;
-    color: #f5e0b7 !important;
-}
-
-.weapon-category-header {
-    background-color: #5a3e1b;
-    color: #f5e0b7;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 2px solid #8b5a2b;
+    background-color: var(--border-accent) !important;
+    color: var(--gold-bright) !important;
 }
 
 .delete-button {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 2px;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
 .delete-button:hover {
-    background-color: #ff1a1a;
-}
-
-.delete-button:active {
-    background-color: #e60000;
+    border-color: var(--danger-border-hover);
+    color: var(--danger-text-hover);
 }
 
 .unequip-button {
-    background-color: #d4af37;
-    color: white;
-    border: none;
+    background: var(--bg-panel);
+    color: var(--text-muted-alt);
+    border: 1px solid var(--border-default);
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 2px;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
 .unequip-button:hover {
-    background-color: #b99932;
+    border-color: var(--border-accent-hover);
+    color: var(--text-body);
 }
-
-.unequip-button:active {
-    background-color: #8d7525;
-}
-
 </style>

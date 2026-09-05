@@ -18,9 +18,9 @@
                             item-value="id"
                             placeholder="Kto dokonuje transakcji?"
                             variant="outlined"
-                            color="#d4af37"
-                            base-color="#8c8c8c"
-                            bg-color="rgba(0,0,0,0.2)"
+                            color="var(--gold)"
+                            base-color="var(--text-faint)"
+                            bg-color="var(--bg-inset)"
                             hide-details="auto"
                             class="wfrp-autocomplete"
                             return-object
@@ -45,16 +45,16 @@
                             item-value="id"
                             placeholder="Wpisz nazwę przedmiotu..."
                             variant="outlined"
-                            color="#d4af37"
-                            base-color="#8c8c8c"
-                            bg-color="rgba(0,0,0,0.2)"
+                            color="var(--gold)"
+                            base-color="var(--text-faint)"
+                            bg-color="var(--bg-inset)"
                             hide-details="auto"
                             class="wfrp-autocomplete"
                             return-object
                             :menu-props="{ contentClass: 'wfrp-autocomplete-menu' }"
                         >
                             <template v-slot:selection="{ item }">
-                                <span style="color: #e0e0e0">
+                                <span style="color: var(--text-body)">
                                     <template v-if="item.raw.tradeable_type === 'App\\Models\\Armor'">
                                         {{ item.raw.tradeable.category }} -
                                     </template>
@@ -66,7 +66,7 @@
                                 <v-list-item v-bind="props" class="wfrp-list-item">
                                     <v-list-item-title>
                                         <span v-if="item.raw.tradeable_type === 'App\\Models\\Armor'"
-                                              style="color: #8c8c8c; font-size: 0.9em;">
+                                              style="color: var(--text-faint); font-size: 0.9em;">
                                             {{ item.raw.tradeable.category }}
                                         </span>
                                     </v-list-item-title>
@@ -81,9 +81,9 @@
                             v-model="customName"
                             placeholder="Np. Skórzana Kurtka"
                             variant="outlined"
-                            color="#d4af37"
-                            base-color="#8c8c8c"
-                            bg-color="rgba(0,0,0,0.2)"
+                            color="var(--gold)"
+                            base-color="var(--text-faint)"
+                            bg-color="var(--bg-inset)"
                             hide-details="auto"
                             class="wfrp-input-field"
                         ></v-text-field>
@@ -102,9 +102,9 @@
                                     type="number"
                                     placeholder="0"
                                     variant="outlined"
-                                    color="#d4af37"
-                                    base-color="#8c8c8c"
-                                    bg-color="rgba(0,0,0,0.2)"
+                                    color="var(--gold)"
+                                    base-color="var(--text-faint)"
+                                    bg-color="var(--bg-inset)"
                                     class="wfrp-input-field right-aligned-input"
                                     hide-details="auto"
                                 >
@@ -121,9 +121,9 @@
                                     type="number"
                                     placeholder="0"
                                     variant="outlined"
-                                    color="#C0C0C0"
-                                    base-color="#8c8c8c"
-                                    bg-color="rgba(0,0,0,0.2)"
+                                    color="var(--silver)"
+                                    base-color="var(--text-faint)"
+                                    bg-color="var(--bg-inset)"
                                     class="wfrp-input-field right-aligned-input"
                                     hide-details="auto"
                                 >
@@ -140,9 +140,9 @@
                                     type="number"
                                     placeholder="0"
                                     variant="outlined"
-                                    color="#cd7f32"
-                                    base-color="#8c8c8c"
-                                    bg-color="rgba(0,0,0,0.2)"
+                                    color="var(--copper)"
+                                    base-color="var(--text-faint)"
+                                    bg-color="var(--bg-inset)"
                                     class="wfrp-input-field right-aligned-input"
                                     hide-details="auto"
                                 >
@@ -264,28 +264,28 @@ const submitTransaction = () => {
     display: flex;
     justify-content: center;
     padding: 20px;
-    font-family: 'Merriweather', serif;
+    font-family: var(--font-body);
 }
 
 .grudge-card {
     width: 100%;
     max-width: 600px;
-    background-color: #3a3935 !important;
-    border: 1px solid #5c5c5c;
-    color: #e0e0e0 !important;
+    background-color: var(--bg-panel) !important;
+    border: 1px solid var(--border-default);
+    color: var(--text-body) !important;
 }
 
 .grudge-header {
     background: rgba(0, 0, 0, 0.3);
     padding: 20px;
-    border-bottom: 1px solid #d4af37;
+    border-bottom: 1px solid var(--gold);
     text-align: center;
 }
 
 .grudge-header h2 {
     margin: 0;
-    color: #d4af37;
-    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-family: var(--font-heading);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-size: 1.4rem;
@@ -297,16 +297,16 @@ const submitTransaction = () => {
 
 .wfrp-label {
     display: block;
-    color: #d4af37;
-    font-weight: bold;
+    color: var(--text-faint);
+    font-family: var(--font-heading);
     margin-bottom: 8px;
-    font-size: 0.9rem;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: .18em;
 }
 
 .helper-text {
-    color: #888;
+    color: var(--text-faint-alt);
     display: block;
     font-style: italic;
     text-align: center;
@@ -317,21 +317,21 @@ const submitTransaction = () => {
     text-align: center;
     font-size: 0.75rem;
     margin-top: 4px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-heading);
 }
 
-.label-gold { color: #d4af37; }
-.label-silver { color: #e0e0e0; }
-.label-copper { color: #cd7f32; }
+.label-gold { color: var(--gold); }
+.label-silver { color: var(--silver); }
+.label-copper { color: var(--copper); }
 
 /* Input styles */
 :deep(.v-field__input) {
-    color: #e0e0e0 !important;
-    font-family: 'Merriweather', serif;
+    color: var(--text-body) !important;
+    font-family: var(--font-body);
 }
 
 :deep(.v-field__input::placeholder) {
-    color: #888 !important;
+    color: var(--text-faint-alt) !important;
     opacity: 1;
     font-style: italic;
 }
@@ -354,14 +354,14 @@ const submitTransaction = () => {
 /* Suffixes */
 .custom-suffix {
     font-weight: 700;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-heading);
     padding-left: 4px;
     opacity: 1 !important;
     user-select: none;
 }
-.gold-suffix { color: #d4af37 !important; }
-.silver-suffix { color: #ffffff !important; }
-.copper-suffix { color: #ff9d5c !important; }
+.gold-suffix { color: var(--gold) !important; }
+.silver-suffix { color: var(--silver) !important; }
+.copper-suffix { color: var(--copper) !important; }
 
 :deep(.v-field__append-inner) {
     align-items: center;
@@ -369,27 +369,27 @@ const submitTransaction = () => {
 }
 
 .wfrp-btn {
-    border-color: #d4af37 !important;
-    color: #d4af37 !important;
-    font-family: 'Cinzel', serif !important;
+    border-color: var(--border-accent) !important;
+    color: var(--gold) !important;
+    font-family: var(--font-heading) !important;
     font-weight: 700 !important;
     letter-spacing: 1px;
-    transition: all 0.3s;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     background: transparent !important;
 }
 
 .wfrp-btn:hover {
-    background-color: #d4af37 !important;
-    color: #1a1a1a !important;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    border-color: var(--gold) !important;
+    background-color: var(--gold) !important;
+    color: var(--bg-base) !important;
 }
 </style>
 
 <style>
 /* Global styles for dropdown */
 .wfrp-autocomplete-menu .v-list {
-    background-color: #3a3935 !important;
-    border: 1px solid #d4af37 !important;
+    background-color: var(--bg-panel) !important;
+    border: 1px solid var(--gold) !important;
     padding: 0 !important;
 }
 .wfrp-autocomplete-menu .v-list-item__overlay {
@@ -402,11 +402,11 @@ const submitTransaction = () => {
 .wfrp-autocomplete-menu .v-list-item-title,
 .wfrp-autocomplete-menu .sub-text,
 .wfrp-autocomplete-menu .sub-quality {
-    font-family: 'Merriweather', serif !important;
-    color: #e0e0e0 !important;
+    font-family: var(--font-body) !important;
+    color: var(--text-body) !important;
 }
 .wfrp-autocomplete-menu .v-list-item--active .v-list-item-title {
-    color: #d4af37 !important;
+    color: var(--gold) !important;
     font-weight: bold !important;
 }
 </style>

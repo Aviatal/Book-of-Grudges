@@ -1,12 +1,12 @@
 <template>
-    <div v-if="loading" class="text-center py-20 text-[#8b5a2b]">
+    <div v-if="loading" class="text-center py-20" style="color: var(--text-faint)">
         <i class="mdi mdi-loading mdi-spin text-5xl"></i>
         <p class="mt-4 uppercase tracking-widest">Otwieranie Kroniki...</p>
     </div>
 
     <div v-else class="token-edit-container">
-        <div class="flex items-center justify-between mb-8 border-b-2 border-[#8b5a2b] pb-4">
-            <h2 class="text-3xl font-bold text-[#d4af37] tracking-widest uppercase font-serif">
+        <div class="flex items-center justify-between mb-8 pb-4" style="border-bottom: 2px solid var(--border-accent-hover)">
+            <h2 class="text-3xl font-bold tracking-widest uppercase font-heading" style="color: var(--gold)">
                 <i class="mdi mdi-feather mr-2"></i> Aktualizacja tokenu
             </h2>
             <div class="flex gap-2">
@@ -20,15 +20,15 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="md:col-span-2 space-y-6 bg-[#2b2a27] p-6 rounded-sm border border-[#8b5a2b] shadow-inner">
-                <h3 class="text-xl font-bold text-[#c4a47c] uppercase tracking-wide border-b border-[#5e4128] pb-2">Dane Podstawowe</h3>
+            <div class="md:col-span-2 space-y-6 p-6 rounded-sm shadow-inner" style="background: var(--bg-panel); border: 1px solid var(--border-default)">
+                <h3 class="text-xl font-bold uppercase tracking-wide pb-2 font-heading" style="color: var(--text-muted-alt); border-bottom: 1px solid var(--border-frame)">Dane Podstawowe</h3>
                 <div>
                     <label class="warhammer-label">
                         Nazwa Tokenu
-                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(przy zmianie pliku uzupełniana automatycznie)</span>
+                        <span class="normal-case font-normal text-xs ml-1" style="color: var(--text-faint-alt)">(przy zmianie pliku uzupełniana automatycznie)</span>
                     </label>
                     <div class="relative">
-                        <i class="mdi mdi-skull absolute left-3 top-1/2 -translate-y-1/2 text-[#8b5a2b] z-10"></i>
+                        <i class="mdi mdi-skull absolute left-3 top-1/2 -translate-y-1/2 z-10" style="color: var(--border-accent-hover)"></i>
                         <input type="text" v-model="token.name" class="warhammer-input pl-11" placeholder="np. Oko Tzeentcha">
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                 <div v-if="!token.hero_id" class="copy-from-row">
                     <label class="warhammer-label flex items-center gap-2">
                         <i class="mdi mdi-content-copy"></i> Skopiuj z innego tokenu
-                        <span class="text-[#706f6c] normal-case font-normal text-xs ml-1">(opcjonalnie — nadpisze kartę poniżej)</span>
+                        <span class="normal-case font-normal text-xs ml-1" style="color: var(--text-faint-alt)">(opcjonalnie — nadpisze kartę poniżej)</span>
                     </label>
                     <v-select
                         v-model="copyFromTokenId"
@@ -69,17 +69,17 @@
             </div>
 
             <div class="space-y-6">
-                <div class="bg-[#2b2a27] p-6 rounded-sm border-2 border-dashed border-[#8b5a2b] shadow-inner">
+                <div class="p-6 rounded-sm shadow-inner" style="background: var(--bg-panel); border: 2px dashed var(--border-accent-hover)">
                     <template v-if="token.image">
-                        <h3 class="text-xl font-bold text-[#c4a47c] uppercase tracking-wide border-b border-[#5e4128] pb-2 mb-4 text-center">Wygląd na Mapie</h3>
+                        <h3 class="text-xl font-bold uppercase tracking-wide pb-2 mb-4 text-center font-heading" style="color: var(--text-muted-alt); border-bottom: 1px solid var(--border-frame)">Wygląd na Mapie</h3>
 
-                        <div class="flex flex-col items-center justify-center mb-6 p-4 bg-[#1b1b18] rounded border border-black">
-                            <div class="text-xs text-[#8b5a2b] uppercase mb-2 tracking-widest">{{ token.name }}</div>
+                        <div class="flex flex-col items-center justify-center mb-6 p-4 rounded" style="background: var(--bg-inset); border: 1px solid #000">
+                            <div class="text-xs uppercase mb-2 tracking-widest" style="color: var(--border-accent-hover)">{{ token.name }}</div>
                             <div
                                 class="token-preview-circ"
                                 :style="previewStyle"
                             >
-                                <i v-if="!token.image" class="mdi mdi-help text-3xl text-[#5e4128]"></i>
+                                <i v-if="!token.image" class="mdi mdi-help text-3xl" style="color: var(--border-frame)"></i>
                             </div>
                         </div>
                     </template>
@@ -90,16 +90,16 @@
                                 <i class="mdi mdi-image-plus"></i> Obrazek / Ikona
                             </label>
                             <div class="flex items-center justify-center w-full">
-                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-[#8b5a2b] border-dashed rounded-lg cursor-pointer bg-[#3b3a36] hover:bg-[#4b4a46] hover:border-[#d4af37] transition-all">
+                                <label class="upload-dropzone">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <i class="mdi mdi-cloud-upload text-2xl text-[#8b5a2b]"></i>
-                                        <p class="text-xs text-[#e4d8b4]"><span class="font-bold">Kliknij</span> lub przeciągnij</p>
-                                        <p class="text-[10px] text-[#706f6c]">PNG, JPG (max. 128x128px)</p>
+                                        <i class="mdi mdi-cloud-upload text-2xl" style="color: var(--border-accent-hover)"></i>
+                                        <p class="text-xs" style="color: var(--text-body)"><span class="font-bold">Kliknij</span> lub przeciągnij</p>
+                                        <p class="text-[10px]" style="color: var(--text-faint-alt)">PNG, JPG (max. 128x128px)</p>
                                     </div>
                                     <input type="file" @change="onFileChange" class="hidden" accept="image/*" />
                                 </label>
                             </div>
-                            <button v-if="imagePreviewUrl" @click="removeImage" class="text-xs text-red-500 underline mt-1 hover:text-red-400">
+                            <button v-if="imagePreviewUrl" @click="removeImage" class="text-xs underline mt-1" style="color: var(--danger-text)">
                                 <i class="mdi mdi-trash-can"></i> Usuń obrazek
                             </button>
                         </div>
@@ -271,16 +271,17 @@ onMounted(() => {
 <style scoped>
 
 .token-edit-container {
-    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-    color: #e4d8b4;
+    font-family: var(--font-body);
+    color: var(--text-body);
 }
 
 /* Customowe Inputy */
 .warhammer-label {
     display: block;
+    font-family: var(--font-heading);
     font-size: 0.85rem;
     font-weight: bold;
-    color: #c4a47c;
+    color: var(--text-muted-alt);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 0.35rem;
@@ -288,12 +289,13 @@ onMounted(() => {
 
 .warhammer-input {
     width: 100%;
-    background-color: #1b1b18;
-    color: #e4d8b4;
-    border: 1px solid #8b5a2b;
+    background-color: var(--bg-inset);
+    color: var(--text-body);
+    border: 1px solid var(--border-default);
     padding: 0.6rem 0.75rem;
     border-radius: 2px;
-    transition: all 0.2s;
+    font-family: var(--font-body);
+    transition: border-color 0.2s ease;
 }
 .warhammer-input.pl-11 {
     padding-left: 2.75rem !important;
@@ -301,54 +303,55 @@ onMounted(() => {
 
 .warhammer-input:focus {
     outline: none;
-    border-color: #d4af37;
+    border-color: var(--gold);
     box-shadow: 0 0 5px rgba(212, 175, 55, 0.4);
 }
 
-.warhammer-input-color {
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 36px;
-    height: 36px;
-    border: none;
+.upload-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 96px;
+    border: 2px dashed var(--border-accent-hover);
+    border-radius: 8px;
     cursor: pointer;
-    background: none;
+    background: var(--bg-panel-gradient);
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
-/* Ukrycie domyślnego wyglądu input color dla lepszej integracji */
-.warhammer-input-color::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-.warhammer-input-color::-webkit-color-swatch {
-    border: 1px solid black;
-    border-radius: 2px;
+
+.upload-dropzone:hover {
+    border-color: var(--gold);
+    background: #332714;
 }
 
 /* Przyciski */
 .warhammer-btn {
-    background-color: #8b5a2b;
-    color: #e4d8b4;
+    background: linear-gradient(#2a2117, #1d1710);
+    color: var(--gold);
     padding: 0.5rem 1.25rem;
-    border: 1px solid #5e4128;
+    border: 1px solid var(--border-accent);
+    font-family: var(--font-heading);
     text-transform: uppercase;
     font-weight: bold;
     font-size: 0.8rem;
     letter-spacing: 0.1em;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 2px 2px 0px rgba(0,0,0,1);
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
 .warhammer-btn:hover {
-    background-color: #d4af37;
-    color: #1b1b18;
+    border-color: var(--gold);
+    color: var(--gold-bright);
 }
 
 .warhammer-btn-secondary {
     background: none;
-    color: #8b5a2b;
+    color: var(--text-faint);
     padding: 0.5rem 1.25rem;
     border: 1px solid transparent;
+    font-family: var(--font-heading);
     text-transform: uppercase;
     font-weight: bold;
     font-size: 0.8rem;
@@ -357,10 +360,38 @@ onMounted(() => {
 }
 
 .warhammer-btn-secondary:hover {
-    color: #d4af37;
-    border-color: #8b5a2b;
-    background-color: #1b1b18;
+    color: var(--gold);
+    border-color: var(--border-accent-hover);
+    background-color: var(--bg-inset);
 }
+
+.copy-from-row {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.custom-select :deep(.vs__dropdown-toggle) {
+    background: var(--bg-inset);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+    padding: 0 6px;
+    min-height: 36px;
+}
+.custom-select :deep(.vs__search),
+.custom-select :deep(.vs__selected) { color: var(--text-body); font-size: 0.85rem; margin: 0; padding: 2px 4px; }
+.custom-select :deep(.vs__search::placeholder) { color: var(--text-faint-alt); }
+.custom-select :deep(.vs__open-indicator) { fill: var(--border-accent-hover); }
+.custom-select :deep(.vs__clear) { fill: var(--border-accent-hover); }
+.custom-select :deep(.vs__dropdown-menu) {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-frame);
+    border-top: none;
+    color: var(--text-body);
+    font-size: 0.85rem;
+}
+.custom-select :deep(.vs__dropdown-option) { padding: 6px 10px; color: var(--text-muted-alt); }
+.custom-select :deep(.vs__dropdown-option--highlight) { background: var(--border-frame); color: var(--text-body); }
 
 /* Okrągły podgląd Tokena */
 .token-preview-circ {
@@ -371,6 +402,6 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5);
-    border: 1px solid #5e4128;
+    border: 1px solid var(--border-frame);
 }
 </style>

@@ -18,6 +18,7 @@ export interface Weapon {
     short_range: number,
     long_range: number,
     reload_time: string,
+    availability: string,
     traits: Record<string, {
         id: number,
         name: string,

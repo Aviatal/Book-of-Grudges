@@ -6,53 +6,76 @@
                     🗺 Przejdź do sesji
                 </a>
             </div>
-            <hero-section
-                :hero="hero"
-                @update-characteristics="refreshCharacteristic"
-            ></hero-section>
-            <hero-description-section
-                :hero-descriptions="hero.description"
-            ></hero-description-section>
-            <hero-characteristic-section
-                :characteristic-data="hero.characteristic"
-                :hero-id="hero.id"
-                @add-characteristic="handleAddCharacteristic"
-            ></hero-characteristic-section>
-            <hero-weapons-section
-                :hero-id="hero.id"
-                :characteristic-data="hero.characteristic"
-                :talents-data="hero.talents"
-                :cold-weapons-data="hero.cold_weapons"
-                :ranged-weapons-data="hero.ranged_weapons"
-                @unequip-weapon="addWeaponToInventory"
-            ></hero-weapons-section>
-            <hero-armors-section
-                :hero-id="hero.id"
-                :armors-data="hero.armors"
-                @unequip-armor="addArmorToInventory"
-            ></hero-armors-section>
-            <hero-skills-section
-                :hero-id="hero.id"
-                :skills-data="hero.skills"
-                :characteristic-data="hero.characteristic"
-            ></hero-skills-section>
-            <hero-talents-section
-                :hero-id="hero.id"
-                :talents-data="hero.talents"
-            ></hero-talents-section>
-            <hero-spells-section
-                v-if="hero.characteristic['Mag']?.pivot.start_value + hero.characteristic['Mag']?.pivot.advancement > 0"
-                :hero-id="hero.id"
-                :spells-data="hero.spells"
-            ></hero-spells-section>
-            <hero-inventory-section
-                :hero-id="hero.id"
-                :inventory-data="hero.inventory"
-                @get-hero="getHero"
-            ></hero-inventory-section>
-            <hero-options-section
-                :hero-id="hero.id"
-            ></hero-options-section>
+
+            <collapsible-section v-if="activeSection === 'bohater'" :toggleable="false" title="Bohater">
+                <hero-section
+                    :hero="hero"
+                    @update-characteristics="refreshCharacteristic"
+                ></hero-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'opis'" :toggleable="false" title="Opis bohatera">
+                <hero-description-section
+                    :hero-descriptions="hero.description"
+                ></hero-description-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'cechy'" :toggleable="false" title="Cechy">
+                <hero-characteristic-section
+                    :characteristic-data="hero.characteristic"
+                    :hero-id="hero.id"
+                    @add-characteristic="handleAddCharacteristic"
+                ></hero-characteristic-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'bron'" :toggleable="false" title="Broń">
+                <hero-weapons-section
+                    :hero-id="hero.id"
+                    :characteristic-data="hero.characteristic"
+                    :talents-data="hero.talents"
+                    :cold-weapons-data="hero.cold_weapons"
+                    :ranged-weapons-data="hero.ranged_weapons"
+                    @unequip-weapon="addWeaponToInventory"
+                ></hero-weapons-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'pancerz'" :toggleable="false" title="Pancerz">
+                <hero-armors-section
+                    :hero-id="hero.id"
+                    :armors-data="hero.armors"
+                    @unequip-armor="addArmorToInventory"
+                ></hero-armors-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'umiejetnosci'" :toggleable="false" title="Umiejętności">
+                <hero-skills-section
+                    :hero-id="hero.id"
+                    :skills-data="hero.skills"
+                    :characteristic-data="hero.characteristic"
+                ></hero-skills-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'zdolnosci'" :toggleable="false" title="Zdolności">
+                <hero-talents-section
+                    :hero-id="hero.id"
+                    :talents-data="hero.talents"
+                ></hero-talents-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'zaklecia'" :toggleable="false" title="Zaklęcia">
+                <hero-spells-section
+                    v-if="hasMagic"
+                    :hero-id="hero.id"
+                    :spells-data="hero.spells"
+                ></hero-spells-section>
+                <p v-else class="no-magic-note">Ta postać nie posiada many i nie rzuca zaklęć.</p>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'ekwipunek'" :toggleable="false" title="Ekwipunek">
+                <hero-inventory-section
+                    :hero-id="hero.id"
+                    :inventory-data="hero.inventory"
+                    @get-hero="getHero"
+                ></hero-inventory-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'opcje'" :toggleable="false" title="Opcje">
+                <hero-options-section
+                    :hero-id="hero.id"
+                ></hero-options-section>
+            </collapsible-section>
+
             <hero-watcher
                 :hero-id="hero.id"
                 @add-new-item="handleNewItem"
@@ -99,7 +122,7 @@ import HeroInventorySection from "./sections/HeroInventorySection.vue";
 import HeroOptionsSection from "./sections/HeroOptionsSection.vue";
 import HeroWatcher from "../../components/HeroWatcher.vue";
 import {CharacteristicPivot, Hero} from "../../../types/Hero";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {useToast} from "vue-toast-notification";
 import axios from "axios";
 import { emitter } from '../../../emitter'
@@ -123,6 +146,17 @@ const isLoading = ref<boolean>(true);
 const hero = ref<Hero | null>(null);
 const toast = useToast();
 const heroCreationRef = ref(null)
+
+const getSectionFromHash = (): string => location.hash.slice(1) || 'cechy';
+const activeSection = ref<string>(getSectionFromHash());
+const onHashChange = () => {
+    activeSection.value = getSectionFromHash();
+};
+
+const hasMagic = computed<boolean>(() => {
+    const mag = hero.value?.characteristic['Mag']?.pivot;
+    return !!mag && mag.start_value + mag.advancement > 0;
+});
 
 const getHero = async(): Promise<void> => {
     isLoading.value = true;
@@ -231,6 +265,11 @@ onMounted(() => {
     emitter.on('luck-spent', () => {
         hero.value.fortune_points--
     })
+    window.addEventListener('hashchange', onHashChange);
+})
+
+onUnmounted(() => {
+    window.removeEventListener('hashchange', onHashChange);
 })
 </script>
 
@@ -287,5 +326,12 @@ onMounted(() => {
 
 .btn-icon {
     font-size: 1.3rem;
+}
+
+.no-magic-note {
+    margin: 0;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--text-faint);
 }
 </style>

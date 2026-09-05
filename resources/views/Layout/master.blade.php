@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-mark.png') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -15,123 +16,84 @@
         </style>
     @endif
 </head>
-<body class="bg-[#2b2a27] text-[#e4d8b4] font-serif flex flex-col min-h-screen">
-<div id="app">
-    <header class="bg-[#3b3a36] py-6 shadow-lg border-b-4 border-[#8b5a2b] text-center font-(family-name:--Cinzel)">
-        <h1 class="text-4xl font-bold text-[#d4af37] tracking-widest">BOOK OF GRUDGES</h1>
-    </header>
+<body class="font-body" style="background: var(--bg-base); background-image: var(--bg-base-gradient); color: var(--text-body); margin: 0; min-height: 100vh">
+<div id="app" class="flex" style="min-height: 100vh">
+    <nav class="w-[264px] shrink-0 self-stretch sticky top-0 flex flex-col" style="height: 100vh; background: var(--bg-sidebar-gradient); border-right: 1px solid var(--border-default)">
+        <div class="flex items-center gap-3.5" style="padding: 24px 22px 20px; border-bottom: 1px solid var(--border-subtle)">
+            <div class="w-[46px] h-[46px] shrink-0 rounded-lg overflow-hidden" style="box-shadow: 0 2px 6px rgba(0,0,0,.6)">
+                <img src="{{ asset('images/logo-mark.png') }}" alt="Book of Grudges" class="w-full h-full object-cover">
+            </div>
+            <div class="font-heading text-sm font-bold tracking-[.16em]" style="color: var(--text-body); line-height: 1.2">BOOK OF<br>GRUDGES</div>
+        </div>
 
-    <main class="flex-grow max-w-[1600px] mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-12 gap-8">
-        <section class="bg-[#3b3a36] p-8 rounded-sm shadow-2xl border-4 border-double border-[#8b5a2b] md:col-span-9">
-            @yield('content')
-        </section>
+        <div class="flex flex-col gap-0.5 overflow-auto flex-1" style="padding: 18px 14px">
+            <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-1.5 pb-2" style="color: var(--text-faint-alt)">KSIĘGA</div>
 
-        <aside class="bg-[#3b3a36] p-6 rounded-sm shadow-lg border border-[#8b5a2b] md:col-span-3 h-fit">
-            <h2 class="text-xl font-bold text-[#d4af37] mb-4 border-b border-[#8b5a2b] pb-2 tracking-widest uppercase text-center">Szybki dostęp</h2>
-            <ul class="space-y-2">
-                {{--PANEL MENU--}}
-                @if(Auth::user() && Auth::user()->getAttribute('is_admin') && str_contains(url()->current(), 'panel'))
-                    <li>
-                        <a href="{{ route('panel.experience.show-experiences-form') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Rozdanie PD
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('panel.fortune-points.show-fp-management-form') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Punkty szczęścia
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('panel.purchases.make-purchase-form') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Zakupy
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('panel.tokens.index') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Tokeny
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('home') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">
-                            Front
-                        </a>
-                    </li>
+            @auth
+                @php
+                    $sheetBaseUrl = route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]);
+                    $sheetOpen = request()->routeIs('character-sheet.*');
+                @endphp
+                <details {{ $sheetOpen ? 'open' : '' }} class="group">
+                    <summary class="relative flex items-center gap-2.5 px-3 py-2.5 text-base cursor-pointer list-none hover:bg-[#221c14]" style="color: var(--text-body)">
+                        <span class="w-[7px] h-[7px] rotate-45 shrink-0" style="background: var(--border-accent-hover)"></span>
+                        <span class="flex-1">Karta postaci</span>
+                        <svg class="transition-transform duration-150 group-open:rotate-180" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b7b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </summary>
+                    <div class="pl-[19px] flex flex-col gap-0.5 mt-0.5" data-hash-nav>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#bohater">Bohater</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#opis">Opis</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#cechy">Cechy</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#bron">Broń</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#pancerz">Pancerz</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#umiejetnosci">Umiejętności</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#zdolnosci">Zdolności</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#zaklecia">Zaklęcia</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#ekwipunek">Ekwipunek</x-sheet-subnav-link>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#opcje">Opcje</x-sheet-subnav-link>
+                    </div>
+                </details>
+            @endauth
 
-                {{--FRONT MENU--}}
-                @else
-                    @auth
-                        <li>
-                            <a href="{{ route('character-sheet.index', ['id' => Auth::user()->getAuthIdentifier()]) }}"
-                               class="text-[#e4d8b4] hover:text-[#d4af37]"
-                            >
-                                Karta postaci
-                            </a>
-                        </li>
-                    @endauth
-                    <li>
-                        <a href="{{ route('weapons.index') }}" class="text-[#e4d8b4] hover:text-[#d4af37]">Bronie</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('armors.index') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Opancerzenie
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('skills-and-talents.skills-index') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Umiejętności
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('skills-and-talents.talents-index') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Zdolności
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('spells.spells-index') }}"
-                           class="text-[#e4d8b4] hover:text-[#d4af37]"
-                        >
-                            Zaklęcia
-                        </a>
-                    </li>
-                    @if(Auth::user() && Auth::user()->getAttribute('is_admin') && !str_contains(url()->current(), 'panel'))
-                        <li>
-                            <a href="{{ route('panel.experience.show-experiences-form') }}"
-                               class="text-[#e4d8b4] hover:text-[#d4af37]"
-                            >
-                                Panel
-                            </a>
-                        </li>
-                    @endif
-                    @auth
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="text-[#e4d8b4] hover:text-[#d4af37]">Wyloguj</button>
-                            </form>
-                        </li>
-                    @endauth
-                @endif
-            </ul>
+            @php
+                $compendiumOpen = request()->routeIs(['weapons.*', 'armors.*', 'skills-and-talents.*', 'spells.*']);
+            @endphp
+            <details {{ $compendiumOpen ? 'open' : '' }} class="group">
+                <summary class="relative flex items-center gap-2.5 px-3 py-2.5 text-base cursor-pointer list-none hover:bg-[#221c14]" style="color: var(--text-body)">
+                    <span class="w-[7px] h-[7px] rotate-45 shrink-0" style="background: var(--border-accent-hover)"></span>
+                    <span class="flex-1">Kompendium wiedzy</span>
+                    <svg class="transition-transform duration-150 group-open:rotate-180" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b7b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </summary>
+                <div class="pl-[19px] flex flex-col gap-0.5 mt-0.5">
+                    <x-sidebar-nav-link :route="route('weapons.index')" pattern="weapons.*">Bronie</x-sidebar-nav-link>
+                    <x-sidebar-nav-link :route="route('armors.index')" pattern="armors.*">Opancerzenie</x-sidebar-nav-link>
+                    <x-sidebar-nav-link :route="route('skills-and-talents.skills-index')" pattern="skills-and-talents.skills-index">Umiejętności</x-sidebar-nav-link>
+                    <x-sidebar-nav-link :route="route('skills-and-talents.talents-index')" pattern="skills-and-talents.talents-index">Zdolności</x-sidebar-nav-link>
+                    <x-sidebar-nav-link :route="route('spells.spells-index')" pattern="spells.*">Zaklęcia</x-sidebar-nav-link>
+                </div>
+            </details>
 
+            @if(Auth::user() && Auth::user()->getAttribute('is_admin'))
+                <div class="h-px my-3.5 mx-2" style="background: linear-gradient(90deg, transparent, var(--border-default), transparent)"></div>
+                <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-0.5 pb-2" style="color: var(--text-faint-alt)">MISTRZ GRY</div>
+
+                <x-sidebar-nav-link :route="route('panel.experience.show-experiences-form')" pattern="panel.experience.*">Rozdanie PD</x-sidebar-nav-link>
+                <x-sidebar-nav-link :route="route('panel.fortune-points.show-fp-management-form')" pattern="panel.fortune-points.*">Punkty szczęścia</x-sidebar-nav-link>
+                <x-sidebar-nav-link :route="route('panel.purchases.make-purchase-form')" pattern="panel.purchases.*">Zakupy</x-sidebar-nav-link>
+                <x-sidebar-nav-link :route="route('panel.tokens.index')" pattern="panel.tokens.*">Tokeny</x-sidebar-nav-link>
+            @endif
+        </div>
+
+        <div style="padding: 16px 18px; border-top: 1px solid var(--border-subtle); background: var(--bg-inset-alt)">
             <currency-converter></currency-converter>
 
             @if(Auth::user() && Auth::user()->hero?->id && !str_contains(url()->current(), 'panel'))
-                <div class="container mx-auto p-4">
-                    <h2 class="text-center text-2xl font-bold text-[#d4af37] mb-4">Szybkie akcje</h2>
+                <div class="mt-4">
+                    <div class="font-heading text-[10px] tracking-[.2em] mb-2.5" style="color: var(--text-faint-alt)">SZYBKIE AKCJE</div>
                     <div class="actions-container">
                         <spend-fortune-point
                             :hero-id="{{ Auth::user()->hero?->id }}"
@@ -143,12 +105,27 @@
                     </div>
                 </div>
             @endif
-        </aside>
-    </main>
 
-    <footer class="text-center py-4 mt-6 text-[#c4a47c] border-t border-[#8b5a2b]">
-        <footer-text></footer-text>
-    </footer>
+            @auth
+                <form method="POST" action="{{ route('logout') }}" class="mt-3.5">
+                    @csrf
+                    <button type="submit" class="text-sm" style="color: var(--text-faint); letter-spacing: .04em; background: none; border: none; padding: 0; cursor: pointer">Wyloguj →</button>
+                </form>
+            @endauth
+            @guest
+                <a href="{{ route('login') }}" class="block mt-3.5 text-sm" style="color: var(--text-faint); letter-spacing: .04em">Zaloguj się →</a>
+            @endguest
+        </div>
+    </nav>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+        <div class="flex-1">
+            @yield('content')
+        </div>
+        <footer class="text-center py-4 text-sm" style="color: var(--text-faint); border-top: 1px solid var(--border-default)">
+            <footer-text></footer-text>
+        </footer>
+    </div>
 </div>
 </body>
 </html>

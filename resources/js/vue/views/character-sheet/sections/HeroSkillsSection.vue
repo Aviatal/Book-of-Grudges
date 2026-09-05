@@ -1,128 +1,60 @@
 <template>
-    <div class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-        <div
-            @click="toggleOpen('main')"
-            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
-        >
-            <h2 class="font-semibold text-xl text-[#e4d8b4]">Umiejętności</h2>
-            <svg
-                :class="isOpen ? 'rotate-180' : ''"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
+    <div>
+        <collapsible-section title="Wykupione" :default-open="true">
+            <v-data-table
+                :headers="hurdledSkillsHeaders"
+                :items="hurdledSkills"
+                class="custom-table"
+                hide-default-footer
+                items-per-page="-1"
+                no-data-text="Nie posiadasz wykupionych umiejętności"
             >
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        </div>
-
-        <transition name="fade">
-            <div v-show="isOpen" class="mt-4">
-                <div
-                    class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-
-                    <div
-                        @click="toggleOpen('hurdled')"
-                        class="cursor-pointer flex justify-between items-center mt-3 px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
+                <template v-slot:item.hurdled="{ item }">
+                    <input type="checkbox" checked @change="updateSkill(item ,'hurdled', 0, true)">
+                </template>
+                <template v-slot:item.test="{ item }">
+                    {{ characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement }}
+                </template>
+                <template v-slot:item.additional_skill_name="{ item }">
+                    <v-text-field
+                        v-model="item.pivot.additional_skill_name"
+                        class="custom-input w-full"
+                        variant="filled"
+                        hide-details
+                        @change="updateSkill(item ,'additional_skill_name', item.pivot.additional_skill_name, true)"
                     >
-                        <h2 class="font-semibold text-xl text-[#e4d8b4]">Wykupione</h2>
-                        <svg
-                            :class="isOpen ? 'rotate-180' : ''"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
-                        >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <transition name="fade">
-                        <div v-show="isHurdledOpen" class="mt-4">
-                            <v-data-table
-                                :headers="hurdledSkillsHeaders"
-                                :items="hurdledSkills"
-                                class="custom-table"
-                                hide-default-footer
-                                items-per-page="-1"
-                                no-data-text="Nie posiadasz wykupionych umiejętności"
-                            >
-                                <template v-slot:item.hurdled="{ item }">
-                                    <input type="checkbox" checked @change="updateSkill(item ,'hurdled', 0, true)">
-                                </template>
-                                <template v-slot:item.test="{ item }">
-                                    {{ characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement }}
-                                </template>
-                                <template v-slot:item.additional_skill_name="{ item }">
-                                    <v-text-field
-                                        v-model="item.pivot.additional_skill_name"
-                                        class="custom-input w-full"
-                                        variant="filled"
-                                        hide-details
-                                        @change="updateSkill(item ,'additional_skill_name', item.pivot.additional_skill_name, true)"
-                                    >
-                                    </v-text-field>
-                                </template>
-                                <template v-slot:item.first_level="{ item }">
-                                    <input :checked="isLevelChecked('first_level', item)" type="checkbox"
-                                           @change="updateSkill(item, 'first_level', !isLevelChecked('first_level', item), true)">
-                                </template>
-                                <template v-slot:item.second_level="{ item }">
-                                    <input :checked="isLevelChecked('second_level', item)" type="checkbox"
-                                           @change="updateSkill(item, 'second_level', !isLevelChecked('second_level', item), true)">
-                                </template>
-                            </v-data-table>
-                        </div>
-                    </transition>
-                </div>
+                    </v-text-field>
+                </template>
+                <template v-slot:item.first_level="{ item }">
+                    <input :checked="isLevelChecked('first_level', item)" type="checkbox"
+                           @change="updateSkill(item, 'first_level', !isLevelChecked('first_level', item), true)">
+                </template>
+                <template v-slot:item.second_level="{ item }">
+                    <input :checked="isLevelChecked('second_level', item)" type="checkbox"
+                           @change="updateSkill(item, 'second_level', !isLevelChecked('second_level', item), true)">
+                </template>
+            </v-data-table>
+        </collapsible-section>
 
-                <div
-                    class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-
-                    <div
-                        @click="toggleOpen('notHurdled')"
-                        class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
-                    >
-                        <h2 class="font-semibold text-xl text-[#e4d8b4]">Niewykupione</h2>
-                        <svg
-                            :class="isOpen ? 'rotate-180' : ''"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
-                        >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <transition name="fade">
-                        <div v-show="isNotHurdledOpen" class="mt-4">
-                            <v-data-table
-                                :headers="notHurdledSkillsHeaders"
-                                :items="notHurdledSkills"
-                                class="custom-table"
-                                hide-default-footer
-                                items-per-page="-1"
-                                no-data-text="Jesteś wcieleniem Sigmara! Posiadasz wszystkie umiejętności!"
-                            >
-                                <template v-slot:item.test="{ item }">
-                                    {{ Math.floor((characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement) / 2) }}
-                                </template>
-                                <template v-slot:item.add="{ item }">
-                                    <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="simple-button">
-                                        Wykup
-                                    </button>
-                                </template>
-                            </v-data-table>
-                        </div>
-                    </transition>
-                </div>
-            </div>
-        </transition>
+        <collapsible-section title="Niewykupione" :default-open="false">
+            <v-data-table
+                :headers="notHurdledSkillsHeaders"
+                :items="notHurdledSkills"
+                class="custom-table"
+                hide-default-footer
+                items-per-page="-1"
+                no-data-text="Jesteś wcieleniem Sigmara! Posiadasz wszystkie umiejętności!"
+            >
+                <template v-slot:item.test="{ item }">
+                    {{ Math.floor((characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement) / 2) }}
+                </template>
+                <template v-slot:item.add="{ item }">
+                    <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="simple-button">
+                        Wykup
+                    </button>
+                </template>
+            </v-data-table>
+        </collapsible-section>
     </div>
 </template>
 <script setup lang="ts">
@@ -138,9 +70,6 @@ const props = defineProps<{
 }>();
 const toast = useToast();
 
-const isOpen = ref<boolean>(false);
-const isHurdledOpen = ref<boolean>(true);
-const isNotHurdledOpen = ref<boolean>(false);
 const hurdledSkillsHeaders = ref<TableHeader[]>([
     {title: 'Umiejętność', align: 'start', sortable: true, value: 'name'},
     {title: 'Cecha', align: 'start', sortable: true, value: 'characteristic'},
@@ -170,20 +99,6 @@ const notHurdledSkills = computed(() => {
         .sort((a, b) => a.name.localeCompare(b.name));
 });
 const characteristic = computed(() => props.characteristicData ?? []);
-
-const toggleOpen = (panel: 'main' | 'hurdled' | 'notHurdled' = 'main') => {
-    switch (panel) {
-        case 'main':
-            isOpen.value = !isOpen.value;
-            break;
-        case 'hurdled':
-            isHurdledOpen.value = !isHurdledOpen.value;
-            break;
-        case 'notHurdled':
-            isNotHurdledOpen.value = !isNotHurdledOpen.value;
-            break;
-    }
-};
 
 const isLevelChecked = (level: string, item: Skill) => {
     return Boolean(item.pivot[level])
@@ -225,38 +140,36 @@ const updateSkill = (skill: Skill, field: string, value: any, update: boolean) =
 
 <style scoped>
 .custom-table {
-    background-color: #2b2a27 !important;
-    border: 1px solid #8b5a2b !important;
-    color: #e4d8b4 !important;
+    background-color: var(--bg-inset) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-body) !important;
 }
 
 .custom-table .v-data-table thead {
-    background-color: #8b5a2b !important;
+    background-color: var(--bg-panel) !important;
 }
 
 .custom-table .v-data-table th {
-    background-color: #8b5a2b !important;
-    color: #2b2a27 !important;
-    font-weight: bold;
+    background-color: var(--bg-panel) !important;
+    color: var(--text-faint) !important;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: .1em;
     text-transform: uppercase;
     padding: 12px 16px !important;
-    border-bottom: 2px solid #704214 !important;
+    border-bottom: 2px solid var(--border-accent) !important;
 }
 
 .custom-table .v-data-table tbody tr {
-    background-color: #3b3a36 !important;
+    background-color: var(--bg-panel) !important;
 }
 
 .custom-table .v-data-table tbody tr:nth-child(even) {
-    background-color: #2b2a27 !important;
+    background-color: var(--bg-inset) !important;
 }
 
 .custom-table .v-data-table th:hover {
-    background-color: #704214 !important;
-    color: #f5e0b7 !important;
+    background-color: var(--border-accent) !important;
+    color: var(--gold-bright) !important;
 }
-
-
-
-
 </style>

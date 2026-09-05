@@ -1,80 +1,61 @@
 <template>
-    <div class="tokens-table-container">
-        <div class="flex justify-between items-center mb-6 border-b-2 border-[#8b5a2b] pb-4">
-            <h2 class="text-3xl font-bold text-[#d4af37] tracking-widest uppercase font-serif">
-                <i class="mdi mdi-format-list-bulleted-type mr-2"></i> Rejestr Artefaktów i Tokenów
-            </h2>
-            <button class="warhammer-btn">
-                <a href="/panel/tokens/create" title="Dodaj token">
-                    <i class="mdi mdi-plus"></i> Nowy token
-                </a>
-            </button>
+    <div>
+        <div class="page-header">
+            <div class="page-header__inner">
+                <div class="page-header__titles">
+                    <div class="page-header__eyebrow">PANEL MISTRZA GRY</div>
+                    <h1 class="page-header__title">Rejestr artefaktów i tokenów</h1>
+                </div>
+                <a href="/panel/tokens/create" class="add-token-btn" title="Dodaj token">+ NOWY TOKEN</a>
+            </div>
         </div>
 
-        <div class="overflow-x-auto border-2 border-[#8b5a2b] shadow-2xl bg-[#2b2a27]">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                <tr class="bg-[#1e1d1b] border-b-2 border-[#8b5a2b]">
-                    <th class="warhammer-th w-16">ID</th>
-                    <th class="warhammer-th">Nazwa</th>
-                    <th class="warhammer-th text-center">Widok</th>
-                    <th class="warhammer-th">Pozycja</th>
-                    <th class="warhammer-th">Postać</th>
-                    <th class="warhammer-th text-right">Akcje</th>
-                </tr>
-                </thead>
-                <tbody class="bg-[#3b3a36]">
-                <tr
-                    v-for="token in tokens"
-                    :key="token.id"
-                    class="grudge-row border-b border-[#5e4128] hover:bg-[#4b4a46] transition-all duration-300"
-                >
-                    <td class="warhammer-td font-mono opacity-60">#{{ token.id }}</td>
-                    <td class="warhammer-td font-bold text-[#d4af37] text-lg">{{ token.name }}</td>
+        <div class="page-content">
+            <div class="tokens-panel">
+                <table class="tokens-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NAZWA</th>
+                        <th class="text-center">WIDOK</th>
+                        <th>POZYCJA</th>
+                        <th>POSTAĆ</th>
+                        <th class="text-right">AKCJE</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="token in tokens" :key="token.id">
+                        <td class="tokens-table__id">#{{ token.id }}</td>
+                        <td class="tokens-table__name">{{ token.name }}</td>
 
-                    <td class="warhammer-td text-center">
-                        <div class="token-wrapper">
-                            <div
-                                class="token-preview-circ"
-                                :style="{
-                                        backgroundImage: `url(${token.image_url})`,
-                                    }"
-                            >
-                                <i v-if="!token.image_url" class="mdi mdi-help text-3xl text-[#5e4128]"></i>
+                        <td class="text-center">
+                            <div class="token-preview" :style="{ backgroundImage: token.image_url ? `url(${token.image_url})` : 'none' }">
+                                <span v-if="!token.image_url" class="token-preview__placeholder">?</span>
                             </div>
-                        </div>
-                    </td>
+                        </td>
 
-                    <td class="warhammer-td font-mono">
-                        <span class="text-[#8b5a2b] font-bold">X:</span> {{ token.x }}
-                        <span class="text-[#8b5a2b] font-bold ml-3">Y:</span> {{ token.y }}
-                    </td>
-                    <td class="warhammer-td italic text-[#c4a47c]">
-                        <div class="flex flex-col">
-                            <span>{{ token.hero ? token.hero.name : 'NPC' }}</span>
-                            <span v-if="token.hero?.user" class="text-xs opacity-70">({{ token.hero.user.name }})</span>
-                        </div>
-                    </td>
-                    <td class="warhammer-td text-right">
-                        <div class="flex justify-end gap-4">
-                            <a :href="'/panel/tokens/'+ token.id +'/edit'" class="icon-btn edit-btn" title="Edytuj">
-                                <i class="mdi mdi-feather"></i>
-                            </a>
-                            <button @click="deleteToken(token.id)" class="icon-btn delete-btn hover:text-red-600" title="Usuń">
-                                <i class="mdi mdi-close-thick"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                        <td class="tokens-table__position">
+                            <span class="tokens-table__coord-label">X:</span> {{ token.x }}
+                            <span class="tokens-table__coord-label" style="margin-left: 12px">Y:</span> {{ token.y }}
+                        </td>
+                        <td class="tokens-table__hero">
+                            {{ token.hero ? token.hero.name : 'NPC' }}
+                            <span v-if="token.hero?.user" class="tokens-table__hero-user">({{ token.hero.user.name }})</span>
+                        </td>
+                        <td class="text-right">
+                            <a :href="'/panel/tokens/'+ token.id +'/edit'" class="table-action-btn" title="Edytuj">Edytuj</a>
+                            <button @click="deleteToken(token.id)" class="table-action-btn table-action-btn--danger" title="Usuń">Usuń</button>
+                        </td>
+                    </tr>
 
-                <tr v-if="tokens.length === 0">
-                    <td colspan="6" class="py-16 text-center text-[#8b5a2b] uppercase tracking-widest italic opacity-50">
-                        <i class="mdi mdi-book-open-variant text-4xl block mb-2"></i>
-                        Księgi milczą o takich tokenach...
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                    <tr v-if="tokens.length === 0">
+                        <td colspan="6" class="tokens-table__empty">
+                            Księgi milczą o takich tokenach...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </template>
@@ -114,91 +95,193 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.warhammer-th {
-    padding: 1.25rem 1rem;
-    color: #d4af37;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.15em;
-    font-weight: 800;
-    background: rgba(0,0,0,0.2);
+.page-header {
+    background: var(--bg-panel-gradient);
+    border-bottom: 1px solid var(--border-default);
+    padding: 26px 34px 20px;
 }
 
-.warhammer-td {
-    padding: 1rem;
-    color: #e4d8b4;
+.page-header__inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.page-header__eyebrow {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: .24em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+}
+
+.page-header__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--gold);
+}
+
+.add-token-btn {
+    padding: 11px 18px;
+    border: 1px solid var(--border-accent);
+    background: linear-gradient(#3a2b17, #241b10);
+    color: var(--gold-bright);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: .14em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+}
+
+.add-token-btn:hover {
+    border-color: var(--gold);
+}
+
+.page-content {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 26px 34px 60px;
+}
+
+.tokens-panel {
+    border: 1px solid var(--border-default);
+    border-top: 1px solid var(--border-accent);
+    background: var(--bg-panel);
+    overflow-x: auto;
+}
+
+.tokens-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.tokens-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: .16em;
+    color: var(--text-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.tokens-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: middle;
 }
 
-.grudge-row:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.15);
+.tokens-table tbody tr:hover {
+    background: #1e1a13;
 }
 
-/* Kontener ułatwiający centrowanie */
-.token-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.tokens-table__id {
+    color: var(--text-faint-alt);
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
 }
 
-/* Stylizacja samego tokena */
-.token-preview-circ {
-    width: 60px;
-    height: 60px;
+.tokens-table__name {
+    color: var(--gold);
+    font-size: 18px;
+}
+
+.tokens-table__position {
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.tokens-table__coord-label {
+    color: var(--border-accent-hover);
+}
+
+.tokens-table__hero {
+    color: var(--text-muted-alt);
+    font-style: italic;
+}
+
+.tokens-table__hero-user {
+    font-size: 12px;
+    color: var(--text-faint-alt);
+    font-style: normal;
+    margin-left: 4px;
+}
+
+.tokens-table__empty {
+    padding: 60px 16px;
+    text-align: center;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-style: italic;
+}
+
+.token-preview {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
+    border: 1px solid var(--border-frame);
+    background-color: var(--bg-inset);
     background-size: cover;
     background-position: center;
-    border: 3px solid #8b5a2b; /* Brązowa rama */
-    outline: 1px solid #d4af37; /* Cienka złota obwódka */
-    box-shadow:
-        0 4px 8px rgba(0,0,0,0.8),
-        inset 0 0 15px rgba(0,0,0,0.6);
-    transition: transform 0.2s ease-in-out, border-color 0.2s;
-    cursor: zoom-in;
 }
 
-.token-preview-circ:hover {
-    transform: scale(1.1);
-    border-color: #d4af37;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+.token-preview__placeholder {
+    color: var(--border-frame);
+    font-size: 18px;
 }
 
-.warhammer-btn {
-    background: linear-gradient(145deg, #8b5a2b, #5e4128);
-    color: #e4d8b4;
-    padding: 0.6rem 1.2rem;
-    border: 1px solid #d4af37;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    font-weight: bold;
-    letter-spacing: 1px;
+.table-action-btn {
+    display: inline-block;
+    padding: 5px 11px;
+    margin-left: 6px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-panel);
+    color: var(--text-muted-alt);
+    font-size: 13px;
     cursor: pointer;
-    box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
-    transition: all 0.2s;
+    font-family: var(--font-body);
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.warhammer-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
-    filter: brightness(1.2);
+.table-action-btn:hover {
+    border-color: var(--border-accent-hover);
+    color: var(--text-body);
 }
 
-.icon-btn {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    color: #8b5a2b;
-    cursor: pointer;
-    transition: transform 0.2s, color 0.2s;
+.table-action-btn--danger {
+    border-color: var(--danger-border);
+    background: var(--danger-bg);
+    color: var(--danger-text);
 }
 
-.edit-btn:hover { color: #d4af37; transform: rotate(-10deg); }
-.delete-btn:hover { color: #ff4444; transform: scale(1.2); }
+.table-action-btn--danger:hover {
+    border-color: var(--danger-border-hover);
+    color: var(--danger-text-hover);
+}
 
-.overflow-x-auto::-webkit-scrollbar { height: 8px; }
-.overflow-x-auto::-webkit-scrollbar-track { background: #1e1d1b; }
-.overflow-x-auto::-webkit-scrollbar-thumb {
-    background: #8b5a2b;
-    border: 2px solid #1e1d1b;
+.tokens-panel::-webkit-scrollbar { height: 10px; }
+.tokens-panel::-webkit-scrollbar-track { background: var(--bg-inset-alt); }
+.tokens-panel::-webkit-scrollbar-thumb {
+    background: var(--border-accent);
+    border: 2px solid var(--bg-inset-alt);
 }
 </style>

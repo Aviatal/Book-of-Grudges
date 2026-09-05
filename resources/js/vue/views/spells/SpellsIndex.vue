@@ -1,75 +1,67 @@
 <template>
-    <div class="container mx-auto p-4 bg-[#121212] min-h-screen text-[#E0E0E0]">
-        <div class="mb-12">
-            <v-text-field
-                v-model="searchValue"
-                label="Przeszukaj zakazane arkana..."
-                prepend-inner-icon="mdi-magnify"
-                variant="outlined"
-                color="#7B1113"
-                theme="dark"
-                class="custom-search"
-                clearable
-                @input="getSpells"
-            ></v-text-field>
-        </div>
-
-        <div class="text-center mb-16">
-            <h1 class="text-6xl font-serif font-bold text-[#7B1113] tracking-[0.2em] uppercase drop-shadow-[0_5px_15px_rgba(123,17,19,0.4)]">
-                KSIĘGA CZARÓW
-            </h1>
-            <div class="flex justify-center items-center mt-4">
-                <div class="h-[1px] w-32 bg-gradient-to-r from-transparent to-[#A27B37]"></div>
-                <v-icon color="#A27B37" class="mx-6" size="large">mdi-skull</v-icon>
-                <div class="h-[1px] w-32 bg-gradient-to-l from-transparent to-[#A27B37]"></div>
+    <div class="spells-page">
+        <div class="page-content">
+            <div class="search-box">
+                <span class="search-box__icon">⌕</span>
+                <input
+                    v-model="searchValue"
+                    type="text"
+                    placeholder="Przeszukaj zakazane arkana…"
+                    class="search-box__input"
+                    @input="getSpells"
+                >
             </div>
-        </div>
 
-        <div v-for="(specializations, type) in groupedSpells" :key="type" class="mb-24">
-
-            <div class="relative mb-12 flex justify-center">
-                <div class="w-full absolute top-1/2 left-0 h-px bg-[#7B1113]/30"></div>
-                <div class="relative bg-[#121212] px-10 py-2 border-2 border-[#7B1113]">
-                    <h2 class="text-5xl font-serif font-black text-[#7B1113] uppercase tracking-widest">
-                        {{ type }}
-                    </h2>
+            <div class="grimoire-title">
+                <h1 class="grimoire-title__heading">KSIĘGA CZARÓW</h1>
+                <div class="grimoire-title__divider">
+                    <div class="grimoire-title__line"></div>
+                    <span class="grimoire-title__icon">☠</span>
+                    <div class="grimoire-title__line"></div>
                 </div>
             </div>
 
-            <div v-for="(spellsInSpec, specName) in specializations" :key="specName" class="mb-16">
+            <div v-for="(specializations, type) in groupedSpells" :key="type" class="spell-type-group">
 
-                <div class="flex items-center mb-8 pl-4">
-                    <v-icon color="#A27B37" size="small" class="mr-4">mdi-script</v-icon>
-                    <h3 v-if="specName && specName !== 'null'" class="text-4xl font-serif text-[#A27B37] italic">
-                        {{ specName }}
-                    </h3>
-                    <h3 v-else class="text-3xl font-serif text-gray-600 italic"> Wiedza Powszechna </h3>
+                <div class="spell-type-group__header">
+                    <div class="spell-type-group__line"></div>
+                    <div class="spell-type-group__badge">
+                        <h2 class="spell-type-group__title">{{ type }}</h2>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-q lg:grid-cols-2 gap-8">
-                    <div v-for="spell in spellsInSpec" :key="spell.id"
-                         class="spell-card bg-[#1A1A1A] border-l-4 border-l-[#7B1113] border-y border-r border-[#333] flex flex-col shadow-2xl">
+                <div v-for="(spellsInSpec, specName) in specializations" :key="specName" class="spell-spec-group">
 
-                        <div class="bg-[#222] p-5 border-b border-[#333] flex justify-between items-center">
-                            <h4 class="text-[#E0E0E0] font-bold text-xl uppercase tracking-tight">{{ spell.name }}</h4>
-                            <div class="bg-[#7B1113] text-white px-3 py-1 rounded-sm text-sm font-black" title="Wymagany poziom mocy">
-                                WPM {{ spell.casting_number }}
-                            </div>
-                        </div>
+                    <div class="spell-spec-group__header">
+                        <span class="spell-spec-group__icon">✦</span>
+                        <h3 v-if="specName && specName !== 'null'" class="spell-spec-group__title">{{ specName }}</h3>
+                        <h3 v-else class="spell-spec-group__title spell-spec-group__title--muted">Wiedza Powszechna</h3>
+                    </div>
 
-                        <div class="p-5 text-s space-y-3 bg-[#1A1A1A]">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[#555] uppercase font-bold tracking-tighter">Inkantacja</span>
-                                <span class="text-[#CCC]">{{ spell.casting_duration }}</span>
-                            </div>
-                            <div class="flex justify-between items-start border-t border-[#252525] pt-3">
-                                <span class="text-[#555] uppercase font-bold tracking-tighter">Składnik</span>
-                                <span class="text-[#A27B37] italic text-right max-w-[150px] leading-none">{{ spell.ingredient || 'Brak' }}</span>
-                            </div>
-                        </div>
+                    <div class="spell-grid">
+                        <div v-for="spell in spellsInSpec" :key="spell.id" class="spell-card">
 
-                        <div class="description-box p-5 bg-[#141414] text-base text-[#999] leading-snug italic border-t border-[#252525] flex-grow">
-                            {{ spell.description }}
+                            <div class="spell-card__header">
+                                <h4 class="spell-card__name">{{ spell.name }}</h4>
+                                <div class="spell-card__badge" title="Wymagany poziom mocy">
+                                    WPM {{ spell.casting_number }}
+                                </div>
+                            </div>
+
+                            <div class="spell-card__meta">
+                                <div class="spell-card__meta-row">
+                                    <span class="spell-card__meta-label">Inkantacja</span>
+                                    <span class="spell-card__meta-value">{{ spell.casting_duration }}</span>
+                                </div>
+                                <div class="spell-card__meta-row spell-card__meta-row--bordered">
+                                    <span class="spell-card__meta-label">Składnik</span>
+                                    <span class="spell-card__meta-ingredient">{{ spell.ingredient || 'Brak' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="description-box">
+                                {{ spell.description }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -121,42 +113,254 @@ export default {
 </script>
 
 <style scoped>
-/* Naprawa skakania - stała wysokość opisu */
-.description-box {
-    min-height: 140px;
-    max-height: 140px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #7B1113 #141414;
+.spells-page {
+    background: var(--bg-base);
+    background-image: var(--bg-base-gradient);
+    min-height: 100%;
 }
 
-/* Custom Scrollbar dla Chrome/Safari */
-.description-box::-webkit-scrollbar {
-    width: 3px;
-}
-.description-box::-webkit-scrollbar-track {
-    background: #141414;
-}
-.description-box::-webkit-scrollbar-thumb {
-    background: #7B1113;
+.page-content {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 26px 34px 60px;
 }
 
-/* Stylizacja wyszukiwarki */
-.custom-search :deep(.v-field) {
-    border: 1px solid #333 !important;
-    border-radius: 0 !important;
+.search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-default);
+    background: var(--bg-inset);
+    max-width: 480px;
+    margin: 0 auto 48px;
+}
+
+.search-box__icon {
+    padding: 0 12px;
+    color: var(--text-faint);
+}
+
+.search-box__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 12px 12px 0;
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-size: 16px;
+    outline: none;
+}
+
+.grimoire-title {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.grimoire-title__heading {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--magic-accent);
+}
+
+.grimoire-title__divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 16px;
+    gap: 24px;
+}
+
+.grimoire-title__line {
+    height: 1px;
+    width: 120px;
+    background: linear-gradient(90deg, transparent, var(--gold-muted));
+}
+
+.grimoire-title__divider .grimoire-title__line:last-child {
+    background: linear-gradient(90deg, var(--gold-muted), transparent);
+}
+
+.grimoire-title__icon {
+    color: var(--gold-muted);
+    font-size: 22px;
+}
+
+.spell-type-group {
+    margin-bottom: 60px;
+}
+
+.spell-type-group__header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.spell-type-group__line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(123, 17, 19, .3);
+}
+
+.spell-type-group__badge {
+    position: relative;
+    background: var(--bg-base);
+    padding: 8px 32px;
+    border: 2px solid var(--magic-accent);
+}
+
+.spell-type-group__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--magic-accent);
+    text-transform: uppercase;
+    letter-spacing: .16em;
+}
+
+.spell-spec-group {
+    margin-bottom: 40px;
+}
+
+.spell-spec-group__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-left: 16px;
+}
+
+.spell-spec-group__icon {
+    color: var(--gold-muted);
+    font-size: 14px;
+}
+
+.spell-spec-group__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-style: italic;
+    color: var(--gold-muted);
+}
+
+.spell-spec-group__title--muted {
+    color: var(--text-faint);
+}
+
+.spell-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.spell-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-default);
+    border-left: 4px solid var(--magic-accent);
+    box-shadow: 0 20px 40px -20px #000;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .spell-card:hover {
     transform: scale(1.02);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, .6);
 }
 
-.font-serif {
-    font-family: 'Crimson Text', 'Georgia', serif;
+.spell-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-h2 {
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+.spell-card__name {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-body);
+}
+
+.spell-card__badge {
+    background: var(--magic-accent);
+    color: var(--text-body);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.spell-card__meta {
+    padding: 16px 20px;
+    background: var(--bg-inset);
+    font-size: 14px;
+}
+
+.spell-card__meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.spell-card__meta-row--bordered {
+    border-top: 1px solid var(--border-subtle);
+    align-items: flex-start;
+}
+
+.spell-card__meta-label {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--text-faint);
+    font-size: 13px;
+}
+
+.spell-card__meta-value {
+    color: var(--text-muted-alt);
+}
+
+.spell-card__meta-ingredient {
+    color: var(--gold-muted);
+    font-style: italic;
+    text-align: right;
+    max-width: 150px;
+}
+
+.description-box {
+    flex-grow: 1;
+    padding: 16px 20px;
+    background: var(--bg-inset-alt);
+    color: var(--text-faint-alt);
+    font-size: 15px;
+    line-height: 1.5;
+    font-style: italic;
+    border-top: 1px solid var(--border-subtle);
+    min-height: 140px;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--magic-accent) var(--bg-inset-alt);
+}
+
+.description-box::-webkit-scrollbar {
+    width: 3px;
+}
+.description-box::-webkit-scrollbar-track {
+    background: var(--bg-inset-alt);
+}
+.description-box::-webkit-scrollbar-thumb {
+    background: var(--magic-accent);
 }
 </style>

@@ -1,21 +1,36 @@
 <template>
-    <div class="container mx-auto p-4">
-        <div>
-            <v-text-field
-                v-model="searchValue"
-                placeholder="Wyszukaj umiejętność"
-                @input="getSkills"
-            ></v-text-field>
+    <div>
+        <div class="page-header">
+            <div class="page-header__inner">
+                <div class="page-header__titles">
+                    <div class="page-header__eyebrow">KOMPENDIUM</div>
+                    <h1 class="page-header__title">Umiejętności</h1>
+                </div>
+                <div class="search-box">
+                    <span class="search-box__icon">⌕</span>
+                    <input
+                        v-model="searchValue"
+                        type="text"
+                        placeholder="Wyszukaj umiejętność…"
+                        class="search-box__input"
+                        @input="getSkills"
+                    >
+                </div>
+            </div>
         </div>
-        <h2 class="text-center text-2xl font-bold text-yellow-500 mb-4">Umiejętności</h2>
-        <div v-show="skillsLength > 0" class="grid grid-cols-2 gap-4" key="skills">
-                    <div v-for="skill in skills" :key="skill.id"
-                         class="bg-gray-800 border border-gray-600 p-4 rounded-lg shadow-lg">
-                        <h3 class="text-lg font-semibold text-white">{{ skill.name }}</h3>
-                        <div><b>Typ: </b>{{ skill.type }}</div>
-                        <div><b>Cecha: </b>{{ skill.characteristic }}</div>
-                        <div><b>Opis: </b>{{ skill.description }}</div>
+
+        <div class="page-content">
+            <div v-show="skillsLength > 0" class="skill-grid">
+                <div v-for="skill in skills" :key="skill.id" class="skill-card">
+                    <div class="skill-card__top">
+                        <h3 class="skill-card__name">{{ skill.name }}</h3>
+                        <span class="skill-card__type">{{ skill.type }}</span>
                     </div>
+                    <div class="skill-card__characteristic">cecha: {{ skill.characteristic }}</div>
+                    <div class="skill-card__divider"></div>
+                    <p class="skill-card__description">{{ skill.description }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -41,7 +56,6 @@ export default {
     },
     methods: {
         getSkills() {
-            console.log('getSkills');
             if (this.debounceTimer) {
                 clearTimeout(this.debounceTimer);
             }
@@ -63,3 +77,135 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.page-header {
+    background: var(--bg-panel-gradient);
+    border-bottom: 1px solid var(--border-default);
+    padding: 26px 34px 20px;
+}
+
+.page-header__inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.page-header__titles {
+    flex: 1;
+    min-width: 260px;
+}
+
+.page-header__eyebrow {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: .24em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+}
+
+.page-header__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--gold);
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-default);
+    background: var(--bg-inset);
+    min-width: 320px;
+}
+
+.search-box__icon {
+    padding: 0 12px;
+    color: var(--text-faint);
+}
+
+.search-box__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 12px 12px 0;
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-size: 16px;
+    outline: none;
+}
+
+.page-content {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 26px 34px 60px;
+}
+
+.skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+}
+
+.skill-card {
+    border: 1px solid var(--border-default);
+    border-top: 1px solid var(--border-accent);
+    background: linear-gradient(#1d1913, #161209);
+    padding: 18px 20px;
+    transition: border-color 0.2s ease;
+}
+
+.skill-card:hover {
+    border-color: var(--border-accent-hover);
+}
+
+.skill-card__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.skill-card__name {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-body);
+    letter-spacing: .04em;
+}
+
+.skill-card__type {
+    border: 1px solid var(--border-frame);
+    background: #221d16;
+    color: var(--text-muted-alt);
+    padding: 2px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.skill-card__characteristic {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--gold-muted);
+    letter-spacing: .06em;
+}
+
+.skill-card__divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 12px 0;
+}
+
+.skill-card__description {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+</style>

@@ -1,3 +1,12 @@
+export interface ArmorLocation {
+    id: number,
+    name: string
+    pivot: {
+        armor_id: number,
+        location_id: number
+    }
+}
+
 export interface Armor {
     name: string,
     category: string,
@@ -5,12 +14,5 @@ export interface Armor {
     loading: number,
     armor_points: number,
     availability: string,
-    locations: {
-        id: number,
-        name: string
-        pivot: {
-            armor_id: number,
-            location_id: number
-        }
-    }
+    locations: ArmorLocation[]
 }

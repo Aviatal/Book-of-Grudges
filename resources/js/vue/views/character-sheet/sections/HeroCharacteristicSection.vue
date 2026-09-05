@@ -1,318 +1,57 @@
 <template>
-    <div class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-        <div
-            @click="toggleOpen"
-            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
-        >
-            <h2 class="font-semibold text-xl text-[#e4d8b4]">Cechy</h2>
-            <svg
-                :class="isOpen ? 'rotate-180' : ''"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24"
-                viewBox="0 0 24 24"
-                 stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
+    <div>
+        <div class="stat-group-label">
+            <span>CECHY PODSTAWOWE</span>
+            <span class="stat-group-line"></span>
+        </div>
+        <div class="stat-grid">
+            <div
+                v-for="code in primaryCodes"
+                :key="code"
+                class="stat-card stat-card--clickable"
+                title="Kliknij, aby rozwinąć cechę"
+                @click="developCharacteristic(code)"
             >
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+                <div class="stat-card__code">{{ code }}</div>
+                <div class="stat-card__value">{{ totalValue(code) }}</div>
+                <div class="stat-card__detail">{{ characteristic[code]?.pivot.start_value }} + {{ characteristic[code]?.pivot.advancement }}</div>
+                <div class="stat-card__available">dostępne: {{ characteristic[code]?.available_advancement ?? '-' }}</div>
+                <button class="stat-card__develop" @click.stop="developCharacteristic(code)">+</button>
+            </div>
         </div>
 
-        <div v-show="isOpen" class="mt-4">
-            <div class="text-center text-[#e4d8b4] text-lg font-semibold mt-6 mb-2">Cechy podstawowe</div>
-            <table class="w-full table-auto border-collapse">
-                <thead>
-                <tr>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">WW</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">US</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">K</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Odp</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Zr</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Int</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">SW</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Ogd</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['WW']?.pivot.start_value }}
-
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['US']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['K']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Odp']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zr']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Int']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['SW']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Ogd']?.pivot.start_value }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['WW']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['US']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['K']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Odp']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Zr']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Int']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['SW']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Ogd']?.available_advancement ?? '-' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('WW')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['WW']?.pivot.start_value + characteristic['WW']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('US')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['US']?.pivot.start_value + characteristic['US']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('K')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['K']?.pivot.start_value + characteristic['K']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Odp')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Odp']?.pivot.start_value + characteristic['Odp']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Zr')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Zr']?.pivot.start_value + characteristic['Zr']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Int')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Int']?.pivot.start_value + characteristic['Int']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('SW')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['SW']?.pivot.start_value + characteristic['SW']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Ogd')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Ogd']?.pivot.start_value + characteristic['Ogd']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="text-center text-[#e4d8b4] text-lg font-semibold mt-6 mb-2">Cechy drugorzędne</div>
-            <table class="w-full table-auto border-collapse mt-4">
-                <thead>
-                <tr>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">A</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Żyw</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">S</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Wt</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Sz</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">Mag</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">PO</th>
-                    <th class="border border-[#8b5a2b] px-2 py-1 text-[#e4d8b4]">PP</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['A']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Żyw']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['S']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Wt']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Sz']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Mag']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PO']?.pivot.start_value }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PP']?.pivot.start_value }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['A']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Żyw']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['S']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Wt']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Sz']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['Mag']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PO']?.available_advancement ?? '-' }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ characteristic['PP']?.available_advancement ?? '-' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('A')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['A']?.pivot.start_value + characteristic['A']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Żyw')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Żyw']?.pivot.start_value + characteristic['Żyw']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ getRelatedCharacteristicValue('K') }}
-                    </td>
-                    <td class="border border-[#8b5a2b]">
-                        {{ getRelatedCharacteristicValue('Odp') }}
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Sz')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Sz']?.pivot.start_value + characteristic['Sz']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('Mag')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['Mag']?.pivot.start_value + characteristic['Mag']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('PO')"
-                        title="Kliknij, aby rozwinąć umiejętność"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer text-center">
-                            {{ characteristic['PO']?.pivot.start_value + characteristic['PO']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                    <td
-                        class="border border-[#8b5a2b] rounded-sm p-0 relative group shadow-sm hover:shadow-md"
-                        @click="developCharacteristic('PP')"
-                        title="Kliknij, aby zwiększyć wartość"
-                    >
-                        <div class="w-full h-full p-2 hover:cursor-pointer  text-center transition-colors duration-200 ease-in-out">
-                            {{ characteristic['PP']?.pivot.start_value + characteristic['PP']?.pivot.advancement }}
-                            <span class="absolute top-1 right-1 bg-[#8b5a2b] text-white px-1 text-s rounded-bl">+</span>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="stat-group-label stat-group-label--secondary">
+            <span>CECHY DRUGORZĘDNE</span>
+            <span class="stat-group-line"></span>
         </div>
+        <div class="stat-grid">
+            <div
+                v-for="stat in secondaryConfig"
+                :key="stat.code"
+                class="stat-card"
+                :class="{ 'stat-card--clickable': !stat.derivedFrom }"
+                :title="stat.derivedFrom ? '' : 'Kliknij, aby rozwinąć cechę'"
+                @click="stat.derivedFrom ? null : developCharacteristic(stat.code)"
+            >
+                <div class="stat-card__code">{{ stat.code }}</div>
+                <template v-if="stat.derivedFrom">
+                    <div class="stat-card__value">{{ getRelatedCharacteristicValue(stat.derivedFrom) }}</div>
+                    <div class="stat-card__detail">z {{ stat.derivedFrom }} {{ totalValue(stat.derivedFrom) }}</div>
+                </template>
+                <template v-else>
+                    <div class="stat-card__value">{{ totalValue(stat.code) }}</div>
+                    <div class="stat-card__detail">{{ characteristic[stat.code]?.pivot.start_value }} + {{ characteristic[stat.code]?.pivot.advancement }}</div>
+                    <div class="stat-card__available">dostępne: {{ characteristic[stat.code]?.available_advancement ?? '-' }}</div>
+                    <button class="stat-card__develop" @click.stop="developCharacteristic(stat.code)">+</button>
+                </template>
+            </div>
+        </div>
+
+        <div class="stat-footer-note">Kliknij <span class="stat-footer-note__accent">+</span>, aby rozwinąć cechę za punkty doświadczenia.</div>
     </div>
 </template>
 <script setup lang="ts">
-import {ref, defineProps, defineEmits, computed} from "vue";
+import {defineProps, defineEmits, computed} from "vue";
 import axios from "axios";
 import {useToast} from "vue-toast-notification";
 import {CharacteristicPivot} from "../../../../types/Hero";
@@ -323,17 +62,29 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-    addCharacteristics: [characteristicName: string, characteristic: CharacteristicPivot, changeCurrentWounds: number, spentExperience: number];
+    addCharacteristic: [characteristicName: string, characteristic: CharacteristicPivot, changeCurrentWounds: number, spentExperience: number];
 }>();
 
-
-const isOpen = ref<boolean>(false);
 const characteristic = computed(() => props.characteristicData ?? {});
 const toast = useToast();
 
-const toggleOpen = (): void => {
-    isOpen.value = !isOpen.value;
-}
+const primaryCodes = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd'];
+const secondaryConfig: { code: string; derivedFrom?: string }[] = [
+    {code: 'A'},
+    {code: 'Żyw'},
+    {code: 'S', derivedFrom: 'K'},
+    {code: 'Wt', derivedFrom: 'Odp'},
+    {code: 'Sz'},
+    {code: 'Mag'},
+    {code: 'PO'},
+    {code: 'PP'},
+];
+
+const totalValue = (code: string): number => {
+    const stat = characteristic.value[code];
+    return stat ? stat.pivot.start_value + stat.pivot.advancement : 0;
+};
+
 const developCharacteristic = (characteristicName: string): void => {
     let titleText = 'Czy na pewno chcesz rozwinąć umiejętność?';
     let subtitleText = 'Będzie Cię to kosztowało punkty doświadczenia!';
@@ -363,7 +114,7 @@ const developCharacteristic = (characteristicName: string): void => {
                         toast.success(response.data.message)
                         characteristic.value[characteristicName].pivot.advancement += response.data.developedValue;
                         emits(
-                            'addCharacteristics',
+                            'addCharacteristic',
                             characteristicName,
                             characteristic.value[characteristicName].pivot,
                             response.data.changeCurrentWounds,
@@ -384,9 +135,107 @@ const getRelatedCharacteristicValue = (basedOn: string) => {
 }
 </script>
 <style scoped>
-td {
+.stat-group-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.stat-group-label--secondary {
+    margin: 26px 0 14px;
+}
+
+.stat-group-label span:first-child {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: var(--text-faint);
+}
+
+.stat-group-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-default), transparent);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 10px;
+}
+
+.stat-card {
+    position: relative;
+    border: 1px solid var(--border-default);
+    background: linear-gradient(#221d17, #171310);
+    padding: 14px 10px 12px;
     text-align: center;
-    vertical-align: middle;
-    padding: 1rem;
+}
+
+.stat-card--clickable {
+    cursor: pointer;
+}
+
+.stat-card--clickable:hover {
+    border-color: var(--border-accent-hover);
+}
+
+.stat-card__code {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: var(--gold-muted);
+}
+
+.stat-card__value {
+    font-size: 34px;
+    line-height: 1.15;
+    color: var(--text-body);
+}
+
+.stat-card__detail {
+    font-size: 13px;
+    color: var(--text-faint);
+}
+
+.stat-card__available {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-faint-alt);
+}
+
+.stat-card__develop {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--border-frame);
+    background: var(--bg-inset-alt);
+    color: var(--gold-muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.stat-card__develop:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    background: #241d14;
+}
+
+.stat-footer-note {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text-faint);
+    font-style: italic;
+}
+
+.stat-footer-note__accent {
+    color: var(--gold-muted);
+    font-style: normal;
 }
 </style>

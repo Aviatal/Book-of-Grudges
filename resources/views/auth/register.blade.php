@@ -1,76 +1,68 @@
 @extends('Layout.master')
 
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card" style="background-color: #333; color: #D4A373; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);">
-                    <div class="card-header" style="background-color: #222; color: #D4A373; text-align: center; padding: 1rem;">{{ __('Register') }}</div>
+    <div class="flex items-center justify-center px-8 py-16">
+        <div class="relative w-full max-w-[440px] p-1" style="border: 1px solid var(--border-frame); background: var(--bg-inset-alt)">
+            <span class="absolute -top-px -left-px w-2.5 h-2.5" style="border-top: 2px solid var(--gold); border-left: 2px solid var(--gold)"></span>
+            <span class="absolute -top-px -right-px w-2.5 h-2.5" style="border-top: 2px solid var(--gold); border-right: 2px solid var(--gold)"></span>
+            <span class="absolute -bottom-px -left-px w-2.5 h-2.5" style="border-bottom: 2px solid var(--gold); border-left: 2px solid var(--gold)"></span>
+            <span class="absolute -bottom-px -right-px w-2.5 h-2.5" style="border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold)"></span>
 
-                    <div class="card-body" style="padding: 2rem;">
-                        <form method="POST" action="{{ route('register') }}">
-                            @csrf
+            <div class="text-center px-8 pt-9 pb-7.5" style="border: 1px solid var(--border-subtle); background: var(--bg-panel-gradient)">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-lg overflow-hidden" style="box-shadow: 0 4px 14px rgba(0,0,0,.7)">
+                    <img src="{{ asset('images/logo-mark.png') }}" alt="Book of Grudges" class="w-full h-full object-cover">
+                </div>
+                <h1 class="font-heading text-[22px] font-bold tracking-[.14em] m-0" style="color: var(--gold)">ZAŁÓŻ KONTO</h1>
+                <div class="italic my-4" style="color: var(--text-faint)">Nowy wpis w księdze urazów</div>
 
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="name" class="col-form-label" style="color: #D4A373;">{{ __('Name') }}</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto; text-align: center;">
-                                    @error('name')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                    @enderror
-                                </div>
-                            </div>
+                <form method="POST" action="{{ route('register') }}" class="text-left">
+                    @csrf
 
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="email" class="col-form-label" style="color: #D4A373;">E-mail</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto; text-align: center;">
-                                    @error('email')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                    @enderror
-                                </div>
-                            </div>
+                    <label class="block mb-3.5">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">{{ __('Name') }}</span>
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                        @error('name')
+                            <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                        @enderror
+                    </label>
 
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="password" class="col-form-label" style="color: #D4A373;">{{ __('Password') }}</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto; text-align: center;">
-                                    @error('password')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                    @enderror
-                                </div>
-                            </div>
+                    <label class="block mb-3.5">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">E-MAIL</span>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email"
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                        @error('email')
+                            <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                        @enderror
+                    </label>
 
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="password-confirm" class="col-form-label" style="color: #D4A373;">{{ __('Confirm Password') }}</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto; text-align: center;">
-                                </div>
-                            </div>
+                    <label class="block mb-3.5">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">{{ __('Password') }}</span>
+                        <input id="password" type="password" name="password" required autocomplete="new-password"
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                        @error('password')
+                            <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                        @enderror
+                    </label>
 
-                            <div class="row mb-0">
-                                <div class="col-12" style="text-align: center;">
-                                    <button type="submit" class="btn btn-primary" style="background-color: #D4A373; color: #222; border: none; padding: 0.75rem 1.5rem; border-radius: 4px;">
-                                        {{ __('Register') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                    <label class="block mb-5">
+                        <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">{{ __('Confirm Password') }}</span>
+                        <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password"
+                               class="w-full box-border px-3 py-3 font-body"
+                               style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                    </label>
+
+                    <button type="submit" class="w-full py-3 font-heading text-[13px] font-semibold tracking-[.18em] cursor-pointer"
+                            style="border: 1px solid var(--border-accent); background: linear-gradient(#3a2b17,#241b10); color: var(--gold-bright)">
+                        {{ __('Register') }}
+                    </button>
+                </form>
+
+                <div class="mt-5 pt-4.5 text-sm" style="border-top: 1px solid var(--border-subtle); color: var(--text-faint)">
+                    Masz już konto? <a href="{{ route('login') }}" style="color: var(--gold)">Zaloguj się</a>
                 </div>
             </div>
         </div>

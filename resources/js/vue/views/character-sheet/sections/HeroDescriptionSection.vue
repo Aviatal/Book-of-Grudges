@@ -1,24 +1,5 @@
 <template>
-    <div class="bg-[#3b3a36] p-4 rounded-md shadow-lg border border-[#8b5a2b] transition-colors duration-300">
-        <div
-            @click="toggleOpen"
-            class="cursor-pointer flex justify-between items-center px-3 py-2 rounded-md hover:bg-[#8b5a2b] hover:text-[#2b2a27] transition-colors duration-300"
-        >
-            <h2 class="font-semibold text-xl text-[#e4d8b4]">Opis bohatera</h2>
-            <svg
-                :class="isOpen ? 'rotate-180' : ''"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24"
-                viewBox="0 0 24 24"
-                fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="feather feather-chevron-down text-[#e4d8b4] transition-transform duration-300"
-            >
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        </div>
-
-        <div v-show="isOpen" class="mt-4">
+    <div>
             <v-row>
                 <v-col cols="12" sm="6" lg="6">
                     <v-text-field
@@ -123,11 +104,10 @@
                     ></v-text-field>
                 </v-col>
             </v-row>
-        </div>
     </div>
 </template>
 <script setup lang="ts">
-import {ref, defineProps} from "vue";
+import {defineProps} from "vue";
 import {useToast} from "vue-toast-notification";
 import axios from "axios";
 
@@ -136,11 +116,6 @@ const props = defineProps<{
 }>();
 const toast = useToast();
 
-const isOpen = ref<boolean>(false);
-
-const toggleOpen = (): void => {
-    isOpen.value = !isOpen.value;
-}
 const updateDescription = async (field: string): Promise<void> => {
     axios.post('karta-postaci/' + props.heroDescriptions.hero_id + '/update-description', {
         field: field,
@@ -167,9 +142,11 @@ const updateDescription = async (field: string): Promise<void> => {
     width: 100%;
     padding: 15px 15px;
     font-size: 16px;
-    border: 1px solid #807a69;
-    border-radius: 4px;
-    background-color: #42413b;
+    font-family: var(--font-body);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+    background-color: var(--bg-inset);
+    color: var(--text-body);
     cursor: pointer;
 }
 
@@ -180,11 +157,12 @@ const updateDescription = async (field: string): Promise<void> => {
     right: 15px;
     transform: translateY(-50%);
     pointer-events: none;
+    color: var(--text-faint);
 }
 
 .custom-select:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    border-color: var(--border-accent-hover);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, .2);
 }
 </style>

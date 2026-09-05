@@ -1,4 +1,5 @@
 import './bootstrap';
+import './sidebar-hash-nav';
 
 import { createApp } from 'vue';
 import {createVuetify} from "vuetify";
@@ -18,6 +19,7 @@ import SkillsIndex from "./vue/views/skills/SkillsIndex.vue";
 import SpellsIndex from "./vue/views/spells/SpellsIndex.vue";
 import TalentsIndex from "./vue/views/talents/TalentsIndex.vue";
 import CurrencyConverter from "./vue/components/CurrencyConverter.vue";
+import CollapsibleSection from "./vue/components/CollapsibleSection.vue";
 import FooterText from "./vue/components/FooterText.vue";
 import ExperienceManagement from "./vue/views/panel/experience/ExperienceManagement.vue";
 import Purchases from "./vue/views/panel/purchases/Purchases.vue";
@@ -44,9 +46,15 @@ const vuetify = createVuetify({
                 dark: true,
                 colors: {
                     primary: '#d4af37',
-                    surface: '#3a3935',
-                    background: '#181818',
-                    error: '#cf6679',
+                    'primary-darken-1': '#8b5a2b',
+                    secondary: '#6b4a24',
+                    surface: '#191510',
+                    'surface-variant': '#221d16',
+                    background: '#100e0b',
+                    error: '#a8341f',
+                    'on-surface': '#e8dcc0',
+                    'on-background': '#e8dcc0',
+                    'on-primary': '#100e0b',
                 }
             }
         }
@@ -105,6 +113,7 @@ app.component('skills-index', SkillsIndex);
 app.component('spells-index', SpellsIndex);
 app.component('talents-index', TalentsIndex);
 app.component('currency-converter', CurrencyConverter);
+app.component('collapsible-section', CollapsibleSection);
 app.component('spend-fortune-point', SpendFortunePoint);
 app.component('spend-fate-point', SpendFatePoint);
 app.component('footer-text', FooterText);
