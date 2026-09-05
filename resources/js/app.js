@@ -80,7 +80,18 @@ const customSwal = Swal.mixin({
 });
 window.customSwal = customSwal;
 
-const app = createApp({})
+const app = createApp({
+        data() {
+            return {
+                mobileMenuOpen: false,
+            };
+        },
+        watch: {
+            mobileMenuOpen(isOpen) {
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            },
+        },
+    })
     .use(vuetify)
     .use(ToastPlugin)
     .use(VueKonva);

@@ -145,7 +145,7 @@ export default {
     border: none;
     padding: 12px 12px 12px 0;
     color: var(--text-body);
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     font-size: 16px;
     outline: none;
 }
@@ -157,7 +157,7 @@ export default {
 
 .grimoire-title__heading {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 42px;
     font-weight: 700;
     letter-spacing: .2em;
@@ -217,7 +217,7 @@ export default {
 
 .spell-type-group__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 28px;
     font-weight: 700;
     color: var(--magic-accent);
@@ -244,7 +244,7 @@ export default {
 
 .spell-spec-group__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 22px;
     font-style: italic;
     color: var(--gold-muted);
@@ -286,7 +286,7 @@ export default {
 
 .spell-card__name {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 18px;
     font-weight: 700;
     text-transform: uppercase;
@@ -362,5 +362,29 @@ export default {
 }
 .description-box::-webkit-scrollbar-thumb {
     background: var(--magic-accent);
+}
+
+@media (max-width: 640px) {
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .search-box {
+        max-width: none;
+    }
+
+    .grimoire-title__heading {
+        font-size: 28px;
+        letter-spacing: .1em;
+    }
+
+    .grimoire-title__line {
+        width: 40px;
+    }
+
+    .grimoire-title__divider {
+        gap: 12px;
+    }
 }
 </style>

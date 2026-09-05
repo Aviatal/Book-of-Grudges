@@ -39,37 +39,39 @@
             <template v-if="step === 2">
                 <div class="step-card">
                     <div class="section-label"><span>KROK 2 — PD DLA POSZCZEGÓLNYCH BOHATERÓW</span><span class="section-label-line"></span></div>
-                    <table class="step-table">
-                        <thead>
-                            <tr>
-                                <th>Użytkownik</th>
-                                <th>Bohater</th>
-                                <th>Liczba PD</th>
-                                <th>Notatka</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="user in activeUsers" :key="user.hero.id">
-                                <td>{{ user.name }}</td>
-                                <td>{{ user.hero.name }}</td>
-                                <td>
-                                    <v-text-field
-                                        v-model="heroesExp[user.hero.id]"
-                                        variant="filled"
-                                        hide-details
-                                    ></v-text-field>
-                                </td>
-                                <td>
-                                    <v-text-field
-                                        v-model="heroesNotes[user.hero.id]"
-                                        placeholder="za odegranie roli"
-                                        variant="filled"
-                                        hide-details
-                                    ></v-text-field>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table class="step-table">
+                            <thead>
+                                <tr>
+                                    <th>Użytkownik</th>
+                                    <th>Bohater</th>
+                                    <th>Liczba PD</th>
+                                    <th>Notatka</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="user in activeUsers" :key="user.hero.id">
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.hero.name }}</td>
+                                    <td>
+                                        <v-text-field
+                                            v-model="heroesExp[user.hero.id]"
+                                            variant="filled"
+                                            hide-details
+                                        ></v-text-field>
+                                    </td>
+                                    <td>
+                                        <v-text-field
+                                            v-model="heroesNotes[user.hero.id]"
+                                            placeholder="za odegranie roli"
+                                            variant="filled"
+                                            hide-details
+                                        ></v-text-field>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="step-card__actions">
                         <button class="simple-button" @click="saveExperience">Zatwierdź rozdanie</button>
                     </div>
@@ -135,7 +137,7 @@ export default {
 }
 
 .page-header__eyebrow {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .24em;
     color: var(--text-faint);
@@ -144,7 +146,7 @@ export default {
 
 .page-header__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: .06em;
@@ -175,7 +177,7 @@ export default {
 }
 
 .section-label span:first-child {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .2em;
     color: var(--text-faint);
@@ -202,7 +204,7 @@ export default {
 
 .field__label {
     display: block;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 10px;
     letter-spacing: .18em;
     color: var(--text-faint);
@@ -241,8 +243,13 @@ export default {
     margin-top: 18px;
 }
 
+.table-scroll {
+    overflow-x: auto;
+}
+
 .step-table {
     width: 100%;
+    min-width: 560px;
     border-collapse: collapse;
     font-size: 16px;
 }
@@ -250,7 +257,7 @@ export default {
 .step-table th {
     text-align: left;
     padding: 10px 12px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 10px;
     letter-spacing: .16em;
     color: var(--text-faint);
@@ -262,5 +269,17 @@ export default {
     padding: 12px;
     color: var(--text-muted-alt);
     border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+    .page-header,
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .step-card {
+        padding: 16px;
+    }
 }
 </style>

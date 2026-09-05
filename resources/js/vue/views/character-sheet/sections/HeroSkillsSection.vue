@@ -49,7 +49,7 @@
                     {{ Math.floor((characteristic[item.characteristic].pivot.start_value + characteristic[item.characteristic].pivot.advancement) / 2) }}
                 </template>
                 <template v-slot:item.add="{ item }">
-                    <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" block class="simple-button">
+                    <button @click="updateSkill(item ,'hurdled', 1, !item.expandable)" class="simple-button w-full">
                         Wykup
                     </button>
                 </template>
@@ -59,9 +59,9 @@
 </template>
 <script setup lang="ts">
 import {ref, defineProps, computed} from "vue";
-import {Skill} from "../../../../types/Skill";
-import {Characteristic} from "../../../../types/Characteristic";
-import {TableHeader} from "../../../../types/general/TableHeader";
+import type {Skill} from "../../../../types/Skill";
+import type {Characteristic} from "../../../../types/Characteristic";
+import type {TableHeader} from "../../../../types/general/TableHeader";
 import {useToast} from "vue-toast-notification";
 const props = defineProps<{
     skillsData: Skill[],
@@ -145,6 +145,10 @@ const updateSkill = (skill: Skill, field: string, value: any, update: boolean) =
     color: var(--text-body) !important;
 }
 
+.custom-table :deep(table) {
+    min-width: 760px;
+}
+
 .custom-table .v-data-table thead {
     background-color: var(--bg-panel) !important;
 }
@@ -152,7 +156,7 @@ const updateSkill = (skill: Skill, field: string, value: any, update: boolean) =
 .custom-table .v-data-table th {
     background-color: var(--bg-panel) !important;
     color: var(--text-faint) !important;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;

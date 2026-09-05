@@ -264,7 +264,7 @@ const submitTransaction = () => {
     display: flex;
     justify-content: center;
     padding: 20px;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
 }
 
 .grudge-card {
@@ -285,7 +285,7 @@ const submitTransaction = () => {
 .grudge-header h2 {
     margin: 0;
     color: var(--gold);
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-size: 1.4rem;
@@ -298,7 +298,7 @@ const submitTransaction = () => {
 .wfrp-label {
     display: block;
     color: var(--text-faint);
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     margin-bottom: 8px;
     font-size: 10px;
     text-transform: uppercase;
@@ -317,7 +317,7 @@ const submitTransaction = () => {
     text-align: center;
     font-size: 0.75rem;
     margin-top: 4px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
 }
 
 .label-gold { color: var(--gold); }
@@ -327,7 +327,7 @@ const submitTransaction = () => {
 /* Input styles */
 :deep(.v-field__input) {
     color: var(--text-body) !important;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
 }
 
 :deep(.v-field__input::placeholder) {
@@ -354,7 +354,7 @@ const submitTransaction = () => {
 /* Suffixes */
 .custom-suffix {
     font-weight: 700;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     padding-left: 4px;
     opacity: 1 !important;
     user-select: none;

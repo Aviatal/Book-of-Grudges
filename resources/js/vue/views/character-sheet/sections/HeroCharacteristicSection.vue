@@ -147,7 +147,7 @@ const getRelatedCharacteristicValue = (basedOn: string) => {
 }
 
 .stat-group-label span:first-child {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .2em;
     color: var(--text-faint);
@@ -182,7 +182,7 @@ const getRelatedCharacteristicValue = (basedOn: string) => {
 }
 
 .stat-card__code {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .16em;
     color: var(--gold-muted);
@@ -218,7 +218,7 @@ const getRelatedCharacteristicValue = (basedOn: string) => {
     font-size: 14px;
     line-height: 1;
     cursor: pointer;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
 }
 
 .stat-card__develop:hover {

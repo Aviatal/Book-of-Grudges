@@ -110,7 +110,7 @@ body {
     padding: 10px 20px;
     font-weight: bold;
     border-radius: 2px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     letter-spacing: .06em;
     transition: 0.2s;
 }
@@ -127,7 +127,7 @@ body {
     padding: 10px 20px;
     font-weight: bold;
     border-radius: 2px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     letter-spacing: .06em;
     transition: 0.2s;
 }
@@ -185,7 +185,7 @@ body {
     border: 1px solid var(--border-accent);
     padding: 8px 16px;
     border-radius: 2px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 12px;
     letter-spacing: .08em;
     cursor: pointer;
@@ -210,7 +210,7 @@ body {
 }
 
 .v-overlay__content .v-list-item-title {
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
 }
 
 .actions-container {

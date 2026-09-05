@@ -86,8 +86,8 @@
 </template>
 <script setup lang="ts">
 import AddArmorModal from "../../../components/character-sheet/AddArmorModal.vue";
-import {Armor} from "../../../../types/Armor";
-import {TableHeader} from "../../../../types/general/TableHeader";
+import type {Armor} from "../../../../types/Armor";
+import type {TableHeader} from "../../../../types/general/TableHeader";
 import {computed, ref} from "vue";
 import heroSvg from '@/assets/images/hero.svg?raw';
 import {useToast} from "vue-toast-notification";
@@ -193,6 +193,10 @@ const handleNewArmor = (newArmor: Armor) => {
     color: var(--text-body) !important;
 }
 
+.custom-table :deep(table) {
+    min-width: 720px;
+}
+
 .custom-table .v-data-table thead {
     background-color: var(--bg-panel) !important;
 }
@@ -200,7 +204,7 @@ const handleNewArmor = (newArmor: Armor) => {
 .custom-table .v-data-table th {
     background-color: var(--bg-panel) !important;
     color: var(--text-faint) !important;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -230,7 +234,7 @@ const handleNewArmor = (newArmor: Armor) => {
     border: 1px solid var(--border-default);
     border-radius: 2px;
     font-size: 16px;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
 }
 
 .armor-input:focus {

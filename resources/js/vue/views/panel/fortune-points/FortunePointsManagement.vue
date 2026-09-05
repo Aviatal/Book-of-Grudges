@@ -54,7 +54,7 @@ export default {
 }
 
 .page-header__eyebrow {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .24em;
     color: var(--text-faint);
@@ -63,7 +63,7 @@ export default {
 
 .page-header__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: .06em;
@@ -95,7 +95,7 @@ export default {
     border: 1px solid var(--border-accent);
     background: linear-gradient(#2a2117, #1d1710);
     cursor: pointer;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -133,8 +133,16 @@ export default {
 }
 
 .hero-card__plus {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 18px;
     color: var(--gold);
+}
+
+@media (max-width: 640px) {
+    .page-header,
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
 </style>

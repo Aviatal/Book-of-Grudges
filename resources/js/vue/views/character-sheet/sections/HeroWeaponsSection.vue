@@ -128,11 +128,11 @@
 import {computed, defineProps, ref} from "vue";
 import AddWeaponModal from "../../../components/character-sheet/AddWeaponModal.vue";
 import {useToast} from "vue-toast-notification";
-import {Weapon} from "../../../../types/Weapon";
-import {Characteristic} from "../../../../types/Characteristic";
-import {Talent} from "../../../../types/Talent";
-import {TableHeader} from "../../../../types/general/TableHeader";
-import {Response} from "../../../../types/general/Response";
+import type {Weapon} from "../../../../types/Weapon";
+import type {Characteristic} from "../../../../types/Characteristic";
+import type {Talent} from "../../../../types/Talent";
+import type {TableHeader} from "../../../../types/general/TableHeader";
+import type {Response} from "../../../../types/general/Response";
 import axios from "axios";
 
 const props = defineProps<{
@@ -257,7 +257,7 @@ const weaponPower = (weapon: Weapon) => {
 }
 
 .section-label span:first-child {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .2em;
     color: var(--text-faint);
@@ -285,6 +285,10 @@ const weaponPower = (weapon: Weapon) => {
     color: var(--text-body) !important;
 }
 
+.custom-table :deep(table) {
+    min-width: 820px;
+}
+
 .custom-table .v-data-table thead {
     background-color: var(--bg-panel) !important;
 }
@@ -292,7 +296,7 @@ const weaponPower = (weapon: Weapon) => {
 .custom-table .v-data-table th {
     background-color: var(--bg-panel) !important;
     color: var(--text-faint) !important;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;

@@ -42,8 +42,8 @@
 <script setup lang="ts">
 import AddInventoryModal from "../../../components/character-sheet/AddInventoryModal.vue";
 import {ref, defineProps, computed} from "vue";
-import {Inventory} from "../../../../types/Inventory";
-import {TableHeader} from "../../../../types/general/TableHeader";
+import type {Inventory} from "../../../../types/Inventory";
+import type {TableHeader} from "../../../../types/general/TableHeader";
 import axios from "axios";
 import {useToast} from "vue-toast-notification";
 
@@ -101,6 +101,10 @@ const editItem = (item: Inventory) => {
     color: var(--text-body) !important;
 }
 
+.custom-table :deep(table) {
+    min-width: 640px;
+}
+
 .custom-table .v-data-table thead {
     background-color: var(--bg-panel) !important;
 }
@@ -108,7 +112,7 @@ const editItem = (item: Inventory) => {
 .custom-table .v-data-table th {
     background-color: var(--bg-panel) !important;
     color: var(--text-faint) !important;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-weight: 600;
     letter-spacing: .1em;
     text-transform: uppercase;

@@ -271,14 +271,14 @@ onMounted(() => {
 <style scoped>
 
 .token-edit-container {
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     color: var(--text-body);
 }
 
 /* Customowe Inputy */
 .warhammer-label {
     display: block;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 0.85rem;
     font-weight: bold;
     color: var(--text-muted-alt);
@@ -294,7 +294,7 @@ onMounted(() => {
     border: 1px solid var(--border-default);
     padding: 0.6rem 0.75rem;
     border-radius: 2px;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     transition: border-color 0.2s ease;
 }
 .warhammer-input.pl-11 {
@@ -332,7 +332,7 @@ onMounted(() => {
     color: var(--gold);
     padding: 0.5rem 1.25rem;
     border: 1px solid var(--border-accent);
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     text-transform: uppercase;
     font-weight: bold;
     font-size: 0.8rem;
@@ -351,7 +351,7 @@ onMounted(() => {
     color: var(--text-faint);
     padding: 0.5rem 1.25rem;
     border: 1px solid transparent;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     text-transform: uppercase;
     font-weight: bold;
     font-size: 0.8rem;

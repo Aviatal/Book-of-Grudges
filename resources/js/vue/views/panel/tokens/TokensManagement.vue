@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import axios from "axios";
-import { Token } from "../../../../types/Token";
+import type { Token } from "../../../../types/Token";
 import {useToast} from "vue-toast-notification";
 
 const tokens = ref<Token[]>([]);
@@ -112,7 +112,7 @@ onMounted(() => {
 }
 
 .page-header__eyebrow {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .24em;
     color: var(--text-faint);
@@ -121,7 +121,7 @@ onMounted(() => {
 
 .page-header__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: .06em;
@@ -133,7 +133,7 @@ onMounted(() => {
     border: 1px solid var(--border-accent);
     background: linear-gradient(#3a2b17, #241b10);
     color: var(--gold-bright);
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 12px;
     letter-spacing: .14em;
     cursor: pointer;
@@ -167,7 +167,7 @@ onMounted(() => {
 .tokens-table th {
     text-align: left;
     padding: 12px 16px;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 10px;
     letter-spacing: .16em;
     color: var(--text-faint);
@@ -257,7 +257,7 @@ onMounted(() => {
     color: var(--text-muted-alt);
     font-size: 13px;
     cursor: pointer;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     text-decoration: none;
     transition: border-color 0.2s ease, color 0.2s ease;
 }
@@ -283,5 +283,13 @@ onMounted(() => {
 .tokens-panel::-webkit-scrollbar-thumb {
     background: var(--border-accent);
     border: 2px solid var(--bg-inset-alt);
+}
+
+@media (max-width: 640px) {
+    .page-header,
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
 </style>

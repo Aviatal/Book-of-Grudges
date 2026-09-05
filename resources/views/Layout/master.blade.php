@@ -18,7 +18,18 @@
 </head>
 <body class="font-body" style="background: var(--bg-base); background-image: var(--bg-base-gradient); color: var(--text-body); margin: 0; min-height: 100vh">
 <div id="app" class="flex" style="min-height: 100vh">
-    <nav class="w-[264px] shrink-0 self-stretch sticky top-0 flex flex-col" style="height: 100vh; background: var(--bg-sidebar-gradient); border-right: 1px solid var(--border-default)">
+    <div
+        v-if="mobileMenuOpen"
+        class="fixed inset-0 z-40 lg:hidden"
+        style="background: rgba(0,0,0,.6)"
+        @click="mobileMenuOpen = false"
+    ></div>
+
+    <nav
+        class="w-[264px] max-w-[85vw] shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-stretch"
+        :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
+        style="height: 100vh; background: var(--bg-sidebar-gradient); border-right: 1px solid var(--border-default)"
+    >
         <div class="flex items-center gap-3.5" style="padding: 24px 22px 20px; border-bottom: 1px solid var(--border-subtle)">
             <div class="w-[46px] h-[46px] shrink-0 rounded-lg overflow-hidden" style="box-shadow: 0 2px 6px rgba(0,0,0,.6)">
                 <img src="{{ asset('images/logo-mark.png') }}" alt="Book of Grudges" class="w-full h-full object-cover">
@@ -109,16 +120,32 @@
             @auth
                 <form method="POST" action="{{ route('logout') }}" class="mt-3.5">
                     @csrf
-                    <button type="submit" class="text-sm" style="color: var(--text-faint); letter-spacing: .04em; background: none; border: none; padding: 0; cursor: pointer">Wyloguj →</button>
+                    <button type="submit" @click="mobileMenuOpen = false" class="text-sm" style="color: var(--text-faint); letter-spacing: .04em; background: none; border: none; padding: 0; cursor: pointer">Wyloguj →</button>
                 </form>
             @endauth
             @guest
-                <a href="{{ route('login') }}" class="block mt-3.5 text-sm" style="color: var(--text-faint); letter-spacing: .04em">Zaloguj się →</a>
+                <a href="{{ route('login') }}" @click="mobileMenuOpen = false" class="block mt-3.5 text-sm" style="color: var(--text-faint); letter-spacing: .04em">Zaloguj się →</a>
             @endguest
         </div>
     </nav>
 
     <div class="flex-1 min-w-0 flex flex-col">
+        <div class="flex items-center gap-3 px-4 py-3 lg:hidden" style="border-bottom: 1px solid var(--border-subtle); background: var(--bg-sidebar-gradient)">
+            <button
+                type="button"
+                @click="mobileMenuOpen = true"
+                class="flex items-center justify-center w-9 h-9 shrink-0"
+                style="color: var(--text-body); background: none; border: 1px solid var(--border-default); border-radius: 4px"
+                aria-label="Otwórz menu"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="font-heading text-sm font-bold tracking-[.16em]" style="color: var(--text-body)">BOOK OF GRUDGES</div>
+        </div>
         <div class="flex-1">
             @yield('content')
         </div>

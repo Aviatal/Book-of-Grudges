@@ -57,7 +57,7 @@ const deleteHero = async (): Promise<void> => {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     letter-spacing: .06em;
 }
 

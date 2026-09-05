@@ -89,7 +89,7 @@ const toggle = () => {
 .collapsible-section__title {
     margin: 0;
     flex: 1;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 16px;
     font-weight: 600;
     letter-spacing: .18em;
@@ -114,5 +114,15 @@ const toggle = () => {
 .collapsible-section__content {
     padding: 22px;
     border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+    .collapsible-section__header {
+        padding: 12px 14px;
+    }
+
+    .collapsible-section__content {
+        padding: 14px;
+    }
 }
 </style>

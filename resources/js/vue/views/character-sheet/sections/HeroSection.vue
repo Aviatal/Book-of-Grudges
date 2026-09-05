@@ -209,7 +209,7 @@ const getProfessions = async(): Promise<void> => {
     width: 100%;
     padding: 15px 15px;
     font-size: 16px;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     border: 1px solid var(--border-default);
     border-radius: 2px;
     background-color: var(--bg-inset);

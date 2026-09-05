@@ -100,7 +100,7 @@ export default {
 }
 
 .page-header__eyebrow {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .24em;
     color: var(--text-faint);
@@ -109,7 +109,7 @@ export default {
 
 .page-header__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: .06em;
@@ -135,7 +135,7 @@ export default {
     border: none;
     padding: 12px 12px 12px 0;
     color: var(--text-body);
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     font-size: 16px;
     outline: none;
 }
@@ -173,7 +173,7 @@ export default {
 
 .skill-card__name {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 17px;
     font-weight: 600;
     color: var(--text-body);
@@ -207,5 +207,23 @@ export default {
     font-size: 16px;
     line-height: 1.5;
     color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    .page-header,
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .page-header__inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        min-width: 0;
+        width: 100%;
+    }
 }
 </style>

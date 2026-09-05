@@ -64,7 +64,7 @@ const removeTalent = (talent: Talent, index: number): void => {
 
 .talent-card__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 17px;
     font-weight: 600;
     color: var(--text-body);
@@ -94,7 +94,7 @@ const removeTalent = (talent: Talent, index: number): void => {
     color: var(--danger-text);
     font-size: 13px;
     cursor: pointer;
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     transition: border-color 0.2s ease, color 0.2s ease;
 }
 

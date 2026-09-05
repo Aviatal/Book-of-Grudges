@@ -1,5 +1,6 @@
 @props(['route', 'pattern'])
 <a href="{{ $route }}"
+   @click="mobileMenuOpen = false"
    class="relative flex items-center gap-2.5 px-3 py-2.5 text-base border border-transparent hover:bg-[#221c14] hover:border-[var(--border-default)]"
    style="color: var(--text-body)"
 >

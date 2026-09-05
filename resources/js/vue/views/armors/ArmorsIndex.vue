@@ -182,7 +182,7 @@ export default {
 }
 
 .page-header__eyebrow {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .24em;
     color: var(--text-faint);
@@ -191,7 +191,7 @@ export default {
 
 .page-header__title {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: .06em;
@@ -217,7 +217,7 @@ export default {
     border: none;
     padding: 12px 12px 12px 0;
     color: var(--text-body);
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     font-size: 16px;
     outline: none;
 }
@@ -240,7 +240,7 @@ export default {
 }
 
 .section-label span:first-child {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 11px;
     letter-spacing: .2em;
     color: var(--text-faint);
@@ -279,7 +279,7 @@ export default {
 
 .armor-card__name {
     margin: 0;
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 18px;
     font-weight: 600;
     color: var(--text-body);
@@ -305,7 +305,7 @@ export default {
 }
 
 .stat-label {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
     font-size: 9px;
     letter-spacing: .16em;
     color: var(--text-faint-alt);
@@ -336,5 +336,23 @@ export default {
     padding: 3px 9px;
     font-size: 13px;
     letter-spacing: .03em;
+}
+
+@media (max-width: 640px) {
+    .page-header,
+    .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .page-header__inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        min-width: 0;
+        width: 100%;
+    }
 }
 </style>
