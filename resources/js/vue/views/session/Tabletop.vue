@@ -1,6 +1,6 @@
 <template>
     <div class="game-container">
-        <div v-if="hasDrawingPermission" class="toolbar shadow-lg">
+        <div v-if="hasDrawingPermission && !isMobile" class="toolbar shadow-lg">
             <div class="tool-group">
                 <button :class="{ active: activeTool === 'select' }" @click="activeTool = 'select'">🏹 Tokeny</button>
                 <button :class="{ active: activeTool === 'select-draw' }" @click="activeTool = 'select-draw'">🛠️ Edytuj</button>
@@ -60,6 +60,7 @@
             :default-size="panelDefaults.chat.size"
             :min-width="260"
             :min-height="160"
+            :mobile-fullscreen="isMobile"
         >
             <template #header-actions>
                 <a
@@ -275,7 +276,7 @@
 
         <!-- Panel warstw -->
         <FloatingPanel
-            v-if="hasDrawingPermission"
+            v-if="hasDrawingPermission && !isMobile"
             panel-id="layers"
             title="🗂 Warstwy"
             :default-pos="{ x: 10, y: 62 }"
@@ -344,7 +345,7 @@
 
         <!-- Schowek -->
         <FloatingPanel
-            v-if="hasDrawingPermission"
+            v-if="hasDrawingPermission && !isMobile"
             panel-id="stash"
             :title="`🗃 Schowek${assets.length ? ' (' + assets.length + ')' : ''}`"
             :default-pos="panelDefaults.stash.pos"
@@ -388,7 +389,7 @@
 
         <!-- Schowek tokenów NPC -->
         <FloatingPanel
-            v-if="hasDrawingPermission && npcTokens.length > 0"
+            v-if="hasDrawingPermission && npcTokens.length > 0 && !isMobile"
             panel-id="npc-stash"
             :title="`🧟 Tokeny NPC (${npcTokens.length})`"
             :default-pos="panelDefaults.npcStash.pos"
@@ -447,13 +448,13 @@
         </FloatingPanel>
 
         <CombatBoard
-            v-if="showCombatBoard"
+            v-if="showCombatBoard && !isMobile"
             :can-draw="hasDrawingPermission"
             :tokens="tokens"
             :hero-id="heroId"
         />
 
-        <div v-show="!showCombatBoard" class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
+        <div v-show="!showCombatBoard && !isMobile" class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
         <v-stage
             ref="stageRef"
             :config="stageConfig"
@@ -661,14 +662,14 @@
 
     <!-- Karta postaci NPC (GM) -->
     <NpcSheetPopup
-        v-if="selectedNpcToken && hasDrawingPermission"
+        v-if="selectedNpcToken && hasDrawingPermission && !isMobile"
         :token="selectedNpcToken"
         :can-roll="true"
         @close="selectedNpcToken = null"
     />
 
     <HeroProxyPopup
-        v-if="selectedHeroToken"
+        v-if="selectedHeroToken && !isMobile"
         :token="selectedHeroToken"
         :is-gm="Boolean(hasDrawingPermission)"
         @close="selectedHeroToken = null"
@@ -676,6 +677,7 @@
 
     <!-- Tracker walki -->
     <CombatTracker
+        v-if="!isMobile"
         :map-token-ids="mapTokens.map(t => t.id)"
         :hero-id="props.heroId"
         :has-drawing-permission="props.hasDrawingPermission"
@@ -1381,6 +1383,9 @@ const handleTokenTransformEnd = async (e: any, token: Token): Promise<void> => {
 const stageScale = ref(1);
 const stagePos  = ref({ x: 0, y: 0 });
 const stageSize = ref({ width: window.innerWidth, height: window.innerHeight });
+// Poniżej tej szerokości cały edytor mapy (canvas, rysowanie, panele MG) jest
+// niepraktyczny na dotyk — pokazujemy tylko czat sesji na pełnym ekranie.
+const isMobile = computed(() => stageSize.value.width <= 768);
 const isPanning = ref(false);
 const lastPanPos = ref({ x: 0, y: 0 });
 const gmFogVisible = ref(false);

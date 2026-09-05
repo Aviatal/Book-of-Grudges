@@ -2,28 +2,29 @@
     <div
         ref="panelEl"
         class="fp"
+        :class="{ 'fp--mobile-fullscreen': mobileFullscreen }"
         :style="wrapperStyle"
         @mousedown="bringToFront"
     >
         <!-- ── Narożniki resize (wszystkie 4) ────────────────────────────── -->
-        <div v-show="!minimized" class="fp-r fp-r-nw" @mousedown.prevent="e => startResize(e, 'nw')" />
-        <div v-show="!minimized" class="fp-r fp-r-ne" @mousedown.prevent="e => startResize(e, 'ne')" />
-        <div v-show="!minimized" class="fp-r fp-r-sw" @mousedown.prevent="e => startResize(e, 'sw')" />
-        <div v-show="!minimized" class="fp-r fp-r-se" @mousedown.prevent="e => startResize(e, 'se')" />
+        <div v-show="!minimized && !mobileFullscreen" class="fp-r fp-r-nw" @mousedown.prevent="e => startResize(e, 'nw')" />
+        <div v-show="!minimized && !mobileFullscreen" class="fp-r fp-r-ne" @mousedown.prevent="e => startResize(e, 'ne')" />
+        <div v-show="!minimized && !mobileFullscreen" class="fp-r fp-r-sw" @mousedown.prevent="e => startResize(e, 'sw')" />
+        <div v-show="!minimized && !mobileFullscreen" class="fp-r fp-r-se" @mousedown.prevent="e => startResize(e, 'se')" />
 
         <!-- ── Nagłówek / uchwyt do przeciągania ────────────────────────── -->
-        <div class="fp-header" @mousedown.prevent="startDrag">
+        <div class="fp-header" :class="{ 'fp-header--static': mobileFullscreen }" @mousedown.prevent="startDrag">
             <span class="fp-title">{{ title }}</span>
             <div class="fp-header-right" @mousedown.stop>
                 <slot name="header-actions" />
-                <button class="fp-btn" :title="minimized ? 'Rozwiń' : 'Zwiń'" @click="toggleMinimize">
+                <button v-if="!mobileFullscreen" class="fp-btn" :title="minimized ? 'Rozwiń' : 'Zwiń'" @click="toggleMinimize">
                     {{ minimized ? '▲' : '▼' }}
                 </button>
             </div>
         </div>
 
         <!-- ── Treść ─────────────────────────────────────────────────────── -->
-        <div v-show="!minimized" class="fp-body">
+        <div v-show="mobileFullscreen || !minimized" class="fp-body">
             <slot />
         </div>
     </div>
@@ -38,13 +39,16 @@ let zCounter = 10010;
 type ResizeDir = 'nw' | 'ne' | 'sw' | 'se';
 
 const props = defineProps<{
-    panelId:         string;
-    title:           string;
-    defaultPos?:     { x: number; y: number };
-    defaultSize?:    { w: number; h: number };
-    minWidth?:       number;
-    minHeight?:      number;
-    startMinimized?: boolean;
+    panelId:          string;
+    title:            string;
+    defaultPos?:      { x: number; y: number };
+    defaultSize?:     { w: number; h: number };
+    minWidth?:        number;
+    minHeight?:       number;
+    startMinimized?:  boolean;
+    // Na wąskich ekranach panel wypełnia cały ekran i nie da się go przeciągać/resize'ować —
+    // przeciąganie/resize palcem po telefonie jest niepraktyczne.
+    mobileFullscreen?: boolean;
 }>();
 
 // ── Stan reaktywny ─────────────────────────────────────────────────────────────
@@ -69,13 +73,23 @@ let resStartPosX = 0;
 let resStartPosY = 0;
 
 // ── Computed style ─────────────────────────────────────────────────────────────
-const wrapperStyle = computed(() => ({
-    left:   `${pos.value.x}px`,
-    top:    `${pos.value.y}px`,
-    width:  `${size.value.w}px`,
-    height: minimized.value ? 'auto' : `${size.value.h}px`,
-    zIndex: zIndex.value,
-}));
+const wrapperStyle = computed(() => {
+    if (props.mobileFullscreen) {
+        return {
+            left: '0', top: '0', right: '0', bottom: '0',
+            width: '100%', height: '100%',
+            zIndex: zIndex.value,
+        };
+    }
+
+    return {
+        left:   `${pos.value.x}px`,
+        top:    `${pos.value.y}px`,
+        width:  `${size.value.w}px`,
+        height: minimized.value ? 'auto' : `${size.value.h}px`,
+        zIndex: zIndex.value,
+    };
+});
 
 // ── Bring to front ─────────────────────────────────────────────────────────────
 const bringToFront = () => { zIndex.value = ++zCounter; };
@@ -85,6 +99,7 @@ const toggleMinimize = () => { minimized.value = !minimized.value; save(); };
 
 // ── Drag ───────────────────────────────────────────────────────────────────────
 const startDrag = (e: MouseEvent) => {
+    if (props.mobileFullscreen) return;
     if ((e.target as HTMLElement).closest('.fp-header-right')) return;
     dragging = true;
     dragOffX = e.clientX - pos.value.x;
@@ -210,6 +225,16 @@ onUnmounted(() => {
     overflow: hidden;
 }
 
+.fp--mobile-fullscreen {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.fp--mobile-fullscreen .fp-body {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* ── Nagłówek ─────────────────────────────────────────────────────────────── */
 .fp-header {
     display: flex;
@@ -221,6 +246,11 @@ onUnmounted(() => {
     cursor: move;
     user-select: none;
     flex-shrink: 0;
+}
+
+.fp-header--static {
+    cursor: default;
+    padding-top: max(6px, env(safe-area-inset-top));
 }
 
 .fp-title {
