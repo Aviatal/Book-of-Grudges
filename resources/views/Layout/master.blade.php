@@ -26,7 +26,7 @@
     ></div>
 
     <nav
-        class="w-[300px] max-w-[85vw] shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-stretch"
+        class="w-[340px] max-w-[85vw] shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-stretch"
         :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
         style="height: 100vh; background: var(--bg-sidebar-gradient); border-right: 1px solid var(--border-default)"
     >
@@ -37,7 +37,7 @@
             <div class="font-heading text-sm font-bold tracking-[.16em]" style="color: var(--text-body); line-height: 1.2">BOOK OF<br>GRUDGES</div>
         </div>
 
-        <div class="flex flex-col gap-0.5 overflow-auto flex-1" style="padding: 18px 14px">
+        <div class="sidebar-scroll flex flex-col gap-0.5 overflow-auto flex-1" style="padding: 18px 14px">
             <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-1.5 pb-2" style="color: var(--text-faint-alt)">KSIĘGA</div>
 
             @auth
