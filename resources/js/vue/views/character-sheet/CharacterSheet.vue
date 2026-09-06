@@ -7,7 +7,12 @@
                 </a>
             </div>
 
-            <collapsible-section v-if="activeSection === 'bohater'" :toggleable="false" title="Bohater">
+            <collapsible-section v-if="activeSection === 'szybki-dostep'" :toggleable="false" title="Szybki dostęp">
+                <hero-quick-access-section
+                    :hero="hero"
+                ></hero-quick-access-section>
+            </collapsible-section>
+            <collapsible-section v-else-if="activeSection === 'bohater'" :toggleable="false" title="Bohater">
                 <hero-section
                     :hero="hero"
                     @update-characteristics="refreshCharacteristic"
@@ -110,6 +115,7 @@
 </template>
 
 <script setup lang="ts">
+import HeroQuickAccessSection from "./sections/HeroQuickAccessSection.vue";
 import HeroSection from "./sections/HeroSection.vue";
 import HeroDescriptionSection from "./sections/HeroDescriptionSection.vue";
 import HeroCharacteristicSection from "./sections/HeroCharacteristicSection.vue";

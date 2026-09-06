@@ -26,7 +26,7 @@
     ></div>
 
     <nav
-        class="w-[264px] max-w-[85vw] shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-stretch"
+        class="w-[300px] max-w-[85vw] shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-stretch"
         :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
         style="height: 100vh; background: var(--bg-sidebar-gradient); border-right: 1px solid var(--border-default)"
     >
@@ -54,6 +54,7 @@
                         </svg>
                     </summary>
                     <div class="pl-[19px] flex flex-col gap-0.5 mt-0.5" data-hash-nav>
+                        <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#szybki-dostep">Szybki dostęp</x-sheet-subnav-link>
                         <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#bohater">Bohater</x-sheet-subnav-link>
                         <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#opis">Opis</x-sheet-subnav-link>
                         <x-sheet-subnav-link href="{{ $sheetBaseUrl }}#cechy">Cechy</x-sheet-subnav-link>
