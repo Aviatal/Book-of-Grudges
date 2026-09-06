@@ -15,12 +15,14 @@
         </div>
 
         <div class="cc__field">
-            <label class="cc__label" for="cc-currency">Waluta</label>
-            <div class="cc__select-wrap">
-                <select id="cc-currency" v-model="selectedCurrency" class="cc__select">
-                    <option v-for="currency in currencies" :key="currency" :value="currency">{{ currency }}</option>
-                </select>
-            </div>
+            <label class="cc__label">Waluta</label>
+            <v-select
+                v-model="selectedCurrency"
+                :options="currencies"
+                :clearable="false"
+                :searchable="false"
+                class="cc__select"
+            ></v-select>
         </div>
 
         <div class="cc__result">
@@ -99,8 +101,7 @@ export default {
     color: var(--text-faint);
 }
 
-.cc__input,
-.cc__select {
+.cc__input {
     width: 100%;
     padding: 8px 10px;
     font-family: var(--font-body), serif;
@@ -121,41 +122,40 @@ export default {
     -moz-appearance: textfield;
 }
 
-.cc__input:focus,
-.cc__select:focus {
+.cc__input:focus {
     outline: none;
     border-color: var(--border-accent-hover);
     box-shadow: 0 0 0 2px rgba(212, 175, 55, .18);
 }
 
-.cc__select-wrap {
-    position: relative;
+/* vue-select — kompaktowo pod sidebar (motyw globalny w app.css) */
+.cc__select :deep(.vs__dropdown-toggle) {
+    padding: 2px 4px 5px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
 }
 
-.cc__select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    padding-right: 28px;
-    cursor: pointer;
-}
-
-.cc__select-wrap::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    width: 6px;
-    height: 6px;
-    border-right: 1px solid var(--gold-muted);
-    border-bottom: 1px solid var(--gold-muted);
-    transform: translateY(-70%) rotate(45deg);
-    pointer-events: none;
-}
-
-.cc__select option {
-    background: var(--bg-panel);
+.cc__select :deep(.vs__selected) {
+    margin: 4px 2px 0;
+    padding: 0 2px;
+    font-family: var(--font-body), serif;
+    font-size: 14px;
+    font-weight: 400;
     color: var(--text-body);
+}
+
+.cc__select :deep(.vs__search) {
+    margin: 4px 0 0;
+    padding: 0 2px;
+}
+
+.cc__select :deep(.vs__actions) {
+    padding-top: 3px;
+}
+
+.cc__select.vs--open :deep(.vs__dropdown-toggle) {
+    border-color: var(--border-accent-hover);
 }
 
 .cc__result {

@@ -17,6 +17,9 @@
 }
 
 :root {
+    /* cała aplikacja jest ciemna — wymusza ciemne natywne kontrolki (listy <select>, paski, pickery) */
+    color-scheme: dark;
+
     /* backgrounds */
     --bg-base: #100e0b;
     --bg-base-gradient: radial-gradient(120% 80% at 50% 0%, #1a1610 0%, #100e0b 60%);
@@ -98,6 +101,90 @@ body {
     color: var(--text-body) !important;
 }
 /* v-select */
+
+/* ── Natywne selecty / inputy — ciemna lista rozwijana i kontrolki ────── */
+select,
+input,
+textarea {
+    color-scheme: dark;
+}
+
+select {
+    accent-color: var(--border-accent-hover);
+}
+
+select option,
+select optgroup {
+    background-color: var(--bg-panel);
+    color: var(--text-body);
+    font-family: var(--font-body), Georgia, serif;
+}
+
+select option:checked,
+select option[selected] {
+    background: var(--border-accent);
+    color: var(--gold-bright);
+    font-weight: 600;
+}
+
+select option:hover {
+    background: var(--border-accent);
+    color: var(--gold-bright);
+}
+
+/* ── vue-select — spójny motyw także bez klasy .custom-select ─────────── */
+.vs__dropdown-toggle {
+    background-color: var(--bg-inset);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+}
+
+.vs--open .vs__dropdown-toggle {
+    border-color: var(--border-accent-hover);
+}
+
+.vs__search,
+.vs__search:focus,
+.vs__selected {
+    color: var(--text-body);
+    font-family: var(--font-body), Georgia, serif;
+}
+
+.vs__search::placeholder {
+    color: var(--text-faint);
+}
+
+.vs__dropdown-menu {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-accent-hover);
+    color: var(--text-body);
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .8);
+}
+
+.vs__dropdown-option {
+    color: var(--text-muted);
+    font-family: var(--font-body), Georgia, serif;
+    padding: 8px 12px;
+}
+
+.vs__dropdown-option--highlight {
+    background: var(--border-accent);
+    color: var(--gold-bright);
+}
+
+.vs__dropdown-option--selected {
+    color: var(--gold);
+}
+
+.vs__open-indicator,
+.vs__clear {
+    fill: var(--gold-muted);
+}
+
+.vs__no-options {
+    color: var(--text-faint);
+    font-style: italic;
+}
 
 .v-toast {
     z-index: 2500 !important;
