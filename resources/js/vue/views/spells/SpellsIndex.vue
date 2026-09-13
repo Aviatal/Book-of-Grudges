@@ -120,8 +120,6 @@ export default {
 }
 
 .page-content {
-    max-width: 1240px;
-    margin: 0 auto;
     padding: 26px 34px 60px;
 }
 

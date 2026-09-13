@@ -145,8 +145,6 @@ export default {
 }
 
 .page-header__inner {
-    max-width: 1240px;
-    margin: 0 auto;
     display: flex;
     align-items: flex-end;
     gap: 24px;
@@ -200,8 +198,6 @@ export default {
 }
 
 .page-content {
-    max-width: 1240px;
-    margin: 0 auto;
     padding: 26px 34px 60px;
 }
 

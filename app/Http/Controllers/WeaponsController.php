@@ -24,8 +24,8 @@ class WeaponsController extends Controller
             return response()->json($weapons->select('name', 'id')->toArray());
         }
         return response()->json([
-            'ranged' => $weapons->where('is_ranged', 1),
-            'cold' => $weapons->where('is_ranged', 0)
+            'ranged' => $weapons->where('is_ranged', 1)->values(),
+            'cold' => $weapons->where('is_ranged', 0)->values()
         ]);
     }
 }

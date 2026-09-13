@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on, attrs }">
-            <button class="button-panel-custom button-orange for-vue" @click="dialog = true">
+            <button class="add-button" @click="dialog = true">
                 Dodaj przedmiot
             </button>
         </template>
@@ -124,34 +124,6 @@ const addItem = () => {
     color: #c09f80;
 }
 
-.cancel-button {
-    background-color: transparent;
-    color: #999;
-    border: 1px solid #999;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 6px;
-    transition: 0.3s;
-}
-
-.cancel-button:hover {
-    color: #c09f80;
-    border-color: #c09f80;
-}
-
-.add-button {
-    background-color: #c09f80;
-    color: #1c1c1c;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 6px;
-    transition: 0.3s;
-}
-
-.add-button:hover {
-    background-color: #d4b38a;
-}
-
 .v-card-title {
     font-size: 1.8rem;
     margin-bottom: 20px;
@@ -160,27 +132,4 @@ const addItem = () => {
 .v-card-text {
     margin: 20px;
 }
-
-.button-panel-custom {
-    background-color: #c09f80;
-    color: #1c1c1c;
-    font-size: 1.2rem;
-    font-weight: bold;
-    padding: 0.8rem;
-    margin: 0.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.button-panel-custom:hover {
-    background-color: #d4b38a;
-    transform: scale(1.1);
-}
-
-.button-panel-custom:active {
-    transform: scale(0.95);
-}
-
 </style>

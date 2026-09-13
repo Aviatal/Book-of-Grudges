@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on, attrs }">
-            <button class="button-panel-custom button-orange for-vue" @click="dialog = true">
+            <button class="add-button" @click="dialog = true">
                 Dodaj zbroję
             </button>
         </template>
@@ -44,7 +44,7 @@
 </template>
 <script setup lang="ts">
 import {defineProps, ref, watch} from 'vue'
-import {Armor} from "../../../types/Armor";
+import {Armor} from "@/types/Armor";
 import {useToast} from "vue-toast-notification";
 const props = defineProps<{
     heroId: number;
@@ -114,17 +114,6 @@ watch(dialog, (newValue) => {
     color: #d4b38a;
 }
 
-.custom-input ::v-deep .v-input__control {
-    background-color: #3b3a36;
-    border: 1px solid #c09f80;
-    color: #fff;
-    border-radius: 6px;
-}
-
-.custom-input ::v-deep {
-    color: #c09f80;
-}
-
 .v-card-title {
     font-size: 1.8rem;
     margin-bottom: 20px;
@@ -132,27 +121,5 @@ watch(dialog, (newValue) => {
 
 .v-card-text {
     margin: 20px;
-}
-
-.button-panel-custom {
-    background-color: #c09f80;
-    color: #1c1c1c;
-    font-size: 1.2rem;
-    font-weight: bold;
-    padding: 0.8rem;
-    margin: 0.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.button-panel-custom:hover {
-    background-color: #d4b38a;
-    transform: scale(1.1);
-}
-
-.button-panel-custom:active {
-    transform: scale(0.95);
 }
 </style>

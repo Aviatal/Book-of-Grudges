@@ -24,9 +24,9 @@ class ArmorsController extends Controller
             return response()->json($armors->select('name', 'category', 'id')->toArray());
         }
         return response()->json([
-            'leather' => $armors->where('category', 'SKÓRZANA'),
-            'mail' => $armors->where('category', 'KOLCZA'),
-            'plate' => $armors->where('category', 'PŁYTOWA'),
+            'leather' => $armors->where('category', 'SKÓRZANA')->values(),
+            'mail' => $armors->where('category', 'KOLCZA')->values(),
+            'plate' => $armors->where('category', 'PŁYTOWA')->values(),
         ]);
     }
 }
