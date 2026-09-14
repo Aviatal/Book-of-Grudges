@@ -9,6 +9,7 @@ use App\Events\Session\TokenPlaceEvent;
 use App\Events\Session\TokenRemoveFromMapEvent;
 use App\Events\Session\TokenScaleEvent;
 use App\Services\TokenService;
+use App\Support\CurrentCampaign;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Support\Facades\Log;
 use App\Models\Token;
@@ -23,14 +24,15 @@ class SessionController extends Controller
     {
         // GM może nie mieć własnej postaci — getHero() zwraca wtedy null; 0 nigdy nie
         // dopasuje się do prawdziwego hero_id, więc "to mój token" po prostu nigdy nie zajdzie
-        $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier())?->id ?? 0;
-        $hasDrawingPermission = $request->user()->is_admin;
-        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission'));
+        $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier(), $this->currentCampaign()->id())?->id ?? 0;
+        $hasDrawingPermission = $this->currentCampaign()->isGm();
+        $campaignId = $this->currentCampaign()->id();
+        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission', 'campaignId'));
     }
 
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
+        $this->abortUnlessGm();
 
         $data = $request->validate([
             'x' => ['required', 'numeric'],
@@ -40,10 +42,10 @@ class SessionController extends Controller
         $x = (float) $data['x'];
         $y = (float) $data['y'];
 
-        $tokensRepository->moveToken($token->getAttribute('id'), $x, $y);
+        $tokensRepository->moveToken($token->getAttribute('id'), $this->currentCampaign()->id(), $x, $y);
 
         try {
-            broadcast(new MoveTokenEvent($token->getAttribute('id'), $x, $y))->toOthers();
+            broadcast(new MoveTokenEvent($token->getAttribute('id'), $x, $y, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Token moved but broadcast failed', ['exception' => $e]);
         }
@@ -53,7 +55,7 @@ class SessionController extends Controller
 
     public function bulkMove(Request $request, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
+        $this->abortUnlessGm();
 
         $data = $request->validate([
             'tokens'      => ['required', 'array', 'min:1'],
@@ -69,10 +71,10 @@ class SessionController extends Controller
             'y'  => (float) $t['y'],
         ], $data['tokens']);
 
-        $tokensRepository->moveMultipleToken($tokens);
+        $tokensRepository->moveMultipleToken($tokens, $this->currentCampaign()->id());
 
         try {
-            broadcast(new MoveBatchTokenEvent($tokens))->toOthers();
+            broadcast(new MoveBatchTokenEvent($tokens, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Tokens bulk-moved but broadcast failed', ['exception' => $e]);
         }
@@ -89,7 +91,7 @@ class SessionController extends Controller
         ]);
 
         try {
-            broadcast(new PingPlayersEvent($data))->toOthers();
+            broadcast(new PingPlayersEvent($data, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Ping broadcast failed', ['exception' => $e]);
         }
@@ -99,13 +101,13 @@ class SessionController extends Controller
 
     public function placeToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
+        $this->abortUnlessGm();
         $request->validate(['x' => 'required|numeric', 'y' => 'required|numeric']);
         $x = (int) $request->input('x');
         $y = (int) $request->input('y');
-        $tokensRepository->placeToken($token->id, $x, $y);
+        $tokensRepository->placeToken($token->id, $this->currentCampaign()->id(), $x, $y);
         try {
-            broadcast(new TokenPlaceEvent($token->id, $x, $y))->toOthers();
+            broadcast(new TokenPlaceEvent($token->id, $x, $y, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Token placed but broadcast failed', ['exception' => $e]);
         }
@@ -114,10 +116,10 @@ class SessionController extends Controller
 
     public function removeTokenFromMap(Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
-        $tokensRepository->removeTokenFromMap($token->id);
+        $this->abortUnlessGm();
+        $tokensRepository->removeTokenFromMap($token->id, $this->currentCampaign()->id());
         try {
-            broadcast(new TokenRemoveFromMapEvent($token->id))->toOthers();
+            broadcast(new TokenRemoveFromMapEvent($token->id, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Token removed from map but broadcast failed', ['exception' => $e]);
         }
@@ -126,12 +128,12 @@ class SessionController extends Controller
 
     public function scaleToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
+        $this->abortUnlessGm();
         $scale = (float) $request->input('scale', 1.0);
         $scale = max(0.1, min(10.0, $scale));
-        $tokensRepository->scaleToken($token->id, $scale);
+        $tokensRepository->scaleToken($token->id, $this->currentCampaign()->id(), $scale);
         try {
-            broadcast(new TokenScaleEvent($token->id, $scale))->toOthers();
+            broadcast(new TokenScaleEvent($token->id, $scale, $this->currentCampaign()->id()))->toOthers();
         } catch (BroadcastException $e) {
             Log::warning('Token scaled but broadcast failed', ['exception' => $e]);
         }
@@ -140,9 +142,9 @@ class SessionController extends Controller
 
     public function duplicateToken(Token $token, TokenService $tokenService): \Illuminate\Http\JsonResponse
     {
-        abort_unless(auth()->user()?->is_admin, 403);
+        $this->abortUnlessGm();
         try {
-            $newToken = $tokenService->duplicateToken($token->id);
+            $newToken = $tokenService->duplicateToken($token->id, $this->currentCampaign()->id());
             return response()->json($newToken->append('image_url'));
         } catch (\Throwable $e) {
             Log::error('Error duplicating token', ['exception' => $e]);

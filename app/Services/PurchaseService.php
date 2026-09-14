@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 
 class PurchaseService
 {
-    public function sendPurchaseToPlayer(Request $request): void
+    public function sendPurchaseToPlayer(Request $request, int $campaignId): void
     {
-        $hero = Hero::findOrFail($request->input('hero_id'));
+        $hero = Hero::where('campaign_id', $campaignId)->findOrFail($request->input('hero_id'));
         $item = MarketplaceItem::findOrFail($request->input('item_id'));
         $price = $request->input('price');
         $customName = $request->input('custom_name');

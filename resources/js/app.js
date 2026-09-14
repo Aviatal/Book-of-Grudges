@@ -29,6 +29,7 @@ import FortunePointsManagement from "@/views/panel/fortune-points/FortunePointsM
 import TokensManagement from "@/views/panel/tokens/TokensManagement.vue";
 import TokenCreate from "@/views/panel/tokens/TokenCreate.vue";
 import TokenEdit from "@/views/panel/tokens/TokenEdit.vue";
+import CampaignManagement from "@/views/panel/campaign/CampaignManagement.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 import '@mdi/font/css/materialdesignicons.css'
@@ -136,5 +137,6 @@ app.component('purchases', Purchases)
 app.component('tokens-management', TokensManagement)
 app.component('token-create', TokenCreate)
 app.component('token-edit', TokenEdit)
+app.component('campaign-management', CampaignManagement)
 
 app.mount('#app');

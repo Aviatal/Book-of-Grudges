@@ -90,30 +90,58 @@
                 </div>
             </details>
 
-            @if(Auth::user() && Auth::user()->getAttribute('is_admin'))
+            @if($isCampaignGm ?? false)
                 <div class="h-px my-3.5 mx-2" style="background: linear-gradient(90deg, transparent, var(--border-default), transparent)"></div>
                 <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-0.5 pb-2" style="color: var(--text-faint-alt)">MISTRZ GRY</div>
 
+                <x-sidebar-nav-link :route="route('panel.campaign.index')" pattern="panel.campaign.*">Kampania</x-sidebar-nav-link>
                 <x-sidebar-nav-link :route="route('panel.experience.show-experiences-form')" pattern="panel.experience.*">Rozdanie PD</x-sidebar-nav-link>
                 <x-sidebar-nav-link :route="route('panel.fortune-points.show-fp-management-form')" pattern="panel.fortune-points.*">Punkty szczęścia</x-sidebar-nav-link>
                 <x-sidebar-nav-link :route="route('panel.purchases.make-purchase-form')" pattern="panel.purchases.*">Zakupy</x-sidebar-nav-link>
                 <x-sidebar-nav-link :route="route('panel.tokens.index')" pattern="panel.tokens.*">Tokeny</x-sidebar-nav-link>
             @endif
+
+            @if($isSuperadmin ?? false)
+                <div class="h-px my-3.5 mx-2" style="background: linear-gradient(90deg, transparent, var(--border-default), transparent)"></div>
+                <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-0.5 pb-2" style="color: var(--text-faint-alt)">ADMINISTRATOR</div>
+                <x-sidebar-nav-link :route="route('panel.superadmin.index')" pattern="panel.superadmin.*">Wszystkie kampanie</x-sidebar-nav-link>
+            @endif
         </div>
 
         <div style="padding: 16px 18px; border-top: 1px solid var(--border-subtle); background: var(--bg-inset-alt)">
+            @auth
+                @php($campaignMemberships = Auth::user()->campaignMemberships()->with('campaign')->get())
+                @if($campaignMemberships->count() > 1)
+                    <form method="POST" action="{{ route('campaigns.switch', $currentCampaign->id ?? $campaignMemberships->first()->campaign_id) }}" class="mb-4">
+                        @csrf
+                        <label class="block">
+                            <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint-alt)">KAMPANIA</span>
+                            <select name="campaign_placeholder" onchange="this.form.action = this.value; this.form.submit()"
+                                    class="w-full box-border px-2.5 py-2 font-body text-sm"
+                                    style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                                @foreach($campaignMemberships as $membership)
+                                    <option value="{{ route('campaigns.switch', $membership->campaign_id) }}" {{ isset($currentCampaign) && $currentCampaign->id === $membership->campaign_id ? 'selected' : '' }}>
+                                        {{ $membership->campaign->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </form>
+                @endif
+            @endauth
+
             <currency-converter></currency-converter>
 
-            @if(Auth::user() && Auth::user()->hero?->id && !str_contains(url()->current(), 'panel'))
+            @if(Auth::user() && ($currentCampaignHero->id ?? null) && !str_contains(url()->current(), 'panel'))
                 <div class="mt-4">
                     <div class="font-heading text-[10px] tracking-[.2em] mb-2.5" style="color: var(--text-faint-alt)">SZYBKIE AKCJE</div>
                     <div class="actions-container">
                         <spend-fortune-point
-                            :hero-id="{{ Auth::user()->hero?->id }}"
+                            :hero-id="{{ $currentCampaignHero->id }}"
                         ></spend-fortune-point>
 
                         <spend-fate-point
-                            :hero-id="{{ Auth::user()->hero?->id }}"
+                            :hero-id="{{ $currentCampaignHero->id }}"
                         ></spend-fate-point>
                     </div>
                 </div>

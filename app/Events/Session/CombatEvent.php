@@ -19,11 +19,12 @@ class CombatEvent implements ShouldBroadcastNow
     public function __construct(
         public readonly string  $type,
         public readonly ?array  $state,
+        public readonly int     $campaignId,
     ) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('combat')];
+        return [new PrivateChannel("combat.{$this->campaignId}")];
     }
 
     public function broadcastAs(): string

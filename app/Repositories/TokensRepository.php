@@ -7,17 +7,19 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TokensRepository
 {
-    public function getTokens(array $relations = []): \Illuminate\Database\Eloquent\Collection
+    public function getTokens(int $campaignId, array $relations = []): \Illuminate\Database\Eloquent\Collection
     {
         return Token::query()
+            ->where('campaign_id', $campaignId)
             ->when(count($relations) > 0, function (Builder $query) use ($relations) {
                 $query->with($relations);
             })
             ->get();
     }
-    public function getToken(int $id, array $relations = []): Token
+    public function getToken(int $id, int $campaignId, array $relations = []): Token
     {
         return Token::query()
+            ->where('campaign_id', $campaignId)
             ->when(count($relations) > 0, function (Builder $query) use ($relations) {
                 $query->with($relations);
             })
@@ -40,27 +42,39 @@ class TokensRepository
         return $token->delete();
     }
 
-    public function moveToken(int $tokenId, float $x, float $y): int
+    public function moveToken(int $tokenId, int $campaignId, float $x, float $y): int
     {
-        return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y]);
+        return Token::query()->where('id', $tokenId)->where('campaign_id', $campaignId)->update(['x' => $x, 'y' => $y]);
     }
-    public function moveMultipleToken(array $tokens): int
+    public function moveMultipleToken(array $tokens, int $campaignId): int
     {
-        return Token::query()->upsert($tokens, 'id', ['x', 'y']);
+        $allowedIds = Token::query()
+            ->where('campaign_id', $campaignId)
+            ->whereIn('id', array_column($tokens, 'id'))
+            ->pluck('id')
+            ->all();
+
+        $filtered = array_values(array_filter($tokens, static fn (array $t): bool => in_array($t['id'], $allowedIds, true)));
+
+        if (empty($filtered)) {
+            return 0;
+        }
+
+        return Token::query()->upsert($filtered, 'id', ['x', 'y']);
     }
 
-    public function placeToken(int $tokenId, float $x, float $y): int
+    public function placeToken(int $tokenId, int $campaignId, float $x, float $y): int
     {
-        return Token::query()->where('id', $tokenId)->update(['x' => $x, 'y' => $y, 'on_map' => true]);
+        return Token::query()->where('id', $tokenId)->where('campaign_id', $campaignId)->update(['x' => $x, 'y' => $y, 'on_map' => true]);
     }
 
-    public function removeTokenFromMap(int $tokenId): int
+    public function removeTokenFromMap(int $tokenId, int $campaignId): int
     {
-        return Token::query()->where('id', $tokenId)->update(['on_map' => false]);
+        return Token::query()->where('id', $tokenId)->where('campaign_id', $campaignId)->update(['on_map' => false]);
     }
 
-    public function scaleToken(int $tokenId, float $scale): int
+    public function scaleToken(int $tokenId, int $campaignId, float $scale): int
     {
-        return Token::query()->where('id', $tokenId)->update(['scale' => $scale]);
+        return Token::query()->where('id', $tokenId)->where('campaign_id', $campaignId)->update(['scale' => $scale]);
     }
 }

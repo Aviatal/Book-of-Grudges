@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Support\CurrentCampaign;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,9 @@ class AssetsController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Asset::orderBy('created_at', 'desc')->get());
+        return response()->json(
+            Asset::where('campaign_id', $this->currentCampaign()->id())->orderBy('created_at', 'desc')->get()
+        );
     }
 
     public function upload(Request $request): JsonResponse
@@ -29,9 +32,10 @@ class AssetsController extends Controller
             $path = $file->store('assets', config('filesystems.media'));
 
             $asset = Asset::create([
-                'name'      => $request->input('name') ?? $file->getClientOriginalName(),
-                'type'      => $request->input('type'),
-                'file_path' => $path,
+                'name'        => $request->input('name') ?? $file->getClientOriginalName(),
+                'type'        => $request->input('type'),
+                'file_path'   => $path,
+                'campaign_id' => $this->currentCampaign()->id(),
             ]);
 
             return response()->json($asset, Response::HTTP_CREATED);
@@ -44,7 +48,7 @@ class AssetsController extends Controller
     public function delete(int $id): JsonResponse
     {
         try {
-            $asset = Asset::findOrFail($id);
+            $asset = Asset::where('campaign_id', $this->currentCampaign()->id())->findOrFail($id);
             Storage::disk(config('filesystems.media'))->delete($asset->file_path);
             $asset->delete();
             return response()->json(null, Response::HTTP_NO_CONTENT);

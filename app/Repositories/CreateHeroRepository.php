@@ -10,13 +10,14 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class CreateHeroRepository
 {
-    public function createHero(array $personalDetails, int $professionId, string $race, array $secondaryCharacteristics, array $money): Hero
+    public function createHero(array $personalDetails, int $professionId, string $race, array $secondaryCharacteristics, array $money, int $campaignId): Hero
     {
         if(!\Auth::check()) {
             throw new AuthorizationException('NIe jesteś zalogowany');
         }
         return Hero::create([
             'user_id' => \Auth::user()->getAuthIdentifier(),
+            'campaign_id' => $campaignId,
             'name' => $personalDetails['name'],
             'race' => $race,
             'current_profession_id' => $professionId,

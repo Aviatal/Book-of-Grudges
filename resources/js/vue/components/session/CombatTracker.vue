@@ -178,6 +178,7 @@ const props = defineProps<{
     boardOpen:            boolean;
     // Blade przekazuje PHP true jako "1" — akceptujemy number i boolean
     hasDrawingPermission: boolean | number;
+    campaignId:           number;
 }>();
 
 const emit = defineEmits<{
@@ -318,7 +319,7 @@ onMounted(async () => {
     }
 
     // Nasłuchuj na zmiany w czasie rzeczywistym
-    window.Echo.private('combat')
+    window.Echo.private(`combat.${props.campaignId}`)
         .listen('.combat', (e: { type: string; state: CombatState | null }) => {
             if (e.type === 'ended') {
                 state.value = null;

@@ -2,20 +2,16 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\CurrentCampaign;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class Admin
+class EnsureCampaignGm
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Auth::user() && \Auth::user()->getAttribute('is_admin')) {
+        if (app(CurrentCampaign::class)->isGm()) {
             return $next($request);
         }
 

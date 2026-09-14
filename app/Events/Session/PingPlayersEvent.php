@@ -15,7 +15,7 @@ class PingPlayersEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public array $newPing) {}
+    public function __construct(public array $newPing, public int $campaignId) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -25,7 +25,7 @@ class PingPlayersEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('drawings'),
+            new PrivateChannel("drawings.{$this->campaignId}"),
         ];
     }
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 
 class HeroesRepository
 {
-    public function getHero(int $userId): ?Hero
+    public function getHero(int $userId, int $campaignId): ?Hero
     {
         if ($userId !== Auth::user()->getAuthIdentifier()) {
             abort(404);
@@ -22,11 +22,13 @@ class HeroesRepository
             'skills', 'talents', 'inventory', 'spells'
         ])
             ->where('user_id', $userId)
+            ->where('campaign_id', $campaignId)
             ->first();
     }
-    public function getHeroes(array $select = ['*'], bool $onlyActive = true) :Collection
+    public function getHeroes(int $campaignId, array $select = ['*'], bool $onlyActive = true): Collection
     {
         return Hero::select($select)
+            ->where('campaign_id', $campaignId)
             ->when($onlyActive, fn($query) => $query->onlyActiveUsers())
             ->get();
     }

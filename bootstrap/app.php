@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'campaign.selected' => \App\Http\Middleware\EnsureCampaignSelected::class,
+            'campaign.gm' => \App\Http\Middleware\EnsureCampaignGm::class,
+            'superadmin' => \App\Http\Middleware\EnsureSuperadmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

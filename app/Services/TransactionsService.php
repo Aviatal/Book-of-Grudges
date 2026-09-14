@@ -22,11 +22,10 @@ class TransactionsService
      * @throws NotEnoughMoneyException
      * @throws \Throwable
      */
-    public function equipMarketplaceItem(Request $request, int $id): ?JsonResponse
+    public function equipMarketplaceItem(Request $request, Hero $hero): ?JsonResponse
     {
         try {
             $marketplaceItem = MarketplaceItem::query()->findOrFail($request->input('item'));
-            $hero = Hero::query()->findOrFail(Auth::user()->hero->id);
 
             DB::beginTransaction();
             $hero->pay($request->input('price'));
@@ -53,7 +52,7 @@ class TransactionsService
                         ]);
                     } catch (AlreadyEquippedException $exception) {
                         $inventoryItem = HeroInventory::query()->create([
-                            'hero_id' => $id,
+                            'hero_id' => $hero->id,
                             'name' => $armor->name,
                             'loading' => $armor->loading,
                         ]);
@@ -110,7 +109,7 @@ class TransactionsService
                         ]);
                     } catch (AlreadyEquippedException $exception) {
                         $inventoryItem = HeroInventory::query()->create([
-                            'hero_id' => $id,
+                            'hero_id' => $hero->id,
                             'name' => $weapon->name . ' ' . $request->input('customName'),
                             'loading' => $weapon->loading,
                         ]);
@@ -130,7 +129,7 @@ class TransactionsService
                     }
                 case 'App\Models\CommonItems':
                     $inventoryItem = HeroInventory::query()->create([
-                        'hero_id' => $id,
+                        'hero_id' => $hero->id,
                         'name' => $request->input('customName'),
                         'loading' => $marketplaceItem->tradeable->getAttribute('loading'),
                     ]);

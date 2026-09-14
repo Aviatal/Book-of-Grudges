@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Repositories\ChatRepository;
 use App\Services\ChatService;
+use App\Support\CurrentCampaign;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,7 @@ class ChatController extends Controller
     public function getMessages(): JsonResponse
     {
         try {
-            return response()->json($this->chatRepository->getMessages(24));
+            return response()->json($this->chatRepository->getMessages($this->currentCampaign()->id(), 24));
         } catch (\Throwable $exception) {
             Log::error('Error during getting messages', ['exception' => $exception]);
             return response()->json(['error' => 'Wystąpił błąd podczas pobierania wiadomości'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -34,7 +35,7 @@ class ChatController extends Controller
         ]);
 
         try {
-            $message = $this->chatService->sendMessage($request->user(), $request->input('text'));
+            $message = $this->chatService->sendMessage($request->user(), $request->input('text'), $this->currentCampaign()->id());
             return response()->json(['message' => $message], Response::HTTP_CREATED);
         } catch (\Throwable $exception) {
             Log::error('Error during sending message', ['exception' => $exception]);
@@ -45,7 +46,7 @@ class ChatController extends Controller
     public function rollInitiative(Request $request): JsonResponse
     {
         try {
-            $message = $this->chatService->rollInitiative($request->user());
+            $message = $this->chatService->rollInitiative($request->user(), $this->currentCampaign()->id());
             return response()->json(['message' => $message], Response::HTTP_CREATED);
         } catch (\Throwable $exception) {
             Log::error('Error during rolling initiative', ['exception' => $exception]);
@@ -56,7 +57,7 @@ class ChatController extends Controller
     public function getSkillsForRoll(Request $request): JsonResponse
     {
         try {
-            return response()->json($this->chatService->getSkillsForHero($request->user()));
+            return response()->json($this->chatService->getSkillsForHero($request->user(), $this->currentCampaign()->id()));
         } catch (\Throwable $exception) {
             Log::error('Error during getting skills for roll', ['exception' => $exception]);
             return response()->json(['error' => 'Wystąpił błąd podczas pobierania umiejętności'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -75,6 +76,7 @@ class ChatController extends Controller
             $message = $this->chatService->rollCharacteristic(
                 $request->user(),
                 $request->input('characteristic'),
+                $this->currentCampaign()->id(),
                 $request->integer('modifier'),
                 $request->boolean('half'),
             );
@@ -97,6 +99,7 @@ class ChatController extends Controller
                 $request->user(),
                 $request->integer('count'),
                 $request->integer('sides'),
+                $this->currentCampaign()->id(),
             );
             return response()->json(['message' => $message], Response::HTTP_CREATED);
         } catch (\Throwable $exception) {
@@ -117,6 +120,7 @@ class ChatController extends Controller
             $message = $this->chatService->rollSkill(
                 $request->user(),
                 $request->integer('skill_id'),
+                $this->currentCampaign()->id(),
                 $request->integer('modifier', 0),
                 $request->boolean('half', false),
             );

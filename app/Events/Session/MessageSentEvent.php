@@ -13,12 +13,12 @@ class MessageSentEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Message $message) {}
+    public function __construct(public Message $message, public int $campaignId) {}
 
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('session-chat'),
+            new PrivateChannel("session-chat.{$this->campaignId}"),
         ];
     }
 

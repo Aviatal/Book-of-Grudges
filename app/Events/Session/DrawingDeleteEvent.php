@@ -15,7 +15,7 @@ class DrawingDeleteEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $drawingId) {}
+    public function __construct(public int $drawingId, public int $campaignId) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -25,7 +25,7 @@ class DrawingDeleteEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('drawings'),
+            new PrivateChannel("drawings.{$this->campaignId}"),
         ];
     }
 

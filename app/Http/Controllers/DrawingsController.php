@@ -9,6 +9,7 @@ use App\Events\Session\DrawingUpdateEvent;
 use App\Http\Requests\StoreDrawingRequest;
 use App\Models\Drawing;
 use App\Repositories\DrawingsRepository;
+use App\Support\CurrentCampaign;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class DrawingsController extends Controller
     public function getDrawings(DrawingsRepository $drawingsRepository): JsonResponse
     {
         try {
-            return response()->json($drawingsRepository->fetchDrawings());
+            return response()->json($drawingsRepository->fetchDrawings($this->currentCampaign()->id()));
         } catch (\Throwable $exception) {
             Log::error('Error fetching drawings', ['exception' => $exception]);
             return response()->json(['error' => 'Błąd pobierania rysunków'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -31,9 +32,9 @@ class DrawingsController extends Controller
     {
         $this->abortUnlessGm();
         try {
-            $drawing = $drawingsRepository->storeDrawing($request->all());
+            $drawing = $drawingsRepository->storeDrawing($request->all(), $this->currentCampaign()->id());
             try {
-                broadcast(new DrawingCreateEvent($drawing->data, $drawing->type, $drawing->layer, $drawing->id))->toOthers();
+                broadcast(new DrawingCreateEvent($drawing->data, $drawing->type, $drawing->layer, $drawing->id, $this->currentCampaign()->id()))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing created but broadcast failed', ['exception' => $e]);
             }
@@ -49,9 +50,9 @@ class DrawingsController extends Controller
         $this->abortUnlessGm();
         try {
             $drawingData = $request->input('data');
-            $drawingsRepository->updateDrawing($drawingId, $drawingData);
+            $drawingsRepository->updateDrawing($drawingId, $this->currentCampaign()->id(), $drawingData);
             try {
-                broadcast(new DrawingUpdateEvent($drawingId, $drawingData))->toOthers();
+                broadcast(new DrawingUpdateEvent($drawingId, $drawingData, $this->currentCampaign()->id()))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing updated but broadcast failed', ['exception' => $e]);
             }
@@ -71,9 +72,9 @@ class DrawingsController extends Controller
         ]);
 
         try {
-            $drawingsRepository->updateDrawingLayer($drawingId, $request->string('layer')->value());
+            $drawingsRepository->updateDrawingLayer($drawingId, $this->currentCampaign()->id(), $request->string('layer')->value());
             try {
-                broadcast(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value()))->toOthers();
+                broadcast(new DrawingLayerChangedEvent($drawingId, $request->string('layer')->value(), $this->currentCampaign()->id()))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing layer changed but broadcast failed', ['exception' => $e]);
             }
@@ -88,9 +89,9 @@ class DrawingsController extends Controller
     {
         $this->abortUnlessGm();
         try {
-            $drawingsRepository->deleteDrawing($drawingId);
+            $drawingsRepository->deleteDrawing($drawingId, $this->currentCampaign()->id());
             try {
-                broadcast(new DrawingDeleteEvent($drawingId))->toOthers();
+                broadcast(new DrawingDeleteEvent($drawingId, $this->currentCampaign()->id()))->toOthers();
             } catch (BroadcastException $e) {
                 Log::warning('Drawing deleted but broadcast failed', ['exception' => $e]);
             }

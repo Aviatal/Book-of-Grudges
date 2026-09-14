@@ -452,6 +452,7 @@
             :can-draw="hasDrawingPermission"
             :tokens="tokens"
             :hero-id="heroId"
+            :campaign-id="props.campaignId"
         />
 
         <div v-show="!showCombatBoard && !isMobile" class="stage-wrapper" :class="{ 'cursor-grab': isPanning }" @dragover="onCanvasDragOver" @drop="onCanvasDrop">
@@ -682,6 +683,7 @@
         :hero-id="props.heroId"
         :has-drawing-permission="props.hasDrawingPermission"
         :board-open="showCombatBoard"
+        :campaign-id="props.campaignId"
         @toggle-board="onToggleBoard"
     />
 </template>
@@ -702,7 +704,8 @@ import FloatingPanel from '../../components/session/FloatingPanel.vue';
 const props = defineProps<{
     userId: number,
     heroId: number,
-    hasDrawingPermission: boolean
+    hasDrawingPermission: boolean,
+    campaignId: number,
 }>();
 
 interface MoveTokenEvent {
@@ -737,11 +740,17 @@ interface MapLayer {
     locked: boolean;
 }
 
-// Nazwy kanałów realtime — subskrybowane w onMounted, opuszczane w onUnmounted
-const REALTIME_CHANNELS = ['token-move', 'drawings', 'session-chat', 'combat'] as const;
+// Nazwy kanałów realtime — subskrybowane w onMounted, opuszczane w onUnmounted.
+// Zawężone do bieżącej kampanii, żeby dwie kampanie nie widziały swoich zdarzeń.
+const REALTIME_CHANNELS = computed(() => [
+    `token-move.${props.campaignId}`,
+    `drawings.${props.campaignId}`,
+    `session-chat.${props.campaignId}`,
+    `combat.${props.campaignId}`,
+]);
 
 const subscribeRealtime = (): void => {
-    window.Echo.private('token-move')
+    window.Echo.private(`token-move.${props.campaignId}`)
         .listen('.move', (e: MoveTokenEvent) => {
             moveToken(e.id, e.x, e.y);
         })
@@ -763,7 +772,7 @@ const subscribeRealtime = (): void => {
             if (token) { token.scale = e.scale; }
         });
 
-    window.Echo.private('drawings')
+    window.Echo.private(`drawings.${props.campaignId}`)
         .listen('.drawing-update', (e: DrawingEditEvent) => {
             const drawing = drawings.value.find(d => d.id === e.drawingId);
             if (drawing) {
@@ -796,7 +805,7 @@ const subscribeRealtime = (): void => {
             });
         });
 
-    window.Echo.private('session-chat')
+    window.Echo.private(`session-chat.${props.campaignId}`)
         .listen('.message-sent', (e: any) => {
             messages.value.push(e.message);
             scrollToBottom();
@@ -2037,7 +2046,7 @@ onMounted(async () => {
         showCombatBoard.value = data.is_open;
     } catch { /* ignoruj — domyślnie false */ }
 
-    window.Echo.private('combat')
+    window.Echo.private(`combat.${props.campaignId}`)
         .listen('.combat', (e: { type: string; state: { is_open?: boolean } | null }) => {
             if (e.type === 'board-visibility') {
                 showCombatBoard.value = e.state?.is_open ?? false;
@@ -2050,7 +2059,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('mouseup', handleWindowMouseUp);
-    REALTIME_CHANNELS.forEach(channel => window.Echo.leave(channel));
+    REALTIME_CHANNELS.value.forEach(channel => window.Echo.leave(channel));
 });
 </script>
 

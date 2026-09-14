@@ -12,11 +12,11 @@ class TokenScaleEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public int $id, public float $scale) {}
+    public function __construct(public int $id, public float $scale, public int $campaignId) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('token-move')];
+        return [new PrivateChannel("token-move.{$this->campaignId}")];
     }
 
     public function broadcastAs(): string

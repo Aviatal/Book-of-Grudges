@@ -15,7 +15,7 @@ class MoveTokenEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $id, public float $x, public float $y) {}
+    public function __construct(public int $id, public float $x, public float $y, public int $campaignId) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -25,7 +25,7 @@ class MoveTokenEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('token-move'),
+            new PrivateChannel("token-move.{$this->campaignId}"),
         ];
     }
 

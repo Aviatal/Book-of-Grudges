@@ -49,16 +49,16 @@ readonly class CreateCharacterService
     /**
      * @throws \Throwable
      */
-    public function createHero(array $data)
+    public function createHero(array $data, int $campaignId)
     {
-        \DB::transaction(function () use ($data, &$hero) {
-            $hero = $this->createHeroRepository->createHero($data['personalDetails'], $data['profession'], $data['race'], $data['secondaryCharacteristics'], $data['money']);
+        \DB::transaction(function () use ($data, $campaignId, &$hero) {
+            $hero = $this->createHeroRepository->createHero($data['personalDetails'], $data['profession'], $data['race'], $data['secondaryCharacteristics'], $data['money'], $campaignId);
             $this->createHeroRepository->attachDescription($hero, $data['personalDetails']);
             $this->createHeroRepository->attachCharacteristics($hero, $data['characteristics'], $data['secondaryCharacteristics'], $data['freeAdvance']);
             $this->createHeroRepository->attachSkills($hero, $data['skills']);
             $this->createHeroRepository->attachTalents($hero, $data['talents']);
             $this->createHeroRepository->addEquipments($hero, $data['equipments']);
         });
-        return $this->heroesRepository->getHero(Auth::user()->getAuthIdentifier());
+        return $this->heroesRepository->getHero(Auth::user()->getAuthIdentifier(), $campaignId);
     }
 }

@@ -14,14 +14,15 @@ class DrawingCreateEvent implements ShouldBroadcastNow
 
     public function __construct(
         public readonly array $data,
-        public readonly string $type = 'pen',
-        public readonly string $layer = 'map',
-        public readonly int $id = 0,
+        public readonly string $type,
+        public readonly string $layer,
+        public readonly int $id,
+        public readonly int $campaignId,
     ) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('drawings')];
+        return [new PrivateChannel("drawings.{$this->campaignId}")];
     }
 
     public function broadcastAs(): string

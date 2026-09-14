@@ -5,5 +5,6 @@
         :user-id="{{ Auth::user()->getAuthIdentifier() }}"
         :hero-id="{{ $heroId }}"
         :has-drawing-permission="{{ $hasDrawingPermission ? 'true' : 'false' }}"
+        :campaign-id="{{ $campaignId }}"
     ></tabletop>
 @endsection

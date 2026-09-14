@@ -1,21 +1,23 @@
 <?php
 
 use App\Http\Controllers\AssetsController;
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CombatController;
 use App\Http\Controllers\ArmorsController;
 use App\Http\Controllers\CharactersController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DrawingsController;
+use App\Http\Controllers\Panel\CampaignController as PanelCampaignController;
 use App\Http\Controllers\Panel\FortunePointsController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\Panel\PurchaseController;
+use App\Http\Controllers\Panel\SuperadminController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SkillsAndTalentsController;
 use App\Http\Controllers\TokensController;
 use App\Http\Controllers\WeaponsController;
-use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 Auth::routes();
 
@@ -44,7 +46,17 @@ Route::group(['prefix' => 'zaklecia'], function () {
 
 Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->name('get-footer-text');
 
-Route::middleware('auth')->group(function (){
+// Wybór/tworzenie/dołączanie do kampanii — wymaga tylko zalogowania, bo to właśnie
+// tu trafia user bez wybranej (lub bez żadnej) kampanii.
+Route::middleware('auth')->prefix('kampanie')->group(function () {
+    Route::get('/', [CampaignController::class, 'index'])->name('campaigns.index');
+    Route::post('/', [CampaignController::class, 'store'])->name('campaigns.store');
+    Route::post('/dolacz', [CampaignController::class, 'join'])->name('campaigns.join');
+    Route::get('/dolacz/{code}', [CampaignController::class, 'joinByLink'])->name('campaigns.join-by-link');
+    Route::post('/{campaign}/wybierz', [CampaignController::class, 'switch'])->name('campaigns.switch');
+});
+
+Route::middleware(['auth', 'campaign.selected'])->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     })->name('home');
@@ -140,8 +152,15 @@ Route::middleware('auth')->group(function (){
     Route::get('/professions/get-professions', [ProfessionsController::class, 'getProfessions'])->name('get-professions');
 });
 
-//PANEL
-Route::middleware(Admin::class)->prefix('panel')->group(function (){
+//PANEL MG (kampania bieżąca)
+Route::middleware(['auth', 'campaign.selected', 'campaign.gm'])->prefix('panel')->group(function (){
+    Route::prefix('kampania')->group(function () {
+        Route::get('/', [PanelCampaignController::class, 'index'])->name('panel.campaign.index');
+        Route::post('/zmien-nazwe', [PanelCampaignController::class, 'rename'])->name('panel.campaign.rename');
+        Route::post('/nowy-kod-zaproszenia', [PanelCampaignController::class, 'regenerateInviteCode'])->name('panel.campaign.regenerate-invite-code');
+        Route::delete('/czlonkowie/{userId}', [PanelCampaignController::class, 'removeMember'])->name('panel.campaign.remove-member');
+    });
+
     Route::prefix('experience')->group(function () {
         Route::get('/show-experience-form', [ExperienceController::class, 'showExperiencesForm'])->name('panel.experience.show-experiences-form');
         Route::post('/save-experience', [ExperienceController::class, 'saveExperience'])->name('panel.experience.save-experience');
@@ -172,4 +191,10 @@ Route::middleware(Admin::class)->prefix('panel')->group(function (){
         Route::get('/get-tokens', [TokensController::class, 'getTokens'])->name('panel.tokens.get-tokens');
         Route::get('/get-token/{token}', [TokensController::class, 'getToken'])->name('panel.tokens.get-token');
     });
+});
+
+// PANEL SUPERADMINA — wgląd do wszystkich kampanii, tylko do odczytu, niezależny od bieżącej kampanii
+Route::middleware(['auth', 'superadmin'])->prefix('panel/superadmin')->group(function () {
+    Route::get('/', [SuperadminController::class, 'index'])->name('panel.superadmin.index');
+    Route::get('/{campaign}', [SuperadminController::class, 'show'])->name('panel.superadmin.show');
 });

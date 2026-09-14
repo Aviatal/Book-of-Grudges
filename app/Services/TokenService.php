@@ -11,7 +11,7 @@ use Intervention\Image\Laravel\Facades\Image;
 readonly class TokenService
 {
     public function __construct(private TokensRepository $tokensRepository){}
-    public function storeToken(array $data): \App\Models\Token
+    public function storeToken(array $data, int $campaignId): \App\Models\Token
     {
         if (isset($data['file'])) {
             if (empty($data['name'])) {
@@ -27,11 +27,12 @@ readonly class TokenService
             $decoded = json_decode($data['sheet'], true);
             $data['sheet'] = $decoded ?? null;
         }
+        $data['campaign_id'] = $campaignId;
         return $this->tokensRepository->createToken($data);
     }
-    public function updateToken(int $tokenId, array $data): \App\Models\Token
+    public function updateToken(int $tokenId, int $campaignId, array $data): \App\Models\Token
     {
-        $token = $this->tokensRepository->getToken($tokenId, ['hero.user']);
+        $token = $this->tokensRepository->getToken($tokenId, $campaignId, ['hero.user']);
         if (isset($data['file'])) {
             $data['image'] = $this->storeTokenImage($data['file'], $tokenId,  $token->getAttribute('image'));
         }
@@ -41,17 +42,17 @@ readonly class TokenService
         }
         return $this->tokensRepository->updateAndRequestToken($token, $data);
     }
-    public function deleteToken(int $tokenId): bool
+    public function deleteToken(int $tokenId, int $campaignId): bool
     {
-        $token = $this->tokensRepository->getToken($tokenId);
+        $token = $this->tokensRepository->getToken($tokenId, $campaignId);
         if ($token->getAttribute('image')) {
             $this->deleteImage($token->getAttribute('image'));
         }
         return $this->tokensRepository->deleteToken($token);
     }
-    public function duplicateToken(int $tokenId): \App\Models\Token
+    public function duplicateToken(int $tokenId, int $campaignId): \App\Models\Token
     {
-        $original = $this->tokensRepository->getToken($tokenId);
+        $original = $this->tokensRepository->getToken($tokenId, $campaignId);
 
         $newImage = null;
         if ($original->getAttribute('image')) {
@@ -60,27 +61,29 @@ readonly class TokenService
             $newImage = $newFilename;
         }
 
-        $newName = $this->nextTokenName($original->getAttribute('name'));
+        $newName = $this->nextTokenName($original->getAttribute('name'), $campaignId);
 
         return $this->tokensRepository->createToken([
-            'name'    => $newName,
-            'image'   => $newImage,
-            'hero_id' => null,
-            'on_map'  => false,
-            'x'       => $original->getAttribute('x'),
-            'y'       => $original->getAttribute('y'),
-            'scale'   => $original->getAttribute('scale'),
-            'sheet'   => $original->getAttribute('sheet'),
+            'name'        => $newName,
+            'image'       => $newImage,
+            'hero_id'     => null,
+            'on_map'      => false,
+            'x'           => $original->getAttribute('x'),
+            'y'           => $original->getAttribute('y'),
+            'scale'       => $original->getAttribute('scale'),
+            'sheet'       => $original->getAttribute('sheet'),
+            'campaign_id' => $campaignId,
         ]);
     }
 
-    private function nextTokenName(string $originalName): string
+    private function nextTokenName(string $originalName, int $campaignId): string
     {
         // Wyciągnij nazwę bazową — usuń końcowy numer (np. "Mutant 3" → "Mutant")
         $baseName = preg_replace('/\s+\d+$/', '', $originalName);
 
-        // Znajdź wszystkie tokeny NPC o tej samej nazwie bazowej
+        // Znajdź wszystkie tokeny NPC o tej samej nazwie bazowej w tej kampanii
         $existing = \App\Models\Token::whereNull('hero_id')
+            ->where('campaign_id', $campaignId)
             ->where('name', 'like', $baseName . '%')
             ->pluck('name');
 

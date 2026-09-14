@@ -14,20 +14,25 @@ class ChatService
 {
     public function __construct(private readonly ChatRepository $chatRepository) {}
 
-    public function sendMessage(User $user, string $text): Message
+    private function heroFor(User $user, int $campaignId): ?Hero
     {
-        $authorName = $user->hero()->value('name') ?? $user->name;
+        return $user->heroes()->where('campaign_id', $campaignId)->first();
+    }
 
-        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text);
+    public function sendMessage(User $user, string $text, int $campaignId): Message
+    {
+        $authorName = $this->heroFor($user, $campaignId)?->name ?? $user->name;
 
-        $this->tryBroadcast($message);
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId);
+
+        $this->tryBroadcast($message, $campaignId);
 
         return $message;
     }
 
-    public function rollInitiative(User $user): Message
+    public function rollInitiative(User $user, int $campaignId): Message
     {
-        $hero = $user->hero()->with('characteristic')->first();
+        $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
         $authorName = $hero?->name ?? $user->name;
 
         $zr = $hero?->characteristic['Zr'];
@@ -38,16 +43,16 @@ class ChatService
 
         $text = "🎲 Rzut na inicjatywę: Zr ({$zrValue}) + k10 [{$roll}] = {$total}";
 
-        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'roll');
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'roll');
 
-        $this->tryBroadcast($message);
+        $this->tryBroadcast($message, $campaignId);
 
         return $message;
     }
 
-    public function getSkillsForHero(User $user): array
+    public function getSkillsForHero(User $user, int $campaignId): array
     {
-        $hero = $user->hero()->with(['skills', 'characteristic'])->first();
+        $hero = $this->heroFor($user, $campaignId)?->load(['skills', 'characteristic']);
 
         if (!$hero) {
             return ['characteristics' => [], 'skills' => []];
@@ -87,9 +92,9 @@ class ChatService
         ];
     }
 
-    public function rollCharacteristic(User $user, string $characteristic, int $modifier = 0, bool $half = false): Message
+    public function rollCharacteristic(User $user, string $characteristic, int $campaignId, int $modifier = 0, bool $half = false): Message
     {
-        $hero = $user->hero()->with('characteristic')->first();
+        $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
 
         if (!$hero) {
             throw new HeroNotFoundException("User {$user->id} has no hero assigned.");
@@ -118,15 +123,15 @@ class ChatService
             'passed'               => $passed,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, 'skill_test');
-        $this->tryBroadcast($message);
+        $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, $campaignId, 'skill_test');
+        $this->tryBroadcast($message, $campaignId);
 
         return $message;
     }
 
-    public function rollDice(User $user, int $count, int $sides): Message
+    public function rollDice(User $user, int $count, int $sides, int $campaignId): Message
     {
-        $hero = $user->hero()->first();
+        $hero = $this->heroFor($user, $campaignId);
         $authorName = $hero?->name ?? $user->name;
 
         $results = [];
@@ -145,15 +150,15 @@ class ChatService
             'total'    => $total,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'dice_roll');
-        $this->tryBroadcast($message);
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'dice_roll');
+        $this->tryBroadcast($message, $campaignId);
 
         return $message;
     }
 
-    public function rollSkill(User $user, int $skillId, int $modifier = 0, bool $half = false): Message
+    public function rollSkill(User $user, int $skillId, int $campaignId, int $modifier = 0, bool $half = false): Message
     {
-        $hero = $user->hero()->with('characteristic')->first();
+        $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
 
         if (!$hero) {
             throw new HeroNotFoundException("User {$user->id} has no hero assigned.");
@@ -182,16 +187,16 @@ class ChatService
             'passed'               => $passed,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, 'skill_test');
-        $this->tryBroadcast($message);
+        $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'skill_test');
+        $this->tryBroadcast($message, $campaignId);
 
         return $message;
     }
 
-    private function tryBroadcast(Message $message): void
+    private function tryBroadcast(Message $message, int $campaignId): void
     {
         try {
-            broadcast(new MessageSentEvent($message));
+            broadcast(new MessageSentEvent($message, $campaignId));
         } catch (\Throwable) {
             // wiadomość jest zapisana w bazie — brak WebSocket nie blokuje odpowiedzi
         }

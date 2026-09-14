@@ -16,11 +16,12 @@ class TokenPlaceEvent implements ShouldBroadcastNow
         public readonly int $id,
         public readonly int $x,
         public readonly int $y,
+        public readonly int $campaignId,
     ) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('token-move')];
+        return [new PrivateChannel("token-move.{$this->campaignId}")];
     }
 
     public function broadcastAs(): string

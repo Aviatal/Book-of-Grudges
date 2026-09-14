@@ -16,6 +16,7 @@ use App\Services\CreateCharacterService;
 use App\Services\FortunePointSatisfactionService;
 use App\Services\HeroService;
 use App\Services\TransactionsService;
+use App\Support\CurrentCampaign;
 use Auth;
 use DB;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -31,13 +32,14 @@ class CharactersController extends Controller
         private readonly HeroService                     $heroService,
         private readonly FortunePointSatisfactionService $fortunePointSatisfactionService,
         private readonly CreateCharacterService          $createCharacterService,
-        private readonly HeroesRepository                $heroesRepository
+        private readonly HeroesRepository                $heroesRepository,
+        private readonly TransactionsService              $transactionsService,
     ) {}
 
     public function getHero(int $userId): JsonResponse
     {
         try {
-            return response()->json($this->heroesRepository->getHero($userId));
+            return response()->json($this->heroesRepository->getHero($userId, $this->currentCampaign()->id()));
         } catch (\Throwable $exception) {
             return response()->json(['message' => 'Wystąpił błąd podczas pobierania bohatera'], 500);
         }
@@ -270,20 +272,24 @@ class CharactersController extends Controller
         return response()->json(['message' => 'Pomyślnie usunięto zdolność']);
     }
 
-    public function addItem(Request $request, int $id)
+    public function addItem(Request $request, Hero $hero)
     {
+        abort_unless($hero->user_id === Auth::id() || $this->currentCampaign()->isGm(), 403);
+
         return response()->json(HeroInventory::query()->create([
-            'hero_id' => $id,
+            'hero_id' => $hero->id,
             'name' => $request->get('name'),
             'loading' => $request->get('loading'),
             'description' => $request->get('description')
         ]));
     }
 
-    public function equipMarketplaceItem(Request $request, int $id): ?JsonResponse
+    public function equipMarketplaceItem(Request $request, Hero $hero): ?JsonResponse
     {
+        abort_unless($hero->user_id === Auth::id(), 403);
+
         try {
-            return new TransactionsService()->equipMarketplaceItem($request, $id);
+            return $this->transactionsService->equipMarketplaceItem($request, $hero);
         } catch (NotEnoughMoneyException $exception) {
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_PAYMENT_REQUIRED);
         } catch (\Throwable $exception) {
@@ -426,7 +432,7 @@ class CharactersController extends Controller
     public function createCharacter(Request $request)
     {
         try {
-            return response()->json($this->createCharacterService->createHero($request->all()), Response::HTTP_CREATED);
+            return response()->json($this->createCharacterService->createHero($request->all(), $this->currentCampaign()->id()), Response::HTTP_CREATED);
         } catch (\InvalidArgumentException $exception) {
             \Log::error('WOUNDS OR/AND FATE NOT FOUND IN REQUEST');
             return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);

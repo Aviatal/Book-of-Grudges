@@ -1,17 +1,23 @@
 <?php
 
+use App\Models\CampaignMember;
+use App\Models\Hero;
 use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('hero.{heroId}', static function ($user, $heroId) {
-    return $user->id === \App\Models\Hero::findOrFail($heroId)?->user_id;
+    return $user->id === Hero::findOrFail($heroId)?->user_id;
 });
 
-Broadcast::channel('session-chat', static function ($user) {
-    return $user !== null;
-});
+$isCampaignMember = static function ($user, $campaignId): bool {
+    return CampaignMember::query()
+        ->where('campaign_id', $campaignId)
+        ->where('user_id', $user->id)
+        ->exists();
+};
 
-// Kanały stołu do gry — każdy zalogowany uczestnik sesji może słuchać.
+// Kanały stołu do gry, odizolowane per kampania — każdy członek danej kampanii może słuchać.
 // Mutacje (rysunki, ruch tokenów, walka) są dodatkowo bramkowane rolą MG w kontrolerach.
-Broadcast::channel('token-move', static fn ($user) => $user !== null);
-Broadcast::channel('drawings', static fn ($user) => $user !== null);
-Broadcast::channel('combat', static fn ($user) => $user !== null);
+Broadcast::channel('session-chat.{campaignId}', $isCampaignMember);
+Broadcast::channel('token-move.{campaignId}', $isCampaignMember);
+Broadcast::channel('drawings.{campaignId}', $isCampaignMember);
+Broadcast::channel('combat.{campaignId}', $isCampaignMember);

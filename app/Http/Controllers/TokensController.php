@@ -7,6 +7,7 @@ use App\Models\Token;
 use App\Repositories\HeroesRepository;
 use App\Repositories\TokensRepository;
 use App\Services\TokenService;
+use App\Support\CurrentCampaign;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -16,11 +17,11 @@ class TokensController extends Controller
 {
     public function getTokens(TokensRepository $tokensRepository): \Illuminate\Database\Eloquent\Collection
     {
-        return $tokensRepository->getTokens(['hero.user']);
+        return $tokensRepository->getTokens($this->currentCampaign()->id(), ['hero.user']);
     }
     public function getToken(int $id, TokensRepository $tokensRepository): Token
     {
-        return $tokensRepository->getToken($id, ['hero.user']);
+        return $tokensRepository->getToken($id, $this->currentCampaign()->id(), ['hero.user']);
     }
 
     public function index()
@@ -30,20 +31,20 @@ class TokensController extends Controller
 
     public function create(HeroesRepository $heroesRepository)
     {
-        $activeHeroes = $heroesRepository->getHeroes(['id', 'name']);
+        $activeHeroes = $heroesRepository->getHeroes($this->currentCampaign()->id(), ['id', 'name']);
         return view('Panel.tokens.create', ['heroes' => $activeHeroes]);
     }
 
     public function edit(int $id, HeroesRepository $heroesRepository)
     {
-        $activeHeroes = $heroesRepository->getHeroes(['id', 'name']);
+        $activeHeroes = $heroesRepository->getHeroes($this->currentCampaign()->id(), ['id', 'name']);
         return view('Panel.tokens.edit', ['tokenId' => $id, 'heroes' => $activeHeroes]);
     }
 
     public function store(UpdateTokenRequest $request, TokenService $tokenService)
     {
         try {
-            $tokenService->storeToken($request->all());
+            $tokenService->storeToken($request->all(), $this->currentCampaign()->id());
             return response()->json([
                 'redirect_url' => route('panel.tokens.index')
             ]);
@@ -61,7 +62,7 @@ class TokensController extends Controller
     public function update(UpdateTokenRequest $request, int $id, TokenService $tokenService)
     {
         try {
-            return $tokenService->updateToken($id, $request->all());
+            return $tokenService->updateToken($id, $this->currentCampaign()->id(), $request->all());
         } catch (ModelNotFoundException $exception) {
             return response()->json(['error' => 'Nie znaleziono tokenu'], ResponseAlias::HTTP_NOT_FOUND);
         } catch (ValidationException $exception) {
@@ -75,7 +76,7 @@ class TokensController extends Controller
     public function delete(int $id, TokenService $tokenService)
     {
         try {
-            return $tokenService->deleteToken($id);
+            return $tokenService->deleteToken($id, $this->currentCampaign()->id());
         } catch (ModelNotFoundException $exception) {
             return response()->json(['error' => 'Nie znaleziono tokenu'], ResponseAlias::HTTP_NOT_FOUND);
         } catch (\Throwable $exception) {

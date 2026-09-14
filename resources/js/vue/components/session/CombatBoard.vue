@@ -111,6 +111,7 @@ const props = defineProps<{
     canDraw: boolean;
     tokens:  Token[];
     heroId:  number;
+    campaignId: number;
 }>();
 
 // ── Stan reaktywny ────────────────────────────────────────────────────────────
@@ -294,7 +295,7 @@ onMounted(async () => {
         console.error('Błąd ładowania stanu walki / planszy', e);
     }
 
-    window.Echo.private('combat')
+    window.Echo.private(`combat.${props.campaignId}`)
         .listen('.combat', (e: { type: string; state: any }) => {
             if (e.type === 'ended') {
                 combatState.value = null;

@@ -59,6 +59,30 @@ class Hero extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(Campaign::class);
+    }
+
+    /**
+     * Route-model binding zawsze zawęża do bieżącej kampanii — dzięki temu żadna trasa
+     * przyjmująca {hero} nie musi ręcznie sprawdzać, czy bohater należy do innej kampanii.
+     *
+     * Czyta bezpośrednio z sesji (a nie z kontenerowego bindingu CurrentCampaign) — SubstituteBindings
+     * wykonuje się w kolejności middleware WCZEŚNIEJ niż nasz EnsureCampaignSelected, więc
+     * `CurrentCampaign` nie byłby jeszcze związany w kontenerze na tym etapie potoku.
+     */
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        $query = $this->where($field ?? $this->getRouteKeyName(), $value);
+
+        if ($campaignId = session('current_campaign_id')) {
+            $query->where('campaign_id', $campaignId);
+        }
+
+        return $query->first();
+    }
+
     public function currentProfession(): BelongsTo
     {
         return $this->belongsTo(Profession::class, 'current_profession_id');

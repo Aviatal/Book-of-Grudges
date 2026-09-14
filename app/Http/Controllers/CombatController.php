@@ -7,6 +7,7 @@ use App\Events\Session\MessageSentEvent;
 use App\Models\Hero;
 use App\Models\Token;
 use App\Repositories\ChatRepository;
+use App\Support\CurrentCampaign;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -21,10 +22,15 @@ class CombatController extends Controller
 
     public function __construct(private readonly ChatRepository $chatRepository) {}
 
+    private function cacheKey(string $baseKey): string
+    {
+        return $baseKey . ':' . $this->currentCampaign()->id();
+    }
+
     // ── GET /session/combat ──────────────────────────────────────────────────
     public function state(): JsonResponse
     {
-        $state = Cache::get(self::CACHE_KEY);
+        $state = Cache::get($this->cacheKey(self::CACHE_KEY));
 
         if (!$state || (isset($state['active']) && !$state['active'])) {
             return response()->json(null);
@@ -44,6 +50,7 @@ class CombatController extends Controller
         ]);
 
         $tokens = Token::with(['hero.characteristic'])
+            ->where('campaign_id', $this->currentCampaign()->id())
             ->whereIn('id', $request->input('token_ids'))
             ->where('on_map', true)
             ->get();
@@ -77,8 +84,8 @@ class CombatController extends Controller
             'participants'  => $participants,
         ];
 
-        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
-        broadcast(new CombatEvent('updated', $state));
+        Cache::put($this->cacheKey(self::CACHE_KEY), $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state, $this->currentCampaign()->id()));
 
         return response()->json($state, Response::HTTP_CREATED);
     }
@@ -90,7 +97,7 @@ class CombatController extends Controller
     {
         $this->abortUnlessGm();
 
-        $state = Cache::get(self::CACHE_KEY);
+        $state = Cache::get($this->cacheKey(self::CACHE_KEY));
         if (!$state) {
             return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
         }
@@ -110,16 +117,16 @@ class CombatController extends Controller
 
         $state['participants'] = $this->sortParticipants($state['participants']);
 
-        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
-        broadcast(new CombatEvent('updated', $state));
+        Cache::put($this->cacheKey(self::CACHE_KEY), $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state, $this->currentCampaign()->id()));
 
         // Wiadomości czatu dla każdego rzuconego NPC
         foreach ($state['participants'] as $p) {
             if ($p['is_npc'] && $p['initiative'] !== null) {
                 if ($tokenId === 0 || (int) $p['token_id'] === $tokenId) {
                     $text    = "🎲 Rzut na inicjatywę: Zr ({$p['zr']}) + k10 [{$p['roll']}] = {$p['initiative']}";
-                    $message = $this->chatRepository->saveMessage($request->user()->id, $p['name'], $text, 'roll');
-                    broadcast(new MessageSentEvent($message));
+                    $message = $this->chatRepository->saveMessage($request->user()->id, $p['name'], $text, $this->currentCampaign()->id(), 'roll');
+                    broadcast(new MessageSentEvent($message, $this->currentCampaign()->id()));
                 }
             }
         }
@@ -135,7 +142,7 @@ class CombatController extends Controller
 
         $request->validate(['token_id' => ['required', 'integer']]);
 
-        $state = Cache::get(self::CACHE_KEY);
+        $state = Cache::get($this->cacheKey(self::CACHE_KEY));
         if (!$state || !($state['active'] ?? false)) {
             return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
         }
@@ -163,13 +170,13 @@ class CombatController extends Controller
         }
 
         $state['participants'] = $this->sortParticipants($state['participants']);
-        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
-        broadcast(new CombatEvent('updated', $state));
+        Cache::put($this->cacheKey(self::CACHE_KEY), $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state, $this->currentCampaign()->id()));
 
         if ($rolledP) {
             $text    = "🎲 Rzut na inicjatywę: Zr ({$rolledP['zr']}) + k10 [{$rolledP['roll']}] = {$rolledP['initiative']}";
-            $message = $this->chatRepository->saveMessage($request->user()->id, $rolledP['name'], $text, 'roll');
-            broadcast(new MessageSentEvent($message));
+            $message = $this->chatRepository->saveMessage($request->user()->id, $rolledP['name'], $text, $this->currentCampaign()->id(), 'roll');
+            broadcast(new MessageSentEvent($message, $this->currentCampaign()->id()));
         }
 
         return response()->json($state);
@@ -178,12 +185,12 @@ class CombatController extends Controller
     // ── POST /session/combat/roll-hero ───────────────────────────────────────
     public function rollHeroInitiative(Request $request): JsonResponse
     {
-        $state = Cache::get(self::CACHE_KEY);
+        $state = Cache::get($this->cacheKey(self::CACHE_KEY));
         if (!$state) {
             return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
         }
 
-        $heroId = (int) $request->user()->hero()->value('id');
+        $heroId = (int) $request->user()->heroes()->where('campaign_id', $this->currentCampaign()->id())->value('id');
         $rolled = false;
 
         foreach ($state['participants'] as &$p) {
@@ -205,15 +212,15 @@ class CombatController extends Controller
 
         $state['participants'] = $this->sortParticipants($state['participants']);
 
-        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
-        broadcast(new CombatEvent('updated', $state));
+        Cache::put($this->cacheKey(self::CACHE_KEY), $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state, $this->currentCampaign()->id()));
 
         // Wiadomość czatu dla rzutu bohatera
         foreach ($state['participants'] as $p) {
             if (!$p['is_npc'] && (int) $p['hero_id'] === $heroId) {
                 $text    = "🎲 Rzut na inicjatywę: Zr ({$p['zr']}) + k10 [{$p['roll']}] = {$p['initiative']}";
-                $message = $this->chatRepository->saveMessage($request->user()->id, $p['name'], $text, 'roll');
-                broadcast(new MessageSentEvent($message));
+                $message = $this->chatRepository->saveMessage($request->user()->id, $p['name'], $text, $this->currentCampaign()->id(), 'roll');
+                broadcast(new MessageSentEvent($message, $this->currentCampaign()->id()));
                 break;
             }
         }
@@ -228,7 +235,7 @@ class CombatController extends Controller
 
         $request->validate(['direction' => ['required', 'in:next,prev']]);
 
-        $state = Cache::get(self::CACHE_KEY);
+        $state = Cache::get($this->cacheKey(self::CACHE_KEY));
         if (!$state) {
             return response()->json(['error' => 'Brak aktywnej walki'], Response::HTTP_NOT_FOUND);
         }
@@ -251,8 +258,8 @@ class CombatController extends Controller
             $state['current_index'] = max(0, $state['current_index'] - 1);
         }
 
-        Cache::put(self::CACHE_KEY, $state, self::CACHE_TTL);
-        broadcast(new CombatEvent('updated', $state));
+        Cache::put($this->cacheKey(self::CACHE_KEY), $state, self::CACHE_TTL);
+        broadcast(new CombatEvent('updated', $state, $this->currentCampaign()->id()));
 
         return response()->json($state);
     }
@@ -260,7 +267,7 @@ class CombatController extends Controller
     // ── GET /session/combat/board-visible ───────────────────────────────────
     public function boardVisible(): JsonResponse
     {
-        return response()->json(['is_open' => (bool) Cache::get(self::BOARD_VISIBLE_CACHE_KEY, false)]);
+        return response()->json(['is_open' => (bool) Cache::get($this->cacheKey(self::BOARD_VISIBLE_CACHE_KEY), false)]);
     }
 
     // ── POST /session/combat/board-toggle ────────────────────────────────────
@@ -271,8 +278,8 @@ class CombatController extends Controller
         $request->validate(['is_open' => ['required', 'boolean']]);
 
         $isOpen = $request->boolean('is_open');
-        Cache::put(self::BOARD_VISIBLE_CACHE_KEY, $isOpen, self::CACHE_TTL);
-        broadcast(new CombatEvent('board-visibility', ['is_open' => $isOpen]));
+        Cache::put($this->cacheKey(self::BOARD_VISIBLE_CACHE_KEY), $isOpen, self::CACHE_TTL);
+        broadcast(new CombatEvent('board-visibility', ['is_open' => $isOpen], $this->currentCampaign()->id()));
 
         return response()->json(['is_open' => $isOpen]);
     }
@@ -280,7 +287,7 @@ class CombatController extends Controller
     // ── GET /session/combat/board ────────────────────────────────────────────
     public function boardPositions(): JsonResponse
     {
-        $positions = Cache::get(self::BOARD_CACHE_KEY, []);
+        $positions = Cache::get($this->cacheKey(self::BOARD_CACHE_KEY), []);
         return response()->json($positions);
     }
 
@@ -297,15 +304,15 @@ class CombatController extends Controller
         $incoming = $request->input('positions');
         $user     = $request->user();
 
-        if ($user?->is_admin) {
+        if ($this->currentCampaign()->isGm()) {
             // MG zapisuje pełny układ planszy
             $positions = $incoming;
         } else {
             // Gracz może przesunąć wyłącznie żeton własnego bohatera — resztę bierzemy z cache
-            $heroId          = (int) $user?->hero()->value('id');
-            $allowedTokenIds = Token::query()->where('hero_id', $heroId)->pluck('id')->all();
+            $heroId          = (int) $user->heroes()->where('campaign_id', $this->currentCampaign()->id())->value('id');
+            $allowedTokenIds = Token::query()->where('campaign_id', $this->currentCampaign()->id())->where('hero_id', $heroId)->pluck('id')->all();
 
-            $merged = collect(Cache::get(self::BOARD_CACHE_KEY, []))
+            $merged = collect(Cache::get($this->cacheKey(self::BOARD_CACHE_KEY), []))
                 ->keyBy('token_id');
 
             foreach ($incoming as $pos) {
@@ -317,8 +324,8 @@ class CombatController extends Controller
             $positions = $merged->values()->all();
         }
 
-        Cache::put(self::BOARD_CACHE_KEY, $positions, self::CACHE_TTL);
-        broadcast(new CombatEvent('board-updated', ['positions' => $positions]));
+        Cache::put($this->cacheKey(self::BOARD_CACHE_KEY), $positions, self::CACHE_TTL);
+        broadcast(new CombatEvent('board-updated', ['positions' => $positions], $this->currentCampaign()->id()));
 
         return response()->json($positions);
     }
@@ -330,10 +337,10 @@ class CombatController extends Controller
 
         // Nadpisujemy stan jako nieaktywny zamiast kasować klucz —
         // Cache::forget może zawodzić na Windows (blokady pliku).
-        Cache::put(self::CACHE_KEY, ['active' => false], 60);
-        Cache::forget(self::BOARD_CACHE_KEY);
-        Cache::put(self::BOARD_VISIBLE_CACHE_KEY, false, 60);
-        broadcast(new CombatEvent('ended', null));
+        Cache::put($this->cacheKey(self::CACHE_KEY), ['active' => false], 60);
+        Cache::forget($this->cacheKey(self::BOARD_CACHE_KEY));
+        Cache::put($this->cacheKey(self::BOARD_VISIBLE_CACHE_KEY), false, 60);
+        broadcast(new CombatEvent('ended', null, $this->currentCampaign()->id()));
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
@@ -415,8 +422,8 @@ class CombatController extends Controller
 
         // Wiadomość pod imieniem bohatera, user_id gracza lub MG jako fallback
         $userId  = $hero->user?->id ?? $request->user()->id;
-        $message = $this->chatRepository->saveMessage($userId, $hero->name, $text, 'skill_test');
-        broadcast(new MessageSentEvent($message));
+        $message = $this->chatRepository->saveMessage($userId, $hero->name, $text, $this->currentCampaign()->id(), 'skill_test');
+        broadcast(new MessageSentEvent($message, $this->currentCampaign()->id()));
 
         return response()->json(['message' => $message], Response::HTTP_CREATED);
     }
@@ -466,18 +473,18 @@ class CombatController extends Controller
             'passed'               => $passed,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
-        $message = $this->chatRepository->saveMessage($request->user()->id, $token->name, $text, 'skill_test');
-        broadcast(new MessageSentEvent($message));
+        $message = $this->chatRepository->saveMessage($request->user()->id, $token->name, $text, $this->currentCampaign()->id(), 'skill_test');
+        broadcast(new MessageSentEvent($message, $this->currentCampaign()->id()));
 
         return response()->json(['message' => $message], Response::HTTP_CREATED);
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    // MG ma dostęp do każdego bohatera; gracz wyłącznie do własnego
+    // MG ma dostęp do każdego bohatera w bieżącej kampanii; gracz wyłącznie do własnego
     private function authorizeHeroAccess(Hero $hero): void
     {
         $user = auth()->user();
-        abort_unless($user?->is_admin || $hero->user_id === $user?->id, 403);
+        abort_unless($this->currentCampaign()->isGm() || $hero->user_id === $user?->id, 403);
     }
 
     private function sortParticipants(array $participants): array

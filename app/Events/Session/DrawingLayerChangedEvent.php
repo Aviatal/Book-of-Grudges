@@ -15,11 +15,12 @@ class DrawingLayerChangedEvent implements ShouldBroadcastNow
     public function __construct(
         public readonly int $drawingId,
         public readonly string $layer,
+        public readonly int $campaignId,
     ) {}
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('drawings')];
+        return [new PrivateChannel("drawings.{$this->campaignId}")];
     }
 
     public function broadcastAs(): string
