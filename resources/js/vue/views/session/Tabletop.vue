@@ -15,6 +15,11 @@
                 class="delete-selected-btn"
                 @click="bulkDeleteSelectedDrawings"
             >🗑 Usuń zaznaczone ({{ selectedDrawingIds.length }})</button>
+            <button
+                v-if="activeTool === 'select-draw' && selectedRemovableTokens.length > 0"
+                class="delete-selected-btn"
+                @click="bulkRemoveSelectedTokens"
+            >🗑 Zdejmij tokeny z mapy ({{ selectedRemovableTokens.length }})</button>
             <button :class="{ active: activeTool === 'ping' }" @click="activeTool = 'ping'">📍 Ping</button>
             <div v-if="hasDrawingPermission" class="tool-group">
                 <button :class="{ active: activeTool === 'fog' }" @click="activeTool = 'fog'" title="Mgła Wojny">🌫️ Mgła</button>
@@ -405,6 +410,11 @@
                     placeholder="🔍 Szukaj..."
                     @click.stop
                 />
+                <div class="npc-filter">
+                    <button :class="{ active: npcMapFilter === 'all' }" @click.stop="npcMapFilter = 'all'">Wszystkie</button>
+                    <button :class="{ active: npcMapFilter === 'on' }" @click.stop="npcMapFilter = 'on'">📍 Na mapie</button>
+                    <button :class="{ active: npcMapFilter === 'off' }" @click.stop="npcMapFilter = 'off'">Poza mapą</button>
+                </div>
                 <div class="npc-stash-scroll">
                     <div
                         v-for="token in filteredNpcTokens"
@@ -900,9 +910,14 @@ const filteredSkills = computed(() => {
 
 const mapTokens  = computed(() => tokens.value.filter(t => t.on_map));
 const npcTokens  = computed(() => tokens.value.filter(t => !t.hero_id));
+const npcMapFilter = ref<'all' | 'on' | 'off'>('all');
+
 const filteredNpcTokens = computed(() => {
     const q = npcSearch.value.trim().toLowerCase();
-    return q ? npcTokens.value.filter(t => t.name.toLowerCase().includes(q)) : npcTokens.value;
+    return npcTokens.value.filter(t =>
+        (!q || t.name.toLowerCase().includes(q)) &&
+        (npcMapFilter.value === 'all' || (npcMapFilter.value === 'on') === !!t.on_map)
+    );
 });
 
 const drawingsByLayer = computed<Record<DrawingLayerId, DrawingData[]>>(() => {
@@ -1061,6 +1076,18 @@ const removeNpcTokenFromMap = async (token: Token): Promise<void> => {
         console.error('Błąd usuwania tokenu z mapy', error);
         token.on_map = true;
     }
+};
+
+const selectedRemovableTokens = computed(() =>
+    tokens.value.filter(t => selectedTokenIds.value.includes(t.id) && t.hero_id == null && t.on_map)
+);
+
+const bulkRemoveSelectedTokens = async (): Promise<void> => {
+    const toRemove = [...selectedRemovableTokens.value];
+    if (toRemove.length === 0) return;
+    selectedTokenIds.value = selectedTokenIds.value.filter(id => !toRemove.some(t => t.id === id));
+    transformerNode.value?.getNode().nodes([]);
+    await Promise.all(toRemove.map(removeNpcTokenFromMap));
 };
 
 const onAssetDragStart = (e: DragEvent, asset: Asset): void => {
@@ -2011,6 +2038,8 @@ const formatDate = (isoString: string) => {
 const handleKeyDown = (e: KeyboardEvent): void => {
     if (e.key === 'Delete' && selectedDrawingIds.value.length > 0) {
         bulkDeleteSelectedDrawings();
+    } else if (e.key === 'Delete' && selectedRemovableTokens.value.length > 0) {
+        bulkRemoveSelectedTokens();
     }
 };
 
@@ -2892,6 +2921,28 @@ button.active { background: #d4af37; color: black; }
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.15s;
+}
+
+.npc-filter {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.npc-filter button {
+    flex: 1;
+    background: #111;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    color: #999;
+    font-size: 0.7rem;
+    padding: 3px 4px;
+    cursor: pointer;
+}
+
+.npc-filter button.active {
+    border-color: #d4af37;
+    color: #e4d8b4;
 }
 
 .npc-search:focus {
