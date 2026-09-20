@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Token;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class TokensRepository
 {
@@ -60,7 +61,20 @@ class TokensRepository
             return 0;
         }
 
-        return Token::query()->upsert($filtered, 'id', ['x', 'y']);
+        // Nie używamy upsert(): Postgres sprawdza NOT NULL (np. `name`) na wstawianym wierszu
+        // jeszcze przed rozpoznaniem konfliktu, więc INSERT ... ON CONFLICT wywala się na produkcji.
+        return DB::transaction(static function () use ($filtered, $campaignId): int {
+            $affected = 0;
+
+            foreach ($filtered as $t) {
+                $affected += Token::query()
+                    ->where('id', $t['id'])
+                    ->where('campaign_id', $campaignId)
+                    ->update(['x' => $t['x'], 'y' => $t['y']]);
+            }
+
+            return $affected;
+        });
     }
 
     public function placeToken(int $tokenId, int $campaignId, float $x, float $y): int
