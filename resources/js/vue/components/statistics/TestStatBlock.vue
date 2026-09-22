@@ -19,6 +19,10 @@
                 <span class="test-stat-block__value">{{ formatPercent(stats.combined.pass_percent) }}</span>
                 <span class="test-stat-block__label">% zdanych</span>
             </div>
+            <div class="test-stat-block__cell test-stat-block__cell--fumble" title="Rzut 97, 98, 99 lub 100 — pech niezależnie od wyniku testu">
+                <span class="test-stat-block__value">💀 {{ stats.fumbles }}</span>
+                <span class="test-stat-block__label">Pech (97-100)</span>
+            </div>
         </div>
 
         <div v-if="stats.by_modifier.length" class="test-stat-block__modifiers">
@@ -84,6 +88,14 @@ const formatPercent = (value: number | null): string => (value === null ? '—' 
 
 .test-stat-block__cell--accent {
     border-color: var(--gold);
+}
+
+.test-stat-block__cell--fumble {
+    border-color: #6b3fa0;
+}
+
+.test-stat-block__cell--fumble .test-stat-block__value {
+    color: #c9a6f5;
 }
 
 .test-stat-block__value {

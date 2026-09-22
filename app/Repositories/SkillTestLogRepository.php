@@ -79,7 +79,12 @@ class SkillTestLogRepository
 
     private function countSelectRaw(): string
     {
-        return 'count(*) as total, sum(case when passed then 1 else 0 end) as passed_total';
+        return implode(', ', [
+            'count(*) as total',
+            'sum(case when passed then 1 else 0 end) as passed_total',
+            // Pech — rzut 97-100, niezależnie od tego, czy test formalnie wyszedł.
+            'sum(case when roll >= 97 then 1 else 0 end) as fumbles_total',
+        ]);
     }
 
     /**
@@ -94,6 +99,7 @@ class SkillTestLogRepository
         $withModifierPassed = 0;
         $withoutModifierTotal = 0;
         $withoutModifierPassed = 0;
+        $fumbles = 0;
         $byModifier = [];
 
         foreach ($rows as $row) {
@@ -104,6 +110,7 @@ class SkillTestLogRepository
 
             $combinedTotal += $total;
             $combinedPassed += $passed;
+            $fumbles += (int) $row->fumbles_total;
 
             if ($modifier !== 0 || $half) {
                 $withModifierTotal += $total;
@@ -126,6 +133,7 @@ class SkillTestLogRepository
             'with_modifier' => $this->toSummary($withModifierTotal, $withModifierPassed),
             'without_modifier' => $this->toSummary($withoutModifierTotal, $withoutModifierPassed),
             'by_modifier' => $byModifier,
+            'fumbles' => $fumbles,
         ];
     }
 

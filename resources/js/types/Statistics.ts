@@ -15,6 +15,7 @@ export interface TestBreakdown {
     with_modifier: TestSummary;
     without_modifier: TestSummary;
     by_modifier: ModifierStat[];
+    fumbles: number;
 }
 
 export interface CharacteristicTestStats extends TestBreakdown {

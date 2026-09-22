@@ -102,10 +102,15 @@
                             </div>
                         </div>
                     </div>
-                    <div v-else-if="msg.type === 'skill_test'" class="message-skill-card" :class="parseSkillTest(msg.text)?.passed ? 'skill-passed' : 'skill-failed'">
+                    <div
+                        v-else-if="msg.type === 'skill_test'"
+                        class="message-skill-card"
+                        :class="[parseSkillTest(msg.text)?.passed ? 'skill-passed' : 'skill-failed', { 'skill-fumble': parseSkillTest(msg.text)?.fumble }]"
+                    >
                         <div class="skill-card-header">
                             <span class="skill-card-icon">🎯</span>
                             <span class="skill-card-type">TEST UMIEJĘTNOŚCI</span>
+                            <span v-if="parseSkillTest(msg.text)?.fumble" class="skill-card-fumble">💀 PECH</span>
                             <span class="skill-card-time">{{ formatDate(msg.created_at) }}</span>
                         </div>
                         <div class="skill-card-author">{{ msg.author_name }}</div>
@@ -134,6 +139,9 @@
                             </div>
                             <div class="skill-verdict" :class="parseSkillTest(msg.text)?.passed ? 'skill-verdict-pass' : 'skill-verdict-fail'">
                                 {{ parseSkillTest(msg.text)?.passed ? '✓ ZDANY' : '✗ NIEZDANY' }}
+                                <span v-if="(parseSkillTest(msg.text)?.levels ?? 0) >= 1" class="skill-verdict-levels">
+                                    ({{ parseSkillTest(msg.text)?.passed ? '+' : '-' }}{{ parseSkillTest(msg.text)?.levels }} {{ pluralizeLevels(parseSkillTest(msg.text)?.levels ?? 0) }})
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -872,6 +880,8 @@ interface SkillTestResult {
     half: boolean;
     roll: number;
     passed: boolean;
+    fumble: boolean;
+    levels: number;
 }
 
 interface SkillOption {
@@ -1818,6 +1828,12 @@ const parseSkillTest = (text: string): SkillTestResult | null => {
     }
 };
 
+const pluralizeLevels = (count: number): string => {
+    if (count === 1) return 'poziom';
+    if (count >= 2 && count <= 4) return 'poziomy';
+    return 'poziomów';
+};
+
 const toggleSkillPicker = async () => {
     showSkillPicker.value = !showSkillPicker.value;
     if (showSkillPicker.value && skills.value.length === 0) {
@@ -2566,6 +2582,24 @@ button.active { background: #d4af37; color: black; }
 .skill-passed { border-color: #2e7d32; background: linear-gradient(135deg, #071209 0%, #0f0f0f 100%); }
 .skill-failed  { border-color: #7f1d1d; background: linear-gradient(135deg, #120707 0%, #0f0f0f 100%); }
 
+/* Pech (rzut 97-100) — wyraźnie widoczne niezależnie od tego, czy test formalnie wyszedł */
+.skill-fumble {
+    border-color: #8b3fd1;
+    box-shadow: 0 0 10px rgba(139, 63, 209, 0.35);
+}
+
+.skill-card-fumble {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #c9a6f5;
+    background: rgba(139, 63, 209, 0.18);
+    border: 1px solid #8b3fd1;
+    border-radius: 4px;
+    padding: 1px 6px;
+    text-shadow: 0 0 6px rgba(139, 63, 209, 0.6);
+}
+
 .skill-card-header {
     display: flex;
     align-items: center;
@@ -2655,6 +2689,15 @@ button.active { background: #d4af37; color: black; }
 
 .skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
 .skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
+
+.skill-verdict-levels {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    opacity: 0.85;
+    text-shadow: none;
+}
 
 /* ── Layers panel — zastąpiony przez FloatingPanel ── */
 /* Treść wewnątrz panelu warstw */

@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\Skill;
 use App\Models\User;
 use App\Repositories\ChatRepository;
+use App\Support\SkillTestOutcome;
 use Illuminate\Support\Facades\Log;
 
 class ChatService
@@ -124,16 +125,7 @@ class ChatService
         $roll   = random_int(1, 100);
         $passed = $roll <= $effective;
 
-        $text = json_encode([
-            'skill'                => $characteristic,
-            'characteristic'       => $characteristic,
-            'characteristic_value' => $charValue,
-            'effective_value'      => $effective,
-            'modifier'             => $modifier,
-            'half'                 => $half,
-            'roll'                 => $roll,
-            'passed'               => $passed,
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $text = $this->buildSkillTestPayload($characteristic, $characteristic, $charValue, $effective, $modifier, $half, $roll, $passed);
 
         $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
@@ -200,16 +192,7 @@ class ChatService
         $roll = random_int(1, 100);
         $passed = $roll <= $effectiveValue;
 
-        $text = json_encode([
-            'skill'                => $skill->name,
-            'characteristic'       => $skill->characteristic,
-            'characteristic_value' => $charValue,
-            'effective_value'      => $effectiveValue,
-            'modifier'             => $modifier,
-            'half'                 => $half,
-            'roll'                 => $roll,
-            'passed'               => $passed,
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $text = $this->buildSkillTestPayload($skill->name, $skill->characteristic, $charValue, $effectiveValue, $modifier, $half, $roll, $passed);
 
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
@@ -227,6 +210,37 @@ class ChatService
         ));
 
         return $message;
+    }
+
+    /**
+     * Wspólny JSON dla wiadomości typu `skill_test` (rzut na cechę i na umiejętność).
+     *
+     * `fumble` — rzut 97-100 to zawsze pech, niezależnie od tego, czy test formalnie wyszedł.
+     * `levels` — o ile pełnych poziomów (10 punktów) różni się rzut od progu; 0, gdy różnica
+     * jest mniejsza niż 10 — wtedy front nie pokazuje żadnej dodatkowej informacji o poziomie.
+     */
+    private function buildSkillTestPayload(
+        string $skill,
+        string $characteristic,
+        int $characteristicValue,
+        int $effectiveValue,
+        int $modifier,
+        bool $half,
+        int $roll,
+        bool $passed,
+    ): string {
+        return json_encode([
+            'skill'                => $skill,
+            'characteristic'       => $characteristic,
+            'characteristic_value' => $characteristicValue,
+            'effective_value'      => $effectiveValue,
+            'modifier'             => $modifier,
+            'half'                 => $half,
+            'roll'                 => $roll,
+            'passed'               => $passed,
+            'fumble'               => SkillTestOutcome::isFumble($roll),
+            'levels'               => SkillTestOutcome::levels($roll, $effectiveValue),
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     private function tryBroadcast(Message $message, int $campaignId): void

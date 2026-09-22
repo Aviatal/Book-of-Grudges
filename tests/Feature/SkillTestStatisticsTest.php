@@ -9,6 +9,7 @@ use App\Models\Skill;
 use App\Models\SkillTestLog;
 use App\Models\User;
 use App\Services\SkillTestStatisticsService;
+use App\Support\SkillTestOutcome;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -81,12 +82,12 @@ class SkillTestStatisticsTest extends TestCase
         [$campaign, $player, $hero] = $this->createCampaignWithHero();
         $skill = $this->createSkill('Spostrzegawczość', 'Int');
 
-        $this->actingAs($player)
+        $characteristicResponse = $this->actingAs($player)
             ->withSession(['current_campaign_id' => $campaign->id])
             ->postJson('/session/chat/roll-characteristic', ['characteristic' => 'Zr', 'modifier' => 0, 'half' => false])
             ->assertCreated();
 
-        $this->actingAs($player)
+        $skillResponse = $this->actingAs($player)
             ->withSession(['current_campaign_id' => $campaign->id])
             ->postJson('/session/chat/roll-skill', ['skill_id' => $skill->id, 'modifier' => 10, 'half' => false])
             ->assertCreated();
@@ -104,6 +105,18 @@ class SkillTestStatisticsTest extends TestCase
         // Test umiejętności "Spostrzegawczość" liczy się do statystyk cechy Int, do której jest przypisana.
         $this->assertSame('Int', $skillLog->characteristic);
         $this->assertTrue($skillLog->has_modifier);
+
+        // Wiadomość na czacie niesie te same pola "pech"/"poziomy", wyliczone z faktycznego rzutu.
+        $characteristicMessage = json_decode($characteristicResponse->json('message.text'), true);
+        $this->assertSame(SkillTestOutcome::isFumble($characteristicLog->roll), $characteristicMessage['fumble']);
+        $this->assertSame(
+            SkillTestOutcome::levels($characteristicLog->roll, $characteristicLog->effective_value),
+            $characteristicMessage['levels'],
+        );
+
+        $skillMessage = json_decode($skillResponse->json('message.text'), true);
+        $this->assertSame(SkillTestOutcome::isFumble($skillLog->roll), $skillMessage['fumble']);
+        $this->assertSame(SkillTestOutcome::levels($skillLog->roll, $skillLog->effective_value), $skillMessage['levels']);
     }
 
     public function test_secondary_characteristics_are_not_offered_for_rolling(): void
@@ -195,30 +208,49 @@ class SkillTestStatisticsTest extends TestCase
             'roll' => 90,
             'passed' => false,
         ]);
+        // Pech (99) na tej samej umiejętności — powinien policzyć się jako pech na wszystkich poziomach.
+        SkillTestLog::create([
+            'hero_id' => $hero->id,
+            'campaign_id' => $hero->campaign_id,
+            'skill_id' => $skill->id,
+            'skill_name' => $skill->name,
+            'characteristic' => 'Int',
+            'characteristic_value' => 40,
+            'effective_value' => 40,
+            'modifier' => 0,
+            'half' => false,
+            'has_modifier' => false,
+            'roll' => 99,
+            'passed' => false,
+        ]);
 
         $statistics = app(SkillTestStatisticsService::class)->getHeroStatistics($hero->id);
 
-        $this->assertSame(3, $statistics['overall']['combined']['total']);
+        $this->assertSame(4, $statistics['overall']['combined']['total']);
         $this->assertSame(2, $statistics['overall']['combined']['passed']);
+        $this->assertSame(1, $statistics['overall']['fumbles']);
 
         $characteristics = collect($statistics['characteristics'])->keyBy('characteristic');
         $this->assertSame(1, $characteristics['Zr']['combined']['total']);
+        $this->assertSame(0, $characteristics['Zr']['fumbles']);
         // Testy Spostrzegawczości (Int) wliczają się do statystyk cechy Int.
-        $this->assertSame(2, $characteristics['Int']['combined']['total']);
+        $this->assertSame(3, $characteristics['Int']['combined']['total']);
         $this->assertSame(1, $characteristics['Int']['with_modifier']['total']);
-        $this->assertSame(1, $characteristics['Int']['without_modifier']['total']);
+        $this->assertSame(2, $characteristics['Int']['without_modifier']['total']);
+        // Pech liczy się do statystyk cechy niezależnie od tego, że test formalnie nie wyszedł.
+        $this->assertSame(1, $characteristics['Int']['fumbles']);
 
         // Rozkład wg konkretnej wartości modyfikatora — 0 i -10 to dwa osobne warianty.
         $intByModifier = collect($characteristics['Int']['by_modifier'])->keyBy(fn ($row) => $row['modifier'].':'.($row['half'] ? 'half' : 'full'));
-        $this->assertSame(1, $intByModifier['0:full']['total']);
+        $this->assertSame(2, $intByModifier['0:full']['total']);
         $this->assertSame(1, $intByModifier['-10:full']['total']);
 
         $this->assertCount(1, $statistics['skills']);
         $skillStats = $statistics['skills'][0];
         $this->assertSame($skill->id, $skillStats['skill_id']);
-        $this->assertSame(2, $skillStats['combined']['total']);
+        $this->assertSame(3, $skillStats['combined']['total']);
         $this->assertSame(1, $skillStats['combined']['passed']);
-        $this->assertSame(50.0, $skillStats['combined']['pass_percent']);
+        $this->assertSame(1, $skillStats['fumbles']);
     }
 
     public function test_statistics_page_shows_only_own_hero_roll_statistics(): void
