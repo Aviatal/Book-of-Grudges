@@ -90,6 +90,8 @@
                 </div>
             </details>
 
+            <x-sidebar-nav-link :route="route('statistics.index')" pattern="statistics.*">Statystyki</x-sidebar-nav-link>
+
             @if($isCampaignGm ?? false)
                 <div class="h-px my-3.5 mx-2" style="background: linear-gradient(90deg, transparent, var(--border-default), transparent)"></div>
                 <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-0.5 pb-2" style="color: var(--text-faint-alt)">MISTRZ GRY</div>

@@ -228,18 +228,18 @@
                     >½ Połowa cechy</button>
                 </div>
                 <!-- Cechy — bezpośredni rzut -->
-                <div v-if="Object.keys(heroCharacteristics).length" class="char-roll-section">
+                <div v-if="orderedHeroCharacteristics.length" class="char-roll-section">
                     <div class="char-roll-label">Cechy</div>
                     <div class="char-roll-grid">
                         <button
-                            v-for="(val, key) in heroCharacteristics"
-                            :key="key"
+                            v-for="entry in orderedHeroCharacteristics"
+                            :key="entry.key"
                             class="char-roll-btn"
                             :disabled="isRollingSkill"
-                            @click="rollCharacteristic(String(key))"
+                            @click="rollCharacteristic(entry.key)"
                         >
-                            <span class="char-roll-key">{{ key }}</span>
-                            <span class="char-roll-val">{{ val }}</span>
+                            <span class="char-roll-key">{{ entry.key }}</span>
+                            <span class="char-roll-val">{{ entry.val }}</span>
                         </button>
                     </div>
                 </div>
@@ -900,6 +900,21 @@ const heroCharacteristics = ref<Record<string, number>>({});
 const isLoadingSkills    = ref(false);
 const MODIFIERS = [-40, -30, -20, -10, 0, 10, 20, 30, 40];
 const messageContainer = ref<HTMLElement | null>(null);
+
+// Backend zwraca tylko cechy podstawowe (drugorzędnych, jak Żywotność czy Szybkość, nie da się
+// testować), w kolejności takiej samej jak na karcie postaci (patrz HeroCharacteristicSection.vue).
+const CHARACTERISTIC_ORDER = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd'];
+
+const orderedHeroCharacteristics = computed(() => {
+    return Object.entries(heroCharacteristics.value)
+        .map(([key, val]) => ({ key, val }))
+        .sort((a, b) => {
+            const indexA = CHARACTERISTIC_ORDER.indexOf(a.key);
+            const indexB = CHARACTERISTIC_ORDER.indexOf(b.key);
+
+            return (indexA === -1 ? CHARACTERISTIC_ORDER.length : indexA) - (indexB === -1 ? CHARACTERISTIC_ORDER.length : indexB);
+        });
+});
 
 const filteredSkills = computed(() => {
     const q = skillSearch.value.trim().toLowerCase();
@@ -2346,7 +2361,10 @@ button.active { background: #d4af37; color: black; }
     border-top: 1px solid #333;
     display: flex;
     flex-direction: column;
-    max-height: 260px;
+    /* Wcześniej sztywne 260px robiło listę umiejętności ciasną i trudną do klikania —
+       zwłaszcza gdy cechy zawijały się na kilka linii i zjadały resztę miejsca. */
+    max-height: min(58vh, 460px);
+    min-height: 0;
 }
 
 .skill-picker-modifiers {
@@ -2415,9 +2433,15 @@ button.active { background: #d4af37; color: black; }
 
 .char-roll-grid {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
 }
+
+.char-roll-grid::-webkit-scrollbar { height: 4px; }
+.char-roll-grid::-webkit-scrollbar-thumb { background: #3b3a36; border-radius: 2px; }
 
 .char-roll-btn {
     display: flex;
@@ -2426,10 +2450,11 @@ button.active { background: #d4af37; color: black; }
     background: #1c1510;
     border: 1px solid #3b3a36;
     border-radius: 3px;
-    padding: 3px 6px;
+    padding: 5px 8px;
     cursor: pointer;
     transition: border-color 0.12s, background 0.12s;
-    min-width: 38px;
+    min-width: 40px;
+    flex: 0 0 auto;
 }
 .char-roll-btn:hover:not(:disabled) { border-color: #d4af37; background: #2c1e0c; }
 .char-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2484,11 +2509,11 @@ button.active { background: #d4af37; color: black; }
     background: #141414;
     border: 1px solid #2a2a2a;
     color: #aaa;
-    padding: 5px 8px;
+    padding: 9px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.82rem;
-    margin-bottom: 2px;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
     text-align: left;
     transition: border-color 0.12s, background 0.12s;
 }

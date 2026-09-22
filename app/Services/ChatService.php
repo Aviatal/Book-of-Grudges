@@ -4,15 +4,20 @@ namespace App\Services;
 
 use App\Events\Session\MessageSentEvent;
 use App\Exceptions\HeroNotFoundException;
+use App\Models\Characteristic;
 use App\Models\Hero;
 use App\Models\Message;
 use App\Models\Skill;
 use App\Models\User;
 use App\Repositories\ChatRepository;
+use Illuminate\Support\Facades\Log;
 
 class ChatService
 {
-    public function __construct(private readonly ChatRepository $chatRepository) {}
+    public function __construct(
+        private readonly ChatRepository $chatRepository,
+        private readonly SkillTestStatisticsService $skillTestStatisticsService,
+    ) {}
 
     private function heroFor(User $user, int $campaignId): ?Hero
     {
@@ -58,9 +63,13 @@ class ChatService
             return ['characteristics' => [], 'skills' => []];
         }
 
-        // Mapa cech: short_name => wartość
+        // Mapa cech: short_name => wartość. Tylko cechy podstawowe — drugorzędnych (A, Żyw, S,
+        // Wt, Sz, Mag, PO, PP) nie da się testować, więc nie mają co pojawiać się jako rzut.
         $charMap = [];
         foreach ($hero->characteristic as $char) {
+            if (!in_array(strtoupper($char->short_name), Characteristic::PRIMARY_CHARACTERISTICS, true)) {
+                continue;
+            }
             $charMap[$char->short_name] = $char->pivot->start_value + $char->pivot->advancement;
         }
 
@@ -104,6 +113,9 @@ class ChatService
         if (!$char) {
             throw new \InvalidArgumentException("Brak cechy: {$characteristic}");
         }
+        if (!in_array(strtoupper($characteristic), Characteristic::PRIMARY_CHARACTERISTICS, true)) {
+            throw new \InvalidArgumentException("Cechy drugorzędnej nie da się testować: {$characteristic}");
+        }
 
         $charValue = $char->pivot->start_value + $char->pivot->advancement;
         $base      = $half ? intdiv($charValue, 2) : $charValue;
@@ -125,6 +137,18 @@ class ChatService
 
         $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
+
+        $this->tryLogSkillTestStatistic(fn () => $this->skillTestStatisticsService->recordCharacteristicTest(
+            $hero,
+            $campaignId,
+            $characteristic,
+            $charValue,
+            $effective,
+            $modifier,
+            $half,
+            $roll,
+            $passed,
+        ));
 
         return $message;
     }
@@ -190,6 +214,18 @@ class ChatService
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
 
+        $this->tryLogSkillTestStatistic(fn () => $this->skillTestStatisticsService->recordSkillTest(
+            $hero,
+            $campaignId,
+            $skill,
+            $charValue,
+            $effectiveValue,
+            $modifier,
+            $half,
+            $roll,
+            $passed,
+        ));
+
         return $message;
     }
 
@@ -199,6 +235,16 @@ class ChatService
             broadcast(new MessageSentEvent($message, $campaignId));
         } catch (\Throwable) {
             // wiadomość jest zapisana w bazie — brak WebSocket nie blokuje odpowiedzi
+        }
+    }
+
+    private function tryLogSkillTestStatistic(\Closure $log): void
+    {
+        try {
+            $log();
+        } catch (\Throwable $exception) {
+            // Zapis statystyk nie może zablokować samego rzutu — logujemy błąd i jedziemy dalej.
+            Log::error('Error during logging skill test statistic', ['exception' => $exception]);
         }
     }
 }

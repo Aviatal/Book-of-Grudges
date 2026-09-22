@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Campaign;
 use App\Models\CampaignMember;
+use App\Models\FortunePointsSatisfaction;
 use App\Models\Hero;
 use App\Models\Token;
 use App\Models\User;
@@ -139,5 +140,58 @@ class CampaignIsolationTest extends TestCase
             ]);
 
         $this->assertSame(0, (int) $heroB->fresh()->current_experience);
+    }
+
+    public function test_statistics_page_does_not_leak_fortune_points_between_campaigns(): void
+    {
+        [$campaignA] = $this->createCampaign();
+        $playerA = $this->addPlayer($campaignA);
+        $heroA = $this->createHero($campaignA, $playerA);
+        FortunePointsSatisfaction::create(['hero_id' => $heroA->id, 'satisfied' => true]);
+
+        [$campaignB] = $this->createCampaign();
+        $playerB = $this->addPlayer($campaignB);
+        $heroB = $this->createHero($campaignB, $playerB);
+        FortunePointsSatisfaction::create(['hero_id' => $heroB->id, 'satisfied' => false]);
+
+        $response = $this->actingAs($playerB)
+            ->withSession(['current_campaign_id' => $campaignB->id])
+            ->get('/statystyki');
+
+        $response->assertOk();
+        $response->assertViewHas('globalStatistics', function (array $globalStatistics) {
+            // playerB nie jest MG — widzi tylko zbiorcze podsumowanie, bez rozbicia na bohaterów.
+            return $globalStatistics['summary']['total'] === 1
+                && $globalStatistics['summary']['satisfied'] === 0
+                && count($globalStatistics['heroes']) === 0;
+        });
+        $response->assertViewHas('playerStatistics', function (array $playerStatistics) {
+            return $playerStatistics['total'] === 1 && $playerStatistics['satisfied'] === 0;
+        });
+        $response->assertViewHas('showHeroBreakdown', false);
+    }
+
+    public function test_gm_sees_hero_breakdown_only_for_own_campaign(): void
+    {
+        [$campaignA, $gmA] = $this->createCampaign();
+        $playerA = $this->addPlayer($campaignA);
+        $heroA = $this->createHero($campaignA, $playerA);
+        FortunePointsSatisfaction::create(['hero_id' => $heroA->id, 'satisfied' => true]);
+
+        [$campaignB] = $this->createCampaign();
+        $playerB = $this->addPlayer($campaignB);
+        $heroB = $this->createHero($campaignB, $playerB);
+        FortunePointsSatisfaction::create(['hero_id' => $heroB->id, 'satisfied' => false]);
+
+        $response = $this->actingAs($gmA)
+            ->withSession(['current_campaign_id' => $campaignA->id])
+            ->get('/statystyki');
+
+        $response->assertOk();
+        $response->assertViewHas('showHeroBreakdown', true);
+        $response->assertViewHas('globalStatistics', function (array $globalStatistics) use ($heroA) {
+            return count($globalStatistics['heroes']) === 1
+                && $globalStatistics['heroes'][0]['hero_id'] === $heroA->id;
+        });
     }
 }

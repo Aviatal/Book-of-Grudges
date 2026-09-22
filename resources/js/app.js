@@ -30,6 +30,7 @@ import TokensManagement from "@/views/panel/tokens/TokensManagement.vue";
 import TokenCreate from "@/views/panel/tokens/TokenCreate.vue";
 import TokenEdit from "@/views/panel/tokens/TokenEdit.vue";
 import CampaignManagement from "@/views/panel/campaign/CampaignManagement.vue";
+import Statistics from "@/views/statistics/Statistics.vue";
 import Swal from 'sweetalert2'
 import CreateHeroView from "@/views/hero-creating/CreateHeroView.vue";
 import '@mdi/font/css/materialdesignicons.css'
@@ -129,6 +130,7 @@ app.component('collapsible-section', CollapsibleSection);
 app.component('spend-fortune-point', SpendFortunePoint);
 app.component('spend-fate-point', SpendFatePoint);
 app.component('footer-text', FooterText);
+app.component('statistics-page', Statistics);
 
 //PANEL
 app.component('experience-management', ExperienceManagement)

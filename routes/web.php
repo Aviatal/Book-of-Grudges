@@ -16,6 +16,7 @@ use App\Http\Controllers\Panel\SuperadminController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SkillsAndTalentsController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\TokensController;
 use App\Http\Controllers\WeaponsController;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,10 @@ Route::middleware(['auth', 'campaign.selected'])->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     })->name('home');
+
+    Route::group(['prefix' => 'statystyki'], function () {
+        Route::get('/', [StatisticsController::class, 'index'])->name('statistics.index');
+    });
 
     Route::group(['prefix' => 'karta-postaci'], function () {
         Route::get('/{id}', [CharactersController::class, 'index'])->name('character-sheet.index');
