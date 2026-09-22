@@ -151,6 +151,14 @@ Route::middleware(['auth', 'campaign.selected'])->group(function (){
             Route::post('/roll-skill', [ChatController::class, 'rollSkill'])->name('messages.roll-skill');
             Route::post('/roll-characteristic', [ChatController::class, 'rollCharacteristic'])->name('messages.roll-characteristic');
             Route::post('/roll-dice', [ChatController::class, 'rollDice'])->name('messages.roll-dice');
+            Route::group(['prefix' => 'private'], function () {
+                Route::get('/', [ChatController::class, 'getPrivateMessages'])->name('messages.private.get-messages');
+                Route::get('/contacts', [ChatController::class, 'getPrivateContacts'])->name('messages.private.contacts');
+                Route::post('/send', [ChatController::class, 'sendPrivateMessage'])->name('messages.private.send-message');
+                Route::post('/roll-characteristic', [ChatController::class, 'rollPrivateCharacteristic'])->name('messages.private.roll-characteristic');
+                Route::post('/roll-skill', [ChatController::class, 'rollPrivateSkill'])->name('messages.private.roll-skill');
+                Route::post('/roll-dice', [ChatController::class, 'rollPrivateDice'])->name('messages.private.roll-dice');
+            });
         });
     });
 

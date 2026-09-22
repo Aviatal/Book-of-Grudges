@@ -43,6 +43,11 @@ return [
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Bez tego, gdy serwer Reverb nie działa (typowe w dev), broadcast() blokuje
+                // odpowiedź HTTP na kilka sekund zanim cURL odpuści połączenie — użytkownik widzi
+                // to jako "nic się nie stało" po kliknięciu wysłania wiadomości/rzutu.
+                'connect_timeout' => 1,
+                'timeout' => 2,
             ],
         ],
 

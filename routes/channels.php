@@ -21,3 +21,9 @@ Broadcast::channel('session-chat.{campaignId}', $isCampaignMember);
 Broadcast::channel('token-move.{campaignId}', $isCampaignMember);
 Broadcast::channel('drawings.{campaignId}', $isCampaignMember);
 Broadcast::channel('combat.{campaignId}', $isCampaignMember);
+
+// Prywatna skrzynka użytkownika w kampanii — tylko właściciel skrzynki, i tylko dopóki wciąż
+// jest członkiem tej kampanii.
+Broadcast::channel('private-chat.{campaignId}.{userId}', static function ($user, $campaignId, $userId) use ($isCampaignMember) {
+    return (int) $user->id === (int) $userId && $isCampaignMember($user, $campaignId);
+});

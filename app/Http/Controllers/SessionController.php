@@ -26,8 +26,9 @@ class SessionController extends Controller
         // dopasuje się do prawdziwego hero_id, więc "to mój token" po prostu nigdy nie zajdzie
         $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier(), $this->currentCampaign()->id())?->id ?? 0;
         $hasDrawingPermission = $this->currentCampaign()->isGm();
+        $isGm = $this->currentCampaign()->isGm();
         $campaignId = $this->currentCampaign()->id();
-        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission', 'campaignId'));
+        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission', 'isGm', 'campaignId'));
     }
 
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse

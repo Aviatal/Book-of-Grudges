@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Events\Session\MessageSentEvent;
+use App\Events\Session\PrivateMessageSentEvent;
 use App\Exceptions\HeroNotFoundException;
+use App\Models\CampaignMember;
 use App\Models\Characteristic;
 use App\Models\Hero;
 use App\Models\Message;
@@ -11,6 +13,7 @@ use App\Models\Skill;
 use App\Models\User;
 use App\Repositories\ChatRepository;
 use App\Support\SkillTestOutcome;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Log;
 
 class ChatService
@@ -247,9 +250,178 @@ class ChatService
     {
         try {
             broadcast(new MessageSentEvent($message, $campaignId));
-        } catch (\Throwable) {
-            // wiadomość jest zapisana w bazie — brak WebSocket nie blokuje odpowiedzi
+        } catch (\Throwable $exception) {
+            // Wiadomość jest już zapisana w bazie — brak WebSocket (np. Reverb nie działa)
+            // nie może zablokować odpowiedzi, ale MUSI być widoczne w logach, inaczej "znikające"
+            // wiadomości/rzuty są niemożliwe do zdiagnozowania.
+            Log::warning('Message sent but broadcast failed', ['exception' => $exception]);
         }
+    }
+
+    private function tryBroadcastPrivate(Message $message, int $campaignId): void
+    {
+        try {
+            broadcast(new PrivateMessageSentEvent($message, $campaignId));
+        } catch (\Throwable $exception) {
+            Log::warning('Private message sent but broadcast failed', ['exception' => $exception]);
+        }
+    }
+
+    /**
+     * Wspólna autoryzacja dla wszystkich akcji prywatnych (wiadomość, cecha, umiejętność, kości):
+     * MG może pisać/rzucać do dowolnego gracza kampanii, gracz — wyłącznie do MG (nawet jako
+     * pierwszy, bez istniejącego wątku). Rozmowy gracz-gracz są zablokowane.
+     *
+     * @throws AuthorizationException
+     */
+    private function authorizePrivateRecipient(int $campaignId, int $recipientId, bool $senderIsGm): void
+    {
+        $recipientMember = CampaignMember::query()
+            ->where('campaign_id', $campaignId)
+            ->where('user_id', $recipientId)
+            ->first();
+
+        if (!$recipientMember) {
+            throw new AuthorizationException('Odbiorca nie jest członkiem tej kampanii.');
+        }
+
+        if ($senderIsGm) {
+            if ($recipientMember->isGm()) {
+                throw new AuthorizationException('Nie można wysłać prywatnej wiadomości do samego siebie.');
+            }
+
+            return;
+        }
+
+        if (!$recipientMember->isGm()) {
+            throw new AuthorizationException('Prywatną wiadomość można wysłać wyłącznie do Mistrza Gry.');
+        }
+    }
+
+    public function sendPrivateMessage(User $user, string $text, int $recipientId, int $campaignId, bool $isGm): Message
+    {
+        $this->authorizePrivateRecipient($campaignId, $recipientId, $isGm);
+
+        $authorName = $this->heroFor($user, $campaignId)?->name ?? $user->name;
+
+        $message = $this->chatRepository->savePrivateMessage($user->id, $recipientId, $authorName, $text, $campaignId);
+
+        $this->tryBroadcastPrivate($message, $campaignId);
+
+        return $message;
+    }
+
+    public function rollPrivateCharacteristic(
+        User $user,
+        string $characteristic,
+        int $recipientId,
+        int $campaignId,
+        bool $isGm,
+        int $modifier = 0,
+        bool $half = false,
+    ): Message {
+        $this->authorizePrivateRecipient($campaignId, $recipientId, $isGm);
+
+        $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
+
+        if (!$hero) {
+            throw new HeroNotFoundException("User {$user->id} has no hero assigned.");
+        }
+
+        $char = $hero->characteristic[$characteristic] ?? null;
+        if (!$char) {
+            throw new \InvalidArgumentException("Brak cechy: {$characteristic}");
+        }
+        if (!in_array(strtoupper($characteristic), Characteristic::PRIMARY_CHARACTERISTICS, true)) {
+            throw new \InvalidArgumentException("Cechy drugorzędnej nie da się testować: {$characteristic}");
+        }
+
+        $charValue = $char->pivot->start_value + $char->pivot->advancement;
+        $base      = $half ? intdiv($charValue, 2) : $charValue;
+        $effective = max(0, $base + $modifier);
+
+        $roll   = random_int(1, 100);
+        $passed = $roll <= $effective;
+
+        $text = $this->buildSkillTestPayload($characteristic, $characteristic, $charValue, $effective, $modifier, $half, $roll, $passed);
+
+        $message = $this->chatRepository->savePrivateMessage($user->id, $recipientId, $hero->name, $text, $campaignId, 'skill_test');
+        $this->tryBroadcastPrivate($message, $campaignId);
+
+        return $message;
+    }
+
+    public function rollPrivateSkill(
+        User $user,
+        int $skillId,
+        int $recipientId,
+        int $campaignId,
+        bool $isGm,
+        int $modifier = 0,
+        bool $half = false,
+    ): Message {
+        $this->authorizePrivateRecipient($campaignId, $recipientId, $isGm);
+
+        $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
+
+        if (!$hero) {
+            throw new HeroNotFoundException("User {$user->id} has no hero assigned.");
+        }
+
+        $skill = Skill::findOrFail($skillId);
+
+        $char = $hero->characteristic[$skill->characteristic] ?? null;
+        $charValue = $char ? ($char->pivot->start_value + $char->pivot->advancement) : 0;
+
+        $base = $half ? intdiv($charValue, 2) : $charValue;
+        $effectiveValue = max(0, $base + $modifier);
+
+        $roll = random_int(1, 100);
+        $passed = $roll <= $effectiveValue;
+
+        $text = $this->buildSkillTestPayload($skill->name, $skill->characteristic, $charValue, $effectiveValue, $modifier, $half, $roll, $passed);
+
+        $message = $this->chatRepository->savePrivateMessage($user->id, $recipientId, $hero->name, $text, $campaignId, 'skill_test');
+        $this->tryBroadcastPrivate($message, $campaignId);
+
+        return $message;
+    }
+
+    public function rollPrivateDice(User $user, int $count, int $sides, int $recipientId, int $campaignId, bool $isGm): Message
+    {
+        $this->authorizePrivateRecipient($campaignId, $recipientId, $isGm);
+
+        $hero = $this->heroFor($user, $campaignId);
+        $authorName = $hero?->name ?? $user->name;
+
+        $results = [];
+        for ($i = 0; $i < $count; $i++) {
+            $results[] = random_int(1, $sides);
+        }
+        $total = array_sum($results);
+
+        $notation = "{$count}k{$sides}";
+
+        $text = json_encode([
+            'notation' => $notation,
+            'count'    => $count,
+            'sides'    => $sides,
+            'results'  => $results,
+            'total'    => $total,
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+        $message = $this->chatRepository->savePrivateMessage($user->id, $recipientId, $authorName, $text, $campaignId, 'dice_roll');
+        $this->tryBroadcastPrivate($message, $campaignId);
+
+        return $message;
+    }
+
+    /**
+     * @return array<int, array{user_id: int, name: string}>
+     */
+    public function getPrivateContacts(int $campaignId, bool $isGm): array
+    {
+        return $this->chatRepository->getPrivateContacts($campaignId, $isGm);
     }
 
     private function tryLogSkillTestStatistic(\Closure $log): void

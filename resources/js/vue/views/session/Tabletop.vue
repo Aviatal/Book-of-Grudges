@@ -76,100 +76,7 @@
                     title="Otwórz kartę bohatera w nowej karcie"
                 >📋</a>
             </template>
-            <div class="chat-messages" ref="messageContainer">
-                <template v-for="msg in messages" :key="msg.id">
-                    <div v-if="msg.type === 'roll'" class="message-roll-card">
-                        <div class="roll-card-header">
-                            <span class="roll-card-icon">🎲</span>
-                            <span class="roll-card-type">INICJATYWA</span>
-                            <span class="roll-card-time">{{ formatDate(msg.created_at) }}</span>
-                        </div>
-                        <div class="roll-card-author">{{ msg.author_name }}</div>
-                        <div class="roll-card-breakdown">
-                            <div class="roll-die">
-                                <span class="roll-die-value">{{ parseRoll(msg.text).zr }}</span>
-                                <span class="roll-die-label">Zręczność</span>
-                            </div>
-                            <span class="roll-op">+</span>
-                            <div class="roll-die roll-die-d10">
-                                <span class="roll-die-value">{{ parseRoll(msg.text).dice }}</span>
-                                <span class="roll-die-label">k10</span>
-                            </div>
-                            <span class="roll-op">=</span>
-                            <div class="roll-die roll-die-total">
-                                <span class="roll-die-value">{{ parseRoll(msg.text).total }}</span>
-                                <span class="roll-die-label">Wynik</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        v-else-if="msg.type === 'skill_test'"
-                        class="message-skill-card"
-                        :class="[parseSkillTest(msg.text)?.passed ? 'skill-passed' : 'skill-failed', { 'skill-fumble': parseSkillTest(msg.text)?.fumble }]"
-                    >
-                        <div class="skill-card-header">
-                            <span class="skill-card-icon">🎯</span>
-                            <span class="skill-card-type">TEST UMIEJĘTNOŚCI</span>
-                            <span v-if="parseSkillTest(msg.text)?.fumble" class="skill-card-fumble">💀 PECH</span>
-                            <span class="skill-card-time">{{ formatDate(msg.created_at) }}</span>
-                        </div>
-                        <div class="skill-card-author">{{ msg.author_name }}</div>
-                        <div class="skill-card-name">
-                            {{ parseSkillTest(msg.text)?.skill }}
-                            <span class="skill-card-char">({{ parseSkillTest(msg.text)?.characteristic }})</span>
-                        </div>
-                        <div class="skill-card-effective" v-if="parseSkillTest(msg.text)?.half || parseSkillTest(msg.text)?.modifier !== 0">
-                            <span class="eff-base">{{ parseSkillTest(msg.text)?.characteristic_value }}</span>
-                            <span class="eff-op" v-if="parseSkillTest(msg.text)?.half">÷2</span>
-                            <span class="eff-op" v-if="parseSkillTest(msg.text)?.modifier !== 0">
-                                {{ parseSkillTest(msg.text)?.modifier > 0 ? '+' + parseSkillTest(msg.text)?.modifier : parseSkillTest(msg.text)?.modifier }}
-                            </span>
-                            <span class="eff-sep">=</span>
-                            <span class="eff-result">{{ parseSkillTest(msg.text)?.effective_value }}</span>
-                        </div>
-                        <div class="skill-card-breakdown">
-                            <div class="skill-stat">
-                                <span class="skill-stat-value">{{ parseSkillTest(msg.text)?.effective_value ?? parseSkillTest(msg.text)?.characteristic_value }}</span>
-                                <span class="skill-stat-label">Próg</span>
-                            </div>
-                            <span class="skill-vs">vs</span>
-                            <div class="skill-stat">
-                                <span class="skill-stat-value">{{ parseSkillTest(msg.text)?.roll }}</span>
-                                <span class="skill-stat-label">k100</span>
-                            </div>
-                            <div class="skill-verdict" :class="parseSkillTest(msg.text)?.passed ? 'skill-verdict-pass' : 'skill-verdict-fail'">
-                                {{ parseSkillTest(msg.text)?.passed ? '✓ ZDANY' : '✗ NIEZDANY' }}
-                                <span v-if="(parseSkillTest(msg.text)?.levels ?? 0) >= 1" class="skill-verdict-levels">
-                                    ({{ parseSkillTest(msg.text)?.passed ? '+' : '-' }}{{ parseSkillTest(msg.text)?.levels }} {{ pluralizeLevels(parseSkillTest(msg.text)?.levels ?? 0) }})
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else-if="msg.type === 'dice_roll'" class="message-dice-card">
-                        <div class="dice-card-header">
-                            <span class="dice-card-icon">🎲</span>
-                            <span class="dice-card-notation">{{ parseDiceRoll(msg.text)?.notation }}</span>
-                            <span class="dice-card-time">{{ formatDate(msg.created_at) }}</span>
-                        </div>
-                        <div class="dice-card-author">{{ msg.author_name }}</div>
-                        <div class="dice-card-results">
-                            <span
-                                v-for="(r, i) in parseDiceRoll(msg.text)?.results ?? []"
-                                :key="i"
-                                class="dice-card-die"
-                            >{{ r }}</span>
-                        </div>
-                        <div v-if="(parseDiceRoll(msg.text)?.count ?? 0) > 1" class="dice-card-total">
-                            = {{ parseDiceRoll(msg.text)?.total }}
-                        </div>
-                    </div>
-                    <div v-else class="message">
-                        <span class="msg-author">[{{ msg.author_name }}]</span>
-                        <span class="msg-content">{{ msg.text }}</span>
-                        <span class="msg-time">{{ formatDate(msg.created_at) }}</span>
-                    </div>
-                </template>
-            </div>
+            <MessageThread :messages="messages" />
 
             <div v-if="isRolling" class="dice-overlay">
                 <div class="dice-overlay-die">🎲</div>
@@ -185,107 +92,20 @@
                 />
                 <button @click="sendMessage">➤</button>
             </div>
-            <div class="chat-actions">
-                <button class="roll-btn" @click="toggleSkillPicker" :disabled="isRollingSkill" :class="{ active: showSkillPicker }">
-                    🎯 Test umiejętności
-                </button>
-                <button class="roll-btn" @click="showDicePicker = !showDicePicker; if(showDicePicker) showSkillPicker = false" :disabled="isRollingDice" :class="{ active: showDicePicker }">
-                    🎲 Rzut kośćmi
-                </button>
-            </div>
 
-            <div v-if="showDicePicker" class="dice-picker">
-                <div class="dice-picker-count">
-                    <span class="dice-picker-label">Liczba kostek</span>
-                    <div class="dice-count-btns">
-                        <button
-                            v-for="n in [1,2,3,4,5]"
-                            :key="n"
-                            class="dice-count-btn"
-                            :class="{ active: diceCount === n }"
-                            @click="diceCount = n"
-                        >{{ n }}</button>
-                    </div>
-                </div>
-                <div class="dice-picker-dice">
-                    <button
-                        v-for="sides in [4,6,8,10,12,20,100]"
-                        :key="sides"
-                        class="dice-type-btn"
-                        :disabled="isRollingDice"
-                        @click="rollDice(sides)"
-                    >k{{ sides }}</button>
-                </div>
-            </div>
-
-            <div v-if="showSkillPicker" class="skill-picker">
-                <div class="skill-picker-modifiers">
-                    <button
-                        v-for="mod in MODIFIERS"
-                        :key="mod"
-                        class="mod-btn"
-                        :class="{ 'mod-active': skillModifier === mod, 'mod-neg': mod < 0, 'mod-pos': mod > 0, 'mod-zero': mod === 0 }"
-                        @click="skillModifier = mod"
-                    >{{ mod > 0 ? '+' + mod : mod }}</button>
-                </div>
-                <div class="skill-picker-options">
-                    <button
-                        class="half-btn"
-                        :class="{ 'half-active': skillHalf }"
-                        @click="skillHalf = !skillHalf"
-                    >½ Połowa cechy</button>
-                </div>
-                <!-- Cechy — bezpośredni rzut -->
-                <div v-if="orderedHeroCharacteristics.length" class="char-roll-section">
-                    <div class="char-roll-label">Cechy</div>
-                    <div class="char-roll-grid">
-                        <button
-                            v-for="entry in orderedHeroCharacteristics"
-                            :key="entry.key"
-                            class="char-roll-btn"
-                            :disabled="isRollingSkill"
-                            @click="rollCharacteristic(entry.key)"
-                        >
-                            <span class="char-roll-key">{{ entry.key }}</span>
-                            <span class="char-roll-val">{{ entry.val }}</span>
-                        </button>
-                    </div>
-                </div>
-
-                <input
-                    v-model="skillSearch"
-                    class="skill-picker-search"
-                    placeholder="Szukaj umiejętności..."
-                    type="text"
-                />
-                <div class="skill-picker-list">
-                    <template v-if="filteredSkills.length">
-                        <div v-if="filteredSkills.some(s => s.is_purchased)" class="skill-group-label">Wykupione</div>
-                        <button
-                            v-for="skill in filteredSkills.filter(s => s.is_purchased)"
-                            :key="skill.id"
-                            class="skill-item skill-item-purchased"
-                            @click="rollSkill(skill.id)"
-                        >
-                            <span class="skill-item-name">{{ skill.additional_name ?? skill.name }}</span>
-                            <span class="skill-item-char">{{ skill.characteristic }} {{ skill.characteristic_value }}</span>
-                        </button>
-                        <div v-if="filteredSkills.some(s => !s.is_purchased)" class="skill-group-label">Pozostałe</div>
-                        <button
-                            v-for="skill in filteredSkills.filter(s => !s.is_purchased)"
-                            :key="skill.id"
-                            class="skill-item"
-                            @click="rollSkill(skill.id)"
-                        >
-                            <span class="skill-item-name">{{ skill.name }}</span>
-                            <span class="skill-item-char">{{ skill.characteristic }} {{ skill.characteristic_value }}</span>
-                        </button>
-                    </template>
-                    <div v-else-if="isLoadingSkills" class="skill-picker-info">Ładowanie...</div>
-                    <div v-else class="skill-picker-info">Brak wyników</div>
-                </div>
-            </div>
+            <RollPicker
+                :skills="skills"
+                :characteristics="orderedHeroCharacteristics"
+                :is-loading-skills="isLoadingSkills"
+                :disabled="isRollingSkill || isRollingDice"
+                @ensure-skills-loaded="ensureSkillsLoaded"
+                @roll-characteristic="rollCharacteristic"
+                @roll-skill="rollSkill"
+                @roll-dice="rollDice"
+            />
         </FloatingPanel>
+
+        <PrivateChatPanel :campaign-id="campaignId" :user-id="userId" :is-gm="isGm" :is-mobile="isMobile" />
 
         <!-- Panel warstw -->
         <FloatingPanel
@@ -718,11 +538,17 @@ import HeroProxyPopup from '../../components/session/HeroProxyPopup.vue';
 import CombatTracker from '../../components/session/CombatTracker.vue';
 import CombatBoard from '../../components/session/CombatBoard.vue';
 import FloatingPanel from '../../components/session/FloatingPanel.vue';
+import MessageThread from '../../components/session/MessageThread.vue';
+import RollPicker from '../../components/session/RollPicker.vue';
+import PrivateChatPanel from '../../components/session/PrivateChatPanel.vue';
+import { useHeroSkills } from '../../../composables/useHeroSkills';
+import { playDiceSound } from '../../../utils/sound';
 
 const props = defineProps<{
     userId: number,
     heroId: number,
     hasDrawingPermission: boolean,
+    isGm: boolean,
     campaignId: number,
 }>();
 
@@ -825,8 +651,7 @@ const subscribeRealtime = (): void => {
 
     window.Echo.private(`session-chat.${props.campaignId}`)
         .listen('.message-sent', (e: any) => {
-            messages.value.push(e.message);
-            scrollToBottom();
+            addMessage(e.message);
         });
 };
 
@@ -871,67 +696,21 @@ const selectedHeroToken = ref<Token | null>(null);
 const loadedDrawingImages = ref<Record<number, HTMLImageElement>>({});
 const pingColor = ref('#00a1ff');
 const pings = ref<any[]>([]);
-interface SkillTestResult {
-    skill: string;
-    characteristic: string;
-    characteristic_value: number;
-    effective_value: number;
-    modifier: number;
-    half: boolean;
-    roll: number;
-    passed: boolean;
-    fumble: boolean;
-    levels: number;
-}
-
-interface SkillOption {
-    id: number;
-    name: string;
-    type: string;
-    characteristic: string;
-    characteristic_value: number;
-    is_purchased: boolean;
-    additional_name: string | null;
-}
-
 const messages = ref<Message[]>([]);
+
+// Wiadomość dodajemy zarówno od razu po odpowiedzi HTTP (żeby nadawca widział własną wiadomość
+// natychmiast, nawet gdy broadcast WS akurat zawiedzie — np. Reverb offline), jak i z echa
+// WebSocketa (żeby inni uczestnicy zobaczyli ją na żywo) — stąd zabezpieczenie przed duplikatem.
+const addMessage = (message: Message) => {
+    if (messages.value.some(m => m.id === message.id)) return;
+    messages.value.push(message);
+};
 const newMessage = ref('');
 const isRolling = ref(false);
 const isRollingSkill = ref(false);
-const showSkillPicker = ref(false);
-const showDicePicker = ref(false);
-const diceCount = ref(1);
 const isRollingDice = ref(false);
-const skillSearch = ref('');
-const skillModifier = ref(0);
-const skillHalf = ref(false);
-const skills             = ref<SkillOption[]>([]);
-const heroCharacteristics = ref<Record<string, number>>({});
-const isLoadingSkills    = ref(false);
-const MODIFIERS = [-40, -30, -20, -10, 0, 10, 20, 30, 40];
-const messageContainer = ref<HTMLElement | null>(null);
 
-// Backend zwraca tylko cechy podstawowe (drugorzędnych, jak Żywotność czy Szybkość, nie da się
-// testować), w kolejności takiej samej jak na karcie postaci (patrz HeroCharacteristicSection.vue).
-const CHARACTERISTIC_ORDER = ['WW', 'US', 'K', 'Odp', 'Zr', 'Int', 'SW', 'Ogd'];
-
-const orderedHeroCharacteristics = computed(() => {
-    return Object.entries(heroCharacteristics.value)
-        .map(([key, val]) => ({ key, val }))
-        .sort((a, b) => {
-            const indexA = CHARACTERISTIC_ORDER.indexOf(a.key);
-            const indexB = CHARACTERISTIC_ORDER.indexOf(b.key);
-
-            return (indexA === -1 ? CHARACTERISTIC_ORDER.length : indexA) - (indexB === -1 ? CHARACTERISTIC_ORDER.length : indexB);
-        });
-});
-
-const filteredSkills = computed(() => {
-    const q = skillSearch.value.trim().toLowerCase();
-    return skills.value.filter(s =>
-        !q || s.name.toLowerCase().includes(q) || (s.additional_name ?? '').toLowerCase().includes(q)
-    );
-});
+const { skills, isLoadingSkills, orderedHeroCharacteristics, ensureLoaded: ensureSkillsLoaded } = useHeroSkills();
 
 const mapTokens  = computed(() => tokens.value.filter(t => t.on_map));
 const npcTokens  = computed(() => tokens.value.filter(t => !t.hero_id));
@@ -1014,7 +793,6 @@ const fetchTokens = async () => {
 const fetchMessages = async () => {
     const { data } = await axios.get('/session/chat');
     messages.value = data;
-    scrollToBottom();
 };
 
 const loadDrawingImage = (drawing: DrawingData): void => {
@@ -1769,165 +1547,53 @@ const sendMessage = async () => {
         const { data } = await axios.post('/session/chat/send', {
             text: newMessage.value
         });
-
+        addMessage(data.message);
         newMessage.value = '';
-        scrollToBottom();
     } catch (error) {
         console.error("Błąd wysyłania wiadomości");
     }
 };
 
-const playDiceSound = () => {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-
-    const ctx = new AudioCtx();
-    const sampleRate = ctx.sampleRate;
-
-    // Kilka "klaknięć" kostką o stół z malejącą głośnością
-    const clacks = [0, 0.09, 0.17, 0.27, 0.36];
-    const totalDuration = 0.55;
-    const bufferSize = Math.floor(sampleRate * totalDuration);
-    const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
-    const data = buffer.getChannelData(0);
-
-    clacks.forEach((clackTime, idx) => {
-        const start = Math.floor(clackTime * sampleRate);
-        const clackLen = Math.floor(0.045 * sampleRate);
-        const volume = 1 - idx * 0.15;
-        for (let i = 0; i < clackLen && start + i < bufferSize; i++) {
-            const env = Math.exp(-i / (clackLen * 0.25));
-            data[start + i] += (Math.random() * 2 - 1) * env * volume;
-        }
-    });
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1800;
-    filter.Q.value = 0.8;
-
-    const gain = ctx.createGain();
-    gain.gain.value = 0.65;
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    source.start();
-    source.onended = () => ctx.close();
-};
-
-const parseSkillTest = (text: string): SkillTestResult | null => {
-    try {
-        return JSON.parse(text) as SkillTestResult;
-    } catch (e) {
-        console.error('Failed to parse skill test message', e);
-        return null;
-    }
-};
-
-const pluralizeLevels = (count: number): string => {
-    if (count === 1) return 'poziom';
-    if (count >= 2 && count <= 4) return 'poziomy';
-    return 'poziomów';
-};
-
-const toggleSkillPicker = async () => {
-    showSkillPicker.value = !showSkillPicker.value;
-    if (showSkillPicker.value && skills.value.length === 0) {
-        isLoadingSkills.value = true;
-        try {
-            const { data } = await axios.get<{ characteristics: Record<string, number>; skills: SkillOption[] }>('/session/chat/skills');
-            heroCharacteristics.value = data.characteristics ?? {};
-            skills.value = data.skills ?? [];
-        } catch (e) {
-            console.error('Błąd pobierania umiejętności', e);
-        } finally {
-            isLoadingSkills.value = false;
-        }
-    }
-};
-
-const rollCharacteristic = async (characteristic: string) => {
+const rollCharacteristic = async (characteristic: string, modifier: number, half: boolean) => {
     if (isRollingSkill.value) return;
-    isRollingSkill.value  = true;
-    showSkillPicker.value = false;
+    isRollingSkill.value = true;
     playDiceSound();
     try {
-        await axios.post('/session/chat/roll-characteristic', {
-            characteristic,
-            modifier: skillModifier.value,
-            half:     skillHalf.value,
-        });
-        scrollToBottom();
+        const { data } = await axios.post('/session/chat/roll-characteristic', { characteristic, modifier, half });
+        addMessage(data.message);
     } catch (e) {
         console.error('Błąd rzutu na cechę', e);
     } finally {
-        skillModifier.value  = 0;
-        skillHalf.value      = false;
         isRollingSkill.value = false;
     }
 };
 
-const rollSkill = async (skillId: number) => {
+const rollSkill = async (skillId: number, modifier: number, half: boolean) => {
     if (isRollingSkill.value) return;
     isRollingSkill.value = true;
-    showSkillPicker.value = false;
     playDiceSound();
     try {
-        await axios.post('/session/chat/roll-skill', {
-            skill_id: skillId,
-            modifier: skillModifier.value,
-            half: skillHalf.value,
-        });
-        scrollToBottom();
+        const { data } = await axios.post('/session/chat/roll-skill', { skill_id: skillId, modifier, half });
+        addMessage(data.message);
     } catch (e) {
         console.error('Błąd testu umiejętności', e);
     } finally {
-        skillModifier.value = 0;
-        skillHalf.value = false;
         isRollingSkill.value = false;
     }
 };
 
-const rollDice = async (sides: number) => {
+const rollDice = async (count: number, sides: number) => {
     if (isRollingDice.value) return;
     isRollingDice.value = true;
-    showDicePicker.value = false;
     playDiceSound();
     try {
-        await axios.post('/session/chat/roll-dice', { count: diceCount.value, sides });
-        scrollToBottom();
+        const { data } = await axios.post('/session/chat/roll-dice', { count, sides });
+        addMessage(data.message);
     } catch (e) {
         console.error('Błąd rzutu kośćmi', e);
     } finally {
         isRollingDice.value = false;
     }
-};
-
-interface DiceRollPayload {
-    notation: string;
-    count: number;
-    sides: number;
-    results: number[];
-    total: number;
-}
-
-const parseDiceRoll = (text: string): DiceRollPayload | null => {
-    try {
-        return JSON.parse(text) as DiceRollPayload;
-    } catch {
-        return null;
-    }
-};
-
-const parseRoll = (text: string) => {
-    const match = text.match(/Zr \((\d+)\) \+ k10 \[(\d+)\] = (\d+)/);
-    return match
-        ? { zr: match[1], dice: match[2], total: match[3] }
-        : { zr: '?', dice: '?', total: '?' };
 };
 
 const rollInitiative = async () => {
@@ -1936,20 +1602,12 @@ const rollInitiative = async () => {
     playDiceSound();
     try {
         const { data } = await axios.post('/session/chat/roll-initiative');
-        scrollToBottom();
+        addMessage(data.message);
     } catch (error) {
         console.error('Błąd rzutu na inicjatywę');
     } finally {
         isRolling.value = false;
     }
-};
-
-const scrollToBottom = () => {
-    setTimeout(() => {
-        if (messageContainer.value) {
-            messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
-        }
-    }, 50);
 };
 
 const handleStageMouseUp = async (e: any) => {
@@ -2051,19 +1709,6 @@ const handleStageMouseUp = async (e: any) => {
         }
     }
     handleSelectionEnd();
-};
-
-const formatDate = (isoString: string) => {
-    const date = new Date(isoString);
-
-    return new Intl.DateTimeFormat('pl-PL', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    }).format(date);
 };
 
 const handleKeyDown = (e: KeyboardEvent): void => {
@@ -2178,119 +1823,9 @@ button.active { background: #d4af37; color: black; }
 }
 .hero-sheet-link:hover { color: #d4af37; }
 
-/* Wewnętrzny layout czatu */
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.message { font-size: 0.95rem; line-height: 1.2; border-bottom: 1px solid #333; padding-bottom: 2px; }
-.msg-author { font-weight: bold; margin-right: 5px; }
-.msg-content { color: #ccc; word-break: break-word; display: block; }
-.msg-time { font-size: 0.7rem; color: #666; float: right; }
-
-/* Roll card */
-.message-roll-card {
-    border: 1px solid #d4af37;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #1a1500 0%, #0f0f0f 100%);
-    padding: 8px 10px;
-    margin: 4px 0;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.4);
-}
-
-.roll-card-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
-}
-
-.roll-card-icon { font-size: 1rem; }
-
-.roll-card-type {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: #d4af37;
-    text-transform: uppercase;
-    flex: 1;
-}
-
-.roll-card-time {
-    font-size: 0.65rem;
-    color: #555;
-}
-
-.roll-card-author {
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-bottom: 8px;
-    font-style: italic;
-}
-
-.roll-card-breakdown {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.roll-op {
-    color: #888;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-.roll-die {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #1e1e1e;
-    border: 1px solid #444;
-    border-radius: 5px;
-    padding: 4px 10px;
-    min-width: 48px;
-}
-
-.roll-die-d10 {
-    border-color: #d4af37;
-    background: #1a1500;
-}
-
-.roll-die-total {
-    border: 2px solid #d4af37;
-    background: #d4af37;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-    min-width: 54px;
-}
-
-.roll-die-value {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1;
-}
-
-.roll-die-total .roll-die-value {
-    color: #1a1a1a;
-    font-size: 1.5rem;
-}
-
-.roll-die-label {
-    font-size: 0.55rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 2px;
-}
-
-.roll-die-total .roll-die-label { color: #5a4a00; }
+/* Wewnętrzny layout czatu — karty wiadomości (.chat-messages, .message-*-card) są teraz
+   w MessageThread.vue, a wybór rzutu (.chat-actions, .skill-picker, .dice-picker) w RollPicker.vue —
+   oba współdzielone z PrivateChatPanel.vue. */
 
 /* Dice overlay */
 .dice-overlay {
@@ -2347,356 +1882,6 @@ button.active { background: #d4af37; color: black; }
     padding: 0 10px;
     cursor: pointer;
     border-radius: 4px;
-}
-
-.chat-actions {
-    padding: 5px 10px 8px;
-    background: #111;
-    display: flex;
-    gap: 5px;
-}
-
-.roll-btn {
-    background: #2a2a1a;
-    border: 1px solid #d4af37;
-    color: #d4af37;
-    padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: background 0.15s;
-}
-
-.roll-btn:hover:not(:disabled) { background: #3a3a1a; }
-.roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.roll-btn.active { background: #3a3a00; border-color: #ffdf00; }
-
-/* Skill picker */
-.skill-picker {
-    background: #0d0d0d;
-    border-top: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    /* Wcześniej sztywne 260px robiło listę umiejętności ciasną i trudną do klikania —
-       zwłaszcza gdy cechy zawijały się na kilka linii i zjadały resztę miejsca. */
-    max-height: min(58vh, 460px);
-    min-height: 0;
-}
-
-.skill-picker-modifiers {
-    display: flex;
-    gap: 3px;
-    padding: 7px 7px 0;
-    flex-wrap: wrap;
-}
-
-.mod-btn {
-    flex: 1;
-    min-width: 34px;
-    padding: 3px 2px;
-    border-radius: 3px;
-    border: 1px solid #2a2a2a;
-    background: #141414;
-    color: #777;
-    font-size: 0.7rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.1s;
-    text-align: center;
-}
-
-.mod-btn:hover { border-color: #555; color: #ccc; background: #1e1e1e; }
-.mod-neg { color: #c0392b; }
-.mod-pos { color: #27ae60; }
-.mod-zero { color: #777; }
-.mod-active { border-color: #d4af37 !important; background: #1a1500 !important; color: #d4af37 !important; box-shadow: 0 0 6px rgba(212,175,55,0.3); }
-
-.skill-picker-options {
-    padding: 5px 7px 3px;
-    display: flex;
-    gap: 5px;
-}
-
-.half-btn {
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    color: #777;
-    padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.78rem;
-    transition: all 0.12s;
-    width: 100%;
-}
-
-.half-btn:hover { border-color: #555; color: #ccc; }
-.half-active { border-color: #7b68ee !important; color: #9d91f0 !important; background: #0e0d1a !important; }
-
-/* ── Sekcja cech w pickerze ── */
-.char-roll-section {
-    padding: 6px 8px 2px;
-    border-bottom: 1px solid #2a2a2a;
-}
-
-.char-roll-label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #8b5a2b;
-    margin-bottom: 5px;
-}
-
-.char-roll-grid {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 4px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: thin;
-}
-
-.char-roll-grid::-webkit-scrollbar { height: 4px; }
-.char-roll-grid::-webkit-scrollbar-thumb { background: #3b3a36; border-radius: 2px; }
-
-.char-roll-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #1c1510;
-    border: 1px solid #3b3a36;
-    border-radius: 3px;
-    padding: 5px 8px;
-    cursor: pointer;
-    transition: border-color 0.12s, background 0.12s;
-    min-width: 40px;
-    flex: 0 0 auto;
-}
-.char-roll-btn:hover:not(:disabled) { border-color: #d4af37; background: #2c1e0c; }
-.char-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.char-roll-key {
-    font-size: 0.6rem;
-    font-weight: 800;
-    color: #8b5a2b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.char-roll-val {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #d4af37;
-    font-variant-numeric: tabular-nums;
-}
-
-.skill-picker-search {
-    margin: 8px;
-    background: #1a1a1a;
-    border: 1px solid #444;
-    color: white;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    outline: none;
-}
-
-.skill-picker-search:focus { border-color: #d4af37; }
-
-.skill-picker-list {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0 6px 6px;
-}
-
-.skill-group-label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #555;
-    padding: 6px 4px 2px;
-}
-
-.skill-item {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    color: #aaa;
-    padding: 9px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-    text-align: left;
-    transition: border-color 0.12s, background 0.12s;
-}
-
-.skill-item:hover {
-    background: #1e1e1e;
-    border-color: #555;
-    color: #ddd;
-}
-
-.skill-item-purchased {
-    border-color: rgba(212, 175, 55, 0.4);
-    color: #e8d68a;
-    background: #16130a;
-}
-
-.skill-item-purchased:hover {
-    background: #201c0e;
-    border-color: #d4af37;
-}
-
-.skill-item-name { flex: 1; }
-
-.skill-item-char {
-    font-size: 0.7rem;
-    color: #666;
-    margin-left: 6px;
-    white-space: nowrap;
-    font-family: monospace;
-}
-
-.skill-item-purchased .skill-item-char { color: #a08030; }
-
-.skill-picker-info {
-    color: #555;
-    font-size: 0.8rem;
-    text-align: center;
-    padding: 12px;
-}
-
-/* Skill test card */
-.message-skill-card {
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin: 4px 0;
-    border: 1px solid #333;
-    background: #0f0f0f;
-}
-
-.skill-passed { border-color: #2e7d32; background: linear-gradient(135deg, #071209 0%, #0f0f0f 100%); }
-.skill-failed  { border-color: #7f1d1d; background: linear-gradient(135deg, #120707 0%, #0f0f0f 100%); }
-
-/* Pech (rzut 97-100) — wyraźnie widoczne niezależnie od tego, czy test formalnie wyszedł */
-.skill-fumble {
-    border-color: #8b3fd1;
-    box-shadow: 0 0 10px rgba(139, 63, 209, 0.35);
-}
-
-.skill-card-fumble {
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: #c9a6f5;
-    background: rgba(139, 63, 209, 0.18);
-    border: 1px solid #8b3fd1;
-    border-radius: 4px;
-    padding: 1px 6px;
-    text-shadow: 0 0 6px rgba(139, 63, 209, 0.6);
-}
-
-.skill-card-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 3px;
-}
-
-.skill-card-icon { font-size: 0.9rem; }
-
-.skill-card-type {
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: #888;
-    text-transform: uppercase;
-    flex: 1;
-}
-
-.skill-card-time { font-size: 0.65rem; color: #555; }
-
-.skill-card-author { font-size: 0.78rem; color: #888; font-style: italic; margin-bottom: 5px; }
-
-.skill-card-name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #ddd;
-    margin-bottom: 7px;
-}
-
-.skill-card-char { font-size: 0.75rem; color: #666; font-weight: normal; }
-
-.skill-card-effective {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.78rem;
-    margin-bottom: 6px;
-    color: #888;
-}
-
-.eff-base { color: #aaa; font-weight: 700; }
-.eff-op { color: #9d91f0; font-weight: 700; }
-.eff-sep { color: #555; }
-.eff-result { color: #d4af37; font-weight: 800; font-size: 0.88rem; }
-
-.skill-card-breakdown {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.skill-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 5px;
-    padding: 4px 10px;
-    min-width: 44px;
-}
-
-.skill-stat-value {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1;
-}
-
-.skill-stat-label {
-    font-size: 0.55rem;
-    color: #555;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 1px;
-}
-
-.skill-vs { color: #555; font-size: 0.8rem; font-weight: bold; }
-
-.skill-verdict {
-    flex: 1;
-    text-align: right;
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
-.skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
-
-.skill-verdict-levels {
-    display: block;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    opacity: 0.85;
-    text-shadow: none;
 }
 
 /* ── Layers panel — zastąpiony przez FloatingPanel ── */
@@ -3141,139 +2326,4 @@ button.active { background: #d4af37; color: black; }
     color: #e74c3c;
 }
 
-/* ── Dice picker ── */
-.dice-picker {
-    background: #0d0d0d;
-    border-top: 1px solid #333;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.dice-picker-label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #8b5a2b;
-}
-
-.dice-picker-count {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.dice-count-btns {
-    display: flex;
-    gap: 3px;
-}
-
-.dice-count-btn {
-    min-width: 28px;
-    padding: 3px 6px;
-    border-radius: 3px;
-    border: 1px solid #2a2a2a;
-    background: #141414;
-    color: #777;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.1s;
-}
-
-.dice-count-btn:hover { border-color: #555; color: #ccc; }
-.dice-count-btn.active { border-color: #d4af37; background: #1a1500; color: #d4af37; }
-
-.dice-picker-dice {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.dice-type-btn {
-    flex: 1;
-    min-width: 40px;
-    padding: 6px 4px;
-    border-radius: 4px;
-    border: 1px solid #3b3a36;
-    background: #1c1510;
-    color: #d4af37;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: border-color 0.12s, background 0.12s;
-    text-align: center;
-}
-
-.dice-type-btn:hover:not(:disabled) { border-color: #d4af37; background: #2c1e0c; }
-.dice-type-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ── Karta wiadomości dice_roll ── */
-.message-dice-card {
-    background: linear-gradient(135deg, #0f0f1a 0%, #141428 100%);
-    border: 1px solid #2a2a5a;
-    border-radius: 6px;
-    margin: 6px 8px;
-    padding: 8px 10px;
-}
-
-.dice-card-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 3px;
-}
-
-.dice-card-icon { font-size: 0.9rem; }
-
-.dice-card-notation {
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #7b68ee;
-    flex: 1;
-}
-
-.dice-card-time {
-    font-size: 0.65rem;
-    color: #555;
-}
-
-.dice-card-author {
-    font-size: 0.72rem;
-    color: #888;
-    margin-bottom: 6px;
-}
-
-.dice-card-results {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.dice-card-die {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 32px;
-    height: 32px;
-    background: #1a1a3a;
-    border: 1px solid #4a4a8a;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #a0a0ff;
-    font-variant-numeric: tabular-nums;
-}
-
-.dice-card-total {
-    margin-top: 5px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #d4af37;
-    text-align: right;
-}
 </style>
