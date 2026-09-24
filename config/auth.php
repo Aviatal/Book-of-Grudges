@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification Required
+    |--------------------------------------------------------------------------
+    |
+    | Gdy false, middleware "verified" przepuszcza także niezweryfikowanych
+    | użytkowników. Służy wyłącznie do pracy lokalnej — na produkcji zostaw true.
+    |
+    */
+
+    'email_verification_required' => (bool) env('AUTH_EMAIL_VERIFICATION_REQUIRED', true),
+
 ];

@@ -106,7 +106,8 @@
             @if($isSuperadmin ?? false)
                 <div class="h-px my-3.5 mx-2" style="background: linear-gradient(90deg, transparent, var(--border-default), transparent)"></div>
                 <div class="font-heading text-[10px] tracking-[.2em] px-2 pt-0.5 pb-2" style="color: var(--text-faint-alt)">ADMINISTRATOR</div>
-                <x-sidebar-nav-link :route="route('panel.superadmin.index')" pattern="panel.superadmin.*">Wszystkie kampanie</x-sidebar-nav-link>
+                <x-sidebar-nav-link :route="route('panel.superadmin.index')" pattern="panel.superadmin.index">Wszystkie kampanie</x-sidebar-nav-link>
+                <x-sidebar-nav-link :route="route('panel.superadmin.users.index')" pattern="panel.superadmin.users.*">Użytkownicy</x-sidebar-nav-link>
             @endif
         </div>
 
