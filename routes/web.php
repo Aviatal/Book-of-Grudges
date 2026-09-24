@@ -13,6 +13,8 @@ use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Panel\ExperienceController;
 use App\Http\Controllers\Panel\PurchaseController;
 use App\Http\Controllers\Panel\SuperadminController;
+use App\Http\Controllers\Panel\SuperadminHeroesController;
+use App\Http\Controllers\Panel\SuperadminUsersController;
 use App\Http\Controllers\ProfessionsController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SkillsAndTalentsController;
@@ -206,8 +208,20 @@ Route::middleware(['auth', 'verified', 'campaign.selected', 'campaign.gm'])->pre
     });
 });
 
-// PANEL SUPERADMINA — wgląd do wszystkich kampanii, tylko do odczytu, niezależny od bieżącej kampanii
+// PANEL SUPERADMINA — niezależny od bieżącej kampanii; kampanie i bohaterowie tylko do odczytu, użytkownicy z edycją/usuwaniem
 Route::middleware(['auth', 'verified', 'superadmin'])->prefix('panel/superadmin')->group(function () {
     Route::get('/', [SuperadminController::class, 'index'])->name('panel.superadmin.index');
-    Route::get('/{campaign}', [SuperadminController::class, 'show'])->name('panel.superadmin.show');
+
+    Route::prefix('uzytkownicy')->name('panel.superadmin.users.')->group(function () {
+        Route::get('/', [SuperadminUsersController::class, 'index'])->name('index');
+        Route::get('/{user}', [SuperadminUsersController::class, 'show'])->name('show')->whereNumber('user');
+        Route::get('/{user}/edytuj', [SuperadminUsersController::class, 'edit'])->name('edit')->whereNumber('user');
+        Route::put('/{user}', [SuperadminUsersController::class, 'update'])->name('update')->whereNumber('user');
+        Route::delete('/{user}', [SuperadminUsersController::class, 'destroy'])->name('destroy')->whereNumber('user');
+    });
+
+    Route::get('/bohaterowie/{heroId}', [SuperadminHeroesController::class, 'show'])
+        ->name('panel.superadmin.heroes.show')->whereNumber('heroId');
+
+    Route::get('/{campaign}', [SuperadminController::class, 'show'])->name('panel.superadmin.show')->whereNumber('campaign');
 });
