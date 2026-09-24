@@ -1,0 +1,322 @@
+/*
+ * Motyw maili Book of Grudges — paleta z resources/css/app.css (zmienne :root).
+ * Maile nie mają dostępu do zmiennych CSS, więc kolory są wpisane na sztywno:
+ *   tła:      #100e0b (base), #191510 (panel), #14110c (inset)
+ *   ramki:    #4a3520 (frame), #2c2117 (subtle), #6b4a24 (accent)
+ *   złoto:    #d4af37 (gold), #f0cf62 (gold-bright)
+ *   tekst:    #e8dcc0 (body), #b3a583 (muted), #8b7b52 (faint), #6d5f45 (faint-alt)
+ */
+
+/* Base */
+
+body,
+body *:not(html):not(style):not(br):not(tr):not(code) {
+    box-sizing: border-box;
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    position: relative;
+}
+
+body {
+    -webkit-text-size-adjust: none;
+    background-color: #100e0b;
+    color: #e8dcc0;
+    height: 100%;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
+}
+
+p,
+ul,
+ol,
+blockquote {
+    line-height: 1.4;
+    text-align: start;
+}
+
+a {
+    color: #d4af37;
+}
+
+a img {
+    border: none;
+}
+
+/* Typography */
+
+h1 {
+    color: #d4af37;
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    margin-top: 0;
+    text-align: start;
+}
+
+h2 {
+    color: #d4af37;
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 0;
+    text-align: start;
+}
+
+h3 {
+    color: #d4af37;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 0;
+    text-align: left;
+}
+
+p {
+    color: #e8dcc0;
+    font-size: 17px;
+    line-height: 1.55em;
+    margin-top: 0;
+    text-align: left;
+}
+
+p.sub {
+    font-size: 12px;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* Layout */
+
+.wrapper {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    background-color: #100e0b;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.content {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+/* Header */
+
+.header {
+    padding: 32px 0 24px;
+    text-align: center;
+}
+
+.header a {
+    color: #d4af37;
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+}
+
+/* Logo */
+
+.logo {
+    border-radius: 8px;
+    height: 72px;
+    margin-bottom: 12px;
+    max-height: 72px;
+    width: 72px;
+}
+
+/* Body */
+
+.body {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    background-color: #100e0b;
+    border-bottom: 1px solid #100e0b;
+    border-top: 1px solid #100e0b;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.inner-body {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+    background-color: #191510;
+    border: 1px solid #4a3520;
+    border-top: 2px solid #d4af37;
+    margin: 0 auto;
+    padding: 0;
+    width: 570px;
+}
+
+.inner-body a {
+    word-break: break-all;
+}
+
+/* Subcopy */
+
+.subcopy {
+    border-top: 1px solid #2c2117;
+    margin-top: 25px;
+    padding-top: 25px;
+}
+
+.subcopy p {
+    color: #8b7b52;
+    font-size: 14px;
+}
+
+.subcopy a {
+    color: #a98b3f;
+}
+
+/* Footer */
+
+.footer {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+    width: 570px;
+}
+
+.footer p {
+    color: #6d5f45;
+    font-size: 13px;
+    text-align: center;
+}
+
+.footer a {
+    color: #6d5f45;
+    text-decoration: underline;
+}
+
+/* Tables */
+
+.table table {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    margin: 30px auto;
+    width: 100%;
+}
+
+.table th {
+    border-bottom: 1px solid #2c2117;
+    color: #d4af37;
+    margin: 0;
+    padding-bottom: 8px;
+}
+
+.table td {
+    color: #e8dcc0;
+    font-size: 15px;
+    line-height: 18px;
+    margin: 0;
+    padding: 10px 0;
+}
+
+.content-cell {
+    max-width: 100vw;
+    padding: 36px 32px;
+}
+
+/* Buttons — ramkę robi komórka <td> w button.blade.php, tu tylko wypełnienie i tekst */
+
+.action {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    margin: 30px auto;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+    float: unset;
+}
+
+.button {
+    -webkit-text-size-adjust: none;
+    color: #f0cf62;
+    display: inline-block;
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    overflow: hidden;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.button-blue,
+.button-primary {
+    background-color: #2e2214;
+    border-bottom: 12px solid #2e2214;
+    border-left: 28px solid #2e2214;
+    border-right: 28px solid #2e2214;
+    border-top: 12px solid #2e2214;
+}
+
+.button-green,
+.button-success {
+    background-color: #2e2214;
+    border-bottom: 12px solid #2e2214;
+    border-left: 28px solid #2e2214;
+    border-right: 28px solid #2e2214;
+    border-top: 12px solid #2e2214;
+}
+
+.button-red,
+.button-error {
+    background-color: #2b1512;
+    border-bottom: 12px solid #2b1512;
+    border-left: 28px solid #2b1512;
+    border-right: 28px solid #2b1512;
+    border-top: 12px solid #2b1512;
+    color: #e0a08c;
+}
+
+/* Panels */
+
+.panel {
+    border-left: #6b4a24 solid 4px;
+    margin: 21px 0;
+}
+
+.panel-content {
+    background-color: #14110c;
+    color: #b3a583;
+    padding: 16px;
+}
+
+.panel-content p {
+    color: #b3a583;
+}
+
+.panel-item {
+    padding: 0;
+}
+
+.panel-item p:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Utilities */
+
+.break-all {
+    word-break: break-all;
+}

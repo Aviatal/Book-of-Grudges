@@ -1,47 +1,35 @@
 @extends('Layout.master')
 
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card" style="background-color: #333; color: #D4A373; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);">
-                    <div class="card-header" style="background-color: #222; color: #D4A373; text-align: center; padding: 1rem;">{{ __('Reset Password') }}</div>
-
-                    <div class="card-body" style="padding: 2rem;">
-                        @if (session('status'))
-                            <div class="alert alert-success" role="alert" style="background-color: #4CAF50; color: white; text-align: center;">
-                                {{ session('status') }}
-                            </div>
-                        @endif
-                        <form method="POST" action="{{ route('password.email') }}">
-                            @csrf
-
-                            <div class="row mb-3">
-                                <div class="col-12" style="text-align: center;">
-                                    <label for="email" class="col-form-label" style="color: #D4A373;">E-mail</label>
-                                </div>
-                                <div class="col-12" style="text-align: center;">
-                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus style="background-color: #555; color: #fff; border: 1px solid #666; padding: 0.5rem; border-radius: 4px; width: 70%; margin: 0 auto; text-align: center;">
-
-                                    @error('email')
-                                    <span class="invalid-feedback" role="alert" style="color: #ff6666;">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="row mb-0">
-                                <div class="col-12" style="text-align: center;">
-                                    <button type="submit" class="btn btn-primary" style="background-color: #D4A373; color: #222; border: none; padding: 0.75rem 1.5rem; border-radius: 4px;">
-                                        Wyślij link do resetu hasła
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+    <x-auth-card title="RESET HASŁA" subtitle="Podaj adres, a wyślemy Ci link do ustawienia nowego hasła">
+        @if (session('status'))
+            <div class="mb-4 px-3 py-2.5 text-sm text-left" role="status"
+                 style="border: 1px solid var(--border-accent); background: var(--bg-inset); color: var(--gold-bright)">
+                {{ session('status') }}
             </div>
+        @endif
+
+        <form method="POST" action="{{ route('password.email') }}" class="text-left">
+            @csrf
+
+            <label class="block mb-5">
+                <span class="block font-heading text-[10px] tracking-[.18em] mb-1.5" style="color: var(--text-faint)">E-MAIL</span>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
+                       class="w-full box-border px-3 py-3 font-body"
+                       style="background: var(--bg-inset); border: 1px solid var(--border-default); color: var(--text-body)">
+                @error('email')
+                    <span class="block mt-1 text-sm" role="alert" style="color: var(--danger-text)">{{ $message }}</span>
+                @enderror
+            </label>
+
+            <button type="submit" class="w-full py-3 font-heading text-[13px] font-semibold tracking-[.18em] cursor-pointer"
+                    style="border: 1px solid var(--border-accent); background: linear-gradient(#3a2b17,#241b10); color: var(--gold-bright)">
+                WYŚLIJ LINK
+            </button>
+        </form>
+
+        <div class="mt-5 pt-4.5 text-sm" style="border-top: 1px solid var(--border-subtle); color: var(--text-faint)">
+            Pamiętasz hasło? <a href="{{ route('login') }}" style="color: var(--gold)">Zaloguj się</a>
         </div>
-    </div>
+    </x-auth-card>
 @endsection

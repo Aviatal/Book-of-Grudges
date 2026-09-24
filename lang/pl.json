@@ -1,0 +1,8 @@
+{
+    "Name": "Imię",
+    "Password": "Hasło",
+    "Confirm Password": "Powtórz hasło",
+    "Register": "Zarejestruj się",
+    "Reset Password": "Zresetuj hasło",
+    "Please confirm your password before continuing.": "Potwierdź hasło, zanim przejdziesz dalej."
+}

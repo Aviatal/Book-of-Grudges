@@ -20,7 +20,7 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\TokensController;
 use App\Http\Controllers\WeaponsController;
 use Illuminate\Support\Facades\Route;
-Auth::routes();
+Auth::routes(['verify' => true]);
 
 Route::group(['prefix' => 'bronie'], function () {
     Route::get('/', [WeaponsController::class, 'index'])->name('weapons.index');
@@ -49,7 +49,7 @@ Route::get('/get-footer-text', [HomepageController::class, 'getFooterText'])->na
 
 // Wybór/tworzenie/dołączanie do kampanii — wymaga tylko zalogowania, bo to właśnie
 // tu trafia user bez wybranej (lub bez żadnej) kampanii.
-Route::middleware('auth')->prefix('kampanie')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('kampanie')->group(function () {
     Route::get('/', [CampaignController::class, 'index'])->name('campaigns.index');
     Route::post('/', [CampaignController::class, 'store'])->name('campaigns.store');
     Route::post('/dolacz', [CampaignController::class, 'join'])->name('campaigns.join');
@@ -57,7 +57,7 @@ Route::middleware('auth')->prefix('kampanie')->group(function () {
     Route::post('/{campaign}/wybierz', [CampaignController::class, 'switch'])->name('campaigns.switch');
 });
 
-Route::middleware(['auth', 'campaign.selected'])->group(function (){
+Route::middleware(['auth', 'verified', 'campaign.selected'])->group(function (){
     Route::get('/', function () {
         return redirect('/karta-postaci/' . Auth::user()->getAuthIdentifier());
     })->name('home');
@@ -166,7 +166,7 @@ Route::middleware(['auth', 'campaign.selected'])->group(function (){
 });
 
 //PANEL MG (kampania bieżąca)
-Route::middleware(['auth', 'campaign.selected', 'campaign.gm'])->prefix('panel')->group(function (){
+Route::middleware(['auth', 'verified', 'campaign.selected', 'campaign.gm'])->prefix('panel')->group(function (){
     Route::prefix('kampania')->group(function () {
         Route::get('/', [PanelCampaignController::class, 'index'])->name('panel.campaign.index');
         Route::post('/zmien-nazwe', [PanelCampaignController::class, 'rename'])->name('panel.campaign.rename');
@@ -207,7 +207,7 @@ Route::middleware(['auth', 'campaign.selected', 'campaign.gm'])->prefix('panel')
 });
 
 // PANEL SUPERADMINA — wgląd do wszystkich kampanii, tylko do odczytu, niezależny od bieżącej kampanii
-Route::middleware(['auth', 'superadmin'])->prefix('panel/superadmin')->group(function () {
+Route::middleware(['auth', 'verified', 'superadmin'])->prefix('panel/superadmin')->group(function () {
     Route::get('/', [SuperadminController::class, 'index'])->name('panel.superadmin.index');
     Route::get('/{campaign}', [SuperadminController::class, 'show'])->name('panel.superadmin.show');
 });

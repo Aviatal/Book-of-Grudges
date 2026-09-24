@@ -99,6 +99,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Markdown Mail Settings
+    |--------------------------------------------------------------------------
+    |
+    | Motyw "book-of-grudges" (resources/views/vendor/mail/html/themes) nadaje
+    | mailom ten sam wygląd co aplikacji: ciemne tło, złote akcenty, logo.
+    |
+    */
+
+    'markdown' => [
+        'theme' => env('MAIL_MARKDOWN_THEME', 'book-of-grudges'),
+
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Global "From" Address
     |--------------------------------------------------------------------------
     |
