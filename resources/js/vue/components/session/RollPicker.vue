@@ -6,6 +6,7 @@
         <button class="roll-btn" @click="showDicePicker = !showDicePicker; if(showDicePicker) showSkillPicker = false" :disabled="disabled" :class="{ active: showDicePicker }">
             🎲 Rzut kośćmi
         </button>
+        <slot name="actions" />
     </div>
 
     <div v-if="showDicePicker" class="dice-picker">
@@ -168,7 +169,13 @@ const rollDice = (sides: number) => {
     padding: 5px 10px 8px;
     background: #111;
     display: flex;
+    flex-wrap: wrap;
     gap: 5px;
+}
+
+/* Przyciski z rodzica (np. punkt przeznaczenia) mają własne style i w pasku nie rozciągają się na całą szerokość */
+.chat-actions :slotted(button) {
+    width: auto;
 }
 
 .roll-btn {

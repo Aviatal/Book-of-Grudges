@@ -6,6 +6,7 @@ import {defineProps} from "vue";
 import {useToast} from "vue-toast-notification";
 import { emitter } from '../../emitter'
 import axios from "axios";
+import {getApiErrorMessage} from "../../utils/apiError";
 
 const props = defineProps<{
     heroId: number
@@ -16,6 +17,7 @@ const spendFp = () => {
     axios
         .patch('karta-postaci/' + props.heroId + '/spend-fortune-point')
         .then(() => {
+            emitter.emit('luck-spent');
             customSwal.fire({
                 title: "Wydałeś punkt szczęścia, było warto?",
                 showDenyButton: true,
@@ -36,12 +38,11 @@ const spendFp = () => {
                             toast.warning('Sigmar tak chciał')
                         }
                     })
-                emitter.emit('luck-spent')
             });
 
         })
         .catch(error => {
-            toast.error(error.response.data.message)
+            toast.error(getApiErrorMessage(error, 'Nie udało się wydać punktu szczęścia'))
         })
 };
 </script>

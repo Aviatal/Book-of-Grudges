@@ -76,7 +76,14 @@
                     title="Otwórz kartę bohatera w nowej karcie"
                 >📋</a>
             </template>
-            <MessageThread :messages="messages" />
+            <MessageThread
+                :messages="messages"
+                :user-id="userId"
+                :hero-id="heroId"
+                :fortune-points="fortunePoints"
+                :luck-busy="isSpendingLuck"
+                @spend-luck="spendLuckOnRoll"
+            />
 
             <div v-if="isRolling" class="dice-overlay">
                 <div class="dice-overlay-die">🎲</div>
@@ -102,7 +109,11 @@
                 @roll-characteristic="rollCharacteristic"
                 @roll-skill="rollSkill"
                 @roll-dice="rollDice"
-            />
+            >
+                <template v-if="heroId" #actions>
+                    <SpendFatePoint :hero-id="heroId" compact />
+                </template>
+            </RollPicker>
         </FloatingPanel>
 
         <PrivateChatPanel :campaign-id="campaignId" :user-id="userId" :is-gm="isGm" :is-mobile="isMobile" />
@@ -528,6 +539,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useToast } from 'vue-toast-notification';
+import { emitter } from '../../../emitter';
 import axios from 'axios';
 import {Token} from "@/types/Token";
 import {DrawingData, DrawingLayerId} from "@/types/DrawingData";
@@ -541,12 +554,17 @@ import FloatingPanel from '../../components/session/FloatingPanel.vue';
 import MessageThread from '../../components/session/MessageThread.vue';
 import RollPicker from '../../components/session/RollPicker.vue';
 import PrivateChatPanel from '../../components/session/PrivateChatPanel.vue';
+import SpendFatePoint from '../../components/SpendFatePoint.vue';
 import { useHeroSkills } from '../../../composables/useHeroSkills';
 import { playDiceSound } from '../../../utils/sound';
+import { parseSkillTest } from '../../../utils/chatMessageParsers';
+import { getApiErrorMessage } from '../../../utils/apiError';
 
 const props = defineProps<{
     userId: number,
     heroId: number,
+    // Stan z chwili wejścia na stronę — dalej aktualizowany na żywo (nowy punkt od MG, wydanie).
+    initialFortunePoints: number,
     hasDrawingPermission: boolean,
     isGm: boolean,
     campaignId: number,
@@ -591,7 +609,12 @@ const REALTIME_CHANNELS = computed(() => [
     `drawings.${props.campaignId}`,
     `session-chat.${props.campaignId}`,
     `combat.${props.campaignId}`,
+    ...(props.heroId ? [`hero.${props.heroId}`] : []),
 ]);
+
+const toast = useToast();
+const fortunePoints = ref(props.initialFortunePoints);
+const onLuckSpent = () => { fortunePoints.value = Math.max(0, fortunePoints.value - 1); };
 
 const subscribeRealtime = (): void => {
     window.Echo.private(`token-move.${props.campaignId}`)
@@ -653,6 +676,15 @@ const subscribeRealtime = (): void => {
         .listen('.message-sent', (e: any) => {
             addMessage(e.message);
         });
+
+    // MG może przyznać punkt szczęścia w trakcie sesji — gracz nie musi odświeżać strony.
+    if (props.heroId) {
+        window.Echo.private(`hero.${props.heroId}`)
+            .listen('.hero.fortune-points-added', () => {
+                fortunePoints.value++;
+                toast.success('Otrzymałeś punkt szczęścia od Mistrza Gry!');
+            });
+    }
 };
 
 const moveToken = (tokenId: number, x: number, y: number) => {
@@ -1582,6 +1614,32 @@ const rollSkill = async (skillId: number, modifier: number, half: boolean) => {
     }
 };
 
+// Punkt szczęścia po nieudanym rzucie — serwer w jednej transakcji wydaje punkt, powtarza ten sam test
+// i zapisuje wynik w statystyce satysfakcji (udany rzut = „warto"), więc nie pytamy tu gracza o ocenę.
+const isSpendingLuck = ref(false);
+const spendLuckOnRoll = async (messageId: number) => {
+    if (isSpendingLuck.value || isRollingSkill.value) return;
+    isSpendingLuck.value = true;
+    playDiceSound();
+    try {
+        const { data } = await axios.post('/session/chat/reroll-with-fortune-point', { message_id: messageId });
+        addMessage(data.message);
+        onLuckSpent();
+        const result = parseSkillTest(data.message.text);
+        if (result?.passed && !result.fumble) {
+            toast.success('Sigmar Ci sprzyja!');
+        } else {
+            toast.warning('Sigmar tak chciał');
+        }
+    } catch (e: any) {
+        // 400 = serwer twierdzi, że punktów już nie ma — licznik u nas był nieaktualny
+        if (e.response?.status === 400) fortunePoints.value = 0;
+        toast.error(getApiErrorMessage(e, 'Nie udało się wydać punktu szczęścia'));
+    } finally {
+        isSpendingLuck.value = false;
+    }
+};
+
 const rollDice = async (count: number, sides: number) => {
     if (isRollingDice.value) return;
     isRollingDice.value = true;
@@ -1744,6 +1802,7 @@ onMounted(async () => {
     window.addEventListener('mouseup', handleWindowMouseUp);
 
     subscribeRealtime();
+    emitter.on('luck-spent', onLuckSpent);
 
     // Pobierz stan widoczności planszy (np. po odświeżeniu strony)
     try {
@@ -1764,6 +1823,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateSize);
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('mouseup', handleWindowMouseUp);
+    emitter.off('luck-spent', onLuckSpent);
     REALTIME_CHANNELS.value.forEach(channel => window.Echo.leave(channel));
 });
 </script>

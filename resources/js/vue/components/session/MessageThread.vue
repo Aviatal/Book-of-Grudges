@@ -33,6 +33,7 @@
                 <div class="skill-card-header">
                     <span class="skill-card-icon">🎯</span>
                     <span class="skill-card-type">TEST UMIEJĘTNOŚCI</span>
+                    <span v-if="parseSkillTest(msg.text)?.fortune_reroll" class="skill-card-luck-badge">🍀 PUNKT SZCZĘŚCIA</span>
                     <span v-if="parseSkillTest(msg.text)?.fumble" class="skill-card-fumble">💀 PECH</span>
                     <span class="skill-card-time">{{ formatDate(msg.created_at) }}</span>
                 </div>
@@ -67,6 +68,14 @@
                         </span>
                     </div>
                 </div>
+                <div v-if="canSpendLuckOn(msg)" class="skill-card-luck">
+                    <button
+                        class="skill-card-luck-btn"
+                        :disabled="(fortunePoints ?? 0) <= 0 || luckBusy"
+                        :title="(fortunePoints ?? 0) <= 0 ? 'Nie masz już punktów szczęścia' : 'Wydaj punkt szczęścia i powtórz ten rzut'"
+                        @click="emit('spend-luck', msg.id)"
+                    >🍀 Wydaj punkt szczęścia i rzuć ponownie</button>
+                </div>
             </div>
             <div v-else-if="msg.type === 'dice_roll'" class="message-dice-card">
                 <div class="dice-card-header">
@@ -96,13 +105,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import type { Message } from '../../../types/Message';
 import { parseRoll, parseSkillTest, parseDiceRoll, formatDate, pluralizeLevels } from '../../../utils/chatMessageParsers';
 
 const props = defineProps<{
     messages: Message[];
+    // Podane tylko tam, gdzie gracz może wydać punkt szczęścia po własnym nieudanym rzucie
+    // (czat sesji); bez nich karty rzutów nie pokazują przycisku.
+    userId?: number;
+    heroId?: number;
+    fortunePoints?: number;
+    // Trwa już wydawanie punktu — blokuje podwójne kliknięcie
+    luckBusy?: boolean;
 }>();
+
+const emit = defineEmits<{
+    'spend-luck': [messageId: number];
+}>();
+
+// Punkt szczęścia ma sens tylko po ostatnim rzucie bohatera — starsze rzuty już „się wydarzyły".
+const lastOwnSkillTestId = computed(() => {
+    if (!props.heroId) return null;
+    const own = props.messages.filter(m => m.type === 'skill_test' && m.user_id === props.userId);
+    return own.length ? own[own.length - 1].id : null;
+});
+
+const canSpendLuckOn = (msg: Message): boolean => {
+    if (msg.id !== lastOwnSkillTestId.value) return false;
+    const result = parseSkillTest(msg.text);
+    // Klucz skill_id ma tylko rzut, który serwer umie powtórzyć (patrz SkillTestResult)
+    // Powtórka za punkt szczęścia jest ostateczna — nie da się jej przerzucić kolejnym punktem
+    return !!result && 'skill_id' in result && !result.fortune_reroll && (!result.passed || result.fumble);
+};
 
 const containerEl = ref<HTMLElement | null>(null);
 
@@ -349,6 +384,47 @@ watch(() => props.messages.length, async () => {
 
 .skill-verdict-pass { color: #4caf50; text-shadow: 0 0 8px rgba(76, 175, 80, 0.4); }
 .skill-verdict-fail { color: #f44336; text-shadow: 0 0 8px rgba(244, 67, 54, 0.4); }
+
+.skill-card-luck {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+}
+
+.skill-card-luck-btn {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #d4af37;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid #d4af37;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.skill-card-luck-btn:hover:not(:disabled) {
+    background: #d4af37;
+    color: #1a1a1a;
+}
+
+.skill-card-luck-btn:disabled {
+    border-color: #555;
+    color: #777;
+    background: #222;
+    cursor: not-allowed;
+}
+
+.skill-card-luck-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid #d4af37;
+    border-radius: 4px;
+    padding: 1px 6px;
+}
 
 .skill-verdict-levels {
     display: block;

@@ -21,6 +21,15 @@ class SkillTestOutcome
     }
 
     /**
+     * Test wyszedł tylko wtedy, gdy rzut mieści się w progu i nie jest pechem — pech (97-100)
+     * liczy się jako porażka nawet wtedy, gdy próg jest wysoki i test formalnie „zdany".
+     */
+    public static function isSuccess(int $roll, int $effectiveValue): bool
+    {
+        return $roll <= $effectiveValue && !self::isFumble($roll);
+    }
+
+    /**
      * O ile pełnych poziomów (10 punktów) rzut różni się od progu — 0, gdy różnica jest
      * mniejsza niż 10 (wtedy nie ma czego pokazywać jako dodatkowej informacji o poziomie).
      */

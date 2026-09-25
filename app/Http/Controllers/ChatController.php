@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Exceptions\FortuneRerollNotAllowedException;
+use App\Exceptions\NotEnoughFortunePointsException;
 use App\Repositories\ChatRepository;
 use App\Services\ChatService;
 use App\Support\CurrentCampaign;
@@ -129,6 +131,29 @@ class ChatController extends Controller
         } catch (\Throwable $exception) {
             Log::error('Error during skill roll', ['exception' => $exception]);
             return response()->json(['error' => 'Wystąpił błąd podczas testu umiejętności'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function rerollWithFortunePoint(Request $request): JsonResponse
+    {
+        $request->validate([
+            'message_id' => ['required', 'integer'],
+        ]);
+
+        try {
+            $message = $this->chatService->rerollWithFortunePoint(
+                $request->user(),
+                $request->integer('message_id'),
+                $this->currentCampaign()->id(),
+            );
+            return response()->json(['message' => $message], Response::HTTP_CREATED);
+        } catch (NotEnoughFortunePointsException $exception) {
+            return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (FortuneRerollNotAllowedException $exception) {
+            return response()->json(['error' => $exception->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Throwable $exception) {
+            Log::error('Error during fortune point reroll', ['exception' => $exception]);
+            return response()->json(['error' => 'Wystąpił błąd podczas wydawania punktu szczęścia'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\Session\MessageSentEvent;
 use App\Events\Session\PrivateMessageSentEvent;
+use App\Exceptions\FortuneRerollNotAllowedException;
 use App\Exceptions\HeroNotFoundException;
 use App\Models\CampaignMember;
 use App\Models\Characteristic;
@@ -12,8 +13,10 @@ use App\Models\Message;
 use App\Models\Skill;
 use App\Models\User;
 use App\Repositories\ChatRepository;
+use App\Repositories\FortunePointsSatisfactionRepository;
 use App\Support\SkillTestOutcome;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ChatService
@@ -21,6 +24,8 @@ class ChatService
     public function __construct(
         private readonly ChatRepository $chatRepository,
         private readonly SkillTestStatisticsService $skillTestStatisticsService,
+        private readonly HeroService $heroService,
+        private readonly FortunePointsSatisfactionRepository $fortunePointsSatisfactionRepository,
     ) {}
 
     private function heroFor(User $user, int $campaignId): ?Hero
@@ -105,7 +110,7 @@ class ChatService
         ];
     }
 
-    public function rollCharacteristic(User $user, string $characteristic, int $campaignId, int $modifier = 0, bool $half = false): Message
+    public function rollCharacteristic(User $user, string $characteristic, int $campaignId, int $modifier = 0, bool $half = false, bool $fortuneReroll = false): Message
     {
         $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
 
@@ -128,7 +133,7 @@ class ChatService
         $roll   = random_int(1, 100);
         $passed = $roll <= $effective;
 
-        $text = $this->buildSkillTestPayload($characteristic, $characteristic, $charValue, $effective, $modifier, $half, $roll, $passed);
+        $text = $this->buildSkillTestPayload($characteristic, $characteristic, $charValue, $effective, $modifier, $half, $roll, $passed, null, $fortuneReroll);
 
         $message = $this->chatRepository->saveMessage($user->id, $hero->name, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
@@ -175,7 +180,7 @@ class ChatService
         return $message;
     }
 
-    public function rollSkill(User $user, int $skillId, int $campaignId, int $modifier = 0, bool $half = false): Message
+    public function rollSkill(User $user, int $skillId, int $campaignId, int $modifier = 0, bool $half = false, bool $fortuneReroll = false): Message
     {
         $hero = $this->heroFor($user, $campaignId)?->load('characteristic');
 
@@ -195,7 +200,7 @@ class ChatService
         $roll = random_int(1, 100);
         $passed = $roll <= $effectiveValue;
 
-        $text = $this->buildSkillTestPayload($skill->name, $skill->characteristic, $charValue, $effectiveValue, $modifier, $half, $roll, $passed);
+        $text = $this->buildSkillTestPayload($skill->name, $skill->characteristic, $charValue, $effectiveValue, $modifier, $half, $roll, $passed, $skill->id, $fortuneReroll);
 
         $message = $this->chatRepository->saveMessage($user->id, $authorName, $text, $campaignId, 'skill_test');
         $this->tryBroadcast($message, $campaignId);
@@ -216,11 +221,79 @@ class ChatService
     }
 
     /**
+     * Wydaje punkt szczęścia i powtarza ten sam test (ta sama umiejętność/cecha, modyfikator i ½ cechy)
+     * zamiast ostatniego, nieudanego rzutu bohatera. Wynik powtórki od razu ląduje w statystyce
+     * satysfakcji z punktów szczęścia: udany rzut = „warto było", nieudany = „nie warto".
+     *
+     * Wszystko w jednej transakcji — jeśli rzut się nie uda technicznie, punkt nie przepada.
+     *
+     * @throws FortuneRerollNotAllowedException
+     * @throws \App\Exceptions\NotEnoughFortunePointsException
+     */
+    public function rerollWithFortunePoint(User $user, int $messageId, int $campaignId): Message
+    {
+        return DB::transaction(function () use ($user, $messageId, $campaignId): Message {
+            $hero = $this->heroFor($user, $campaignId);
+            if (!$hero) {
+                throw new HeroNotFoundException("User {$user->id} has no hero assigned.");
+            }
+            // Blokada wiersza bohatera — dwa równoległe kliknięcia nie wydadzą dwóch punktów na ten sam rzut.
+            $hero = Hero::query()->whereKey($hero->id)->lockForUpdate()->firstOrFail();
+
+            $ownSkillTests = fn () => Message::query()
+                ->where('campaign_id', $campaignId)
+                ->where('user_id', $user->id)
+                ->whereNull('recipient_id')
+                ->where('type', 'skill_test');
+
+            $source = $ownSkillTests()->whereKey($messageId)->first();
+            if (!$source) {
+                throw new FortuneRerollNotAllowedException('Nie znaleziono rzutu do powtórzenia.');
+            }
+            if ((int) $ownSkillTests()->max('id') !== $source->id) {
+                throw new FortuneRerollNotAllowedException('Punkt szczęścia można wydać tylko po ostatnim rzucie.');
+            }
+
+            $payload = json_decode($source->text, true);
+            // Klucz `skill_id` (null dla cechy) mają tylko rzuty zapisane po wprowadzeniu tej funkcji —
+            // starszych nie wiemy, jak dokładnie powtórzyć.
+            if (!is_array($payload) || !array_key_exists('skill_id', $payload)) {
+                throw new FortuneRerollNotAllowedException('Tego rzutu nie da się powtórzyć.');
+            }
+            // Jeden rzut można poprawić punktem szczęścia tylko raz — powtórka jest ostateczna, nawet nieudana.
+            if (!empty($payload['fortune_reroll'])) {
+                throw new FortuneRerollNotAllowedException('Ten rzut został już powtórzony punktem szczęścia.');
+            }
+            if (SkillTestOutcome::isSuccess((int) $payload['roll'], (int) $payload['effective_value'])) {
+                throw new FortuneRerollNotAllowedException('Ten rzut się udał — punkt szczęścia nie jest potrzebny.');
+            }
+
+            $this->heroService->spendFortunePoint($hero);
+
+            $modifier = (int) $payload['modifier'];
+            $half = (bool) $payload['half'];
+            $reroll = $payload['skill_id'] !== null
+                ? $this->rollSkill($user, (int) $payload['skill_id'], $campaignId, $modifier, $half, true)
+                : $this->rollCharacteristic($user, (string) $payload['characteristic'], $campaignId, $modifier, $half, true);
+
+            $result = json_decode($reroll->text, true, 512, JSON_THROW_ON_ERROR);
+            $this->fortunePointsSatisfactionRepository->insertSatisfactionToDatabase(
+                $hero->id,
+                SkillTestOutcome::isSuccess((int) $result['roll'], (int) $result['effective_value']),
+            );
+
+            return $reroll;
+        });
+    }
+
+    /**
      * Wspólny JSON dla wiadomości typu `skill_test` (rzut na cechę i na umiejętność).
      *
      * `fumble` — rzut 97-100 to zawsze pech, niezależnie od tego, czy test formalnie wyszedł.
      * `levels` — o ile pełnych poziomów (10 punktów) różni się rzut od progu; 0, gdy różnica
      * jest mniejsza niż 10 — wtedy front nie pokazuje żadnej dodatkowej informacji o poziomie.
+     * `skill_id` — null dla rzutu na cechę; po jego obecności wiadomość da się powtórzyć punktem szczęścia.
+     * `fortune_reroll` — to powtórka rzutu za punkt szczęścia.
      */
     private function buildSkillTestPayload(
         string $skill,
@@ -231,8 +304,12 @@ class ChatService
         bool $half,
         int $roll,
         bool $passed,
+        ?int $skillId = null,
+        bool $fortuneReroll = false,
     ): string {
         return json_encode([
+            'skill_id'             => $skillId,
+            'fortune_reroll'       => $fortuneReroll,
             'skill'                => $skill,
             'characteristic'       => $characteristic,
             'characteristic_value' => $characteristicValue,

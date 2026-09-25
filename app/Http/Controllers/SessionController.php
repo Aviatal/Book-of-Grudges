@@ -24,11 +24,13 @@ class SessionController extends Controller
     {
         // GM może nie mieć własnej postaci — getHero() zwraca wtedy null; 0 nigdy nie
         // dopasuje się do prawdziwego hero_id, więc "to mój token" po prostu nigdy nie zajdzie
-        $heroId = $heroesRepository->getHero($request->user()->getAuthIdentifier(), $this->currentCampaign()->id())?->id ?? 0;
+        $hero = $heroesRepository->getHero($request->user()->getAuthIdentifier(), $this->currentCampaign()->id());
+        $heroId = $hero?->id ?? 0;
+        $fortunePoints = $hero?->fortune_points ?? 0;
         $hasDrawingPermission = $this->currentCampaign()->isGm();
         $isGm = $this->currentCampaign()->isGm();
         $campaignId = $this->currentCampaign()->id();
-        return view('Pages.session.index', compact('heroId', 'hasDrawingPermission', 'isGm', 'campaignId'));
+        return view('Pages.session.index', compact('heroId', 'fortunePoints', 'hasDrawingPermission', 'isGm', 'campaignId'));
     }
 
     public function moveToken(Request $request, Token $token, TokensRepository $tokensRepository): \Illuminate\Http\JsonResponse

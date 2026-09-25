@@ -1,27 +1,43 @@
 <template>
-    <button class="btn-blood-fate w-full" @click="spendFatePoint">Wydaj punkt przeznaczenia</button>
+    <button class="btn-blood-fate w-full" :class="{ compact }" @click="spendFatePoint">Wydaj punkt przeznaczenia</button>
 </template>
 <script setup lang="ts">
 import {defineProps} from "vue";
 import {useToast} from "vue-toast-notification";
 import axios from "axios";
+import {getApiErrorMessage} from "../../utils/apiError";
 
 const props = defineProps<{
-    heroId: number
+    heroId: number,
+    compact?: boolean
 }>()
 const toast = useToast();
 
 const spendFatePoint = () => {
-    axios
-        .patch('karta-postaci/' + props.heroId + '/spend-fate-point')
-        .then(() => {
-            customSwal.fire({
-                title: "Udało Ci się oszukać przeznaczenie... Tym razem",
-            });
-        })
-        .catch(error => {
-            toast.error(error.response.data.message)
-        })
+    customSwal.fire({
+        title: "Czy na pewno chcesz wydać punkt przeznaczenia?",
+        text: "Tej operacji nie można cofnąć.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Tak, wydaj",
+        cancelButtonText: "Anuluj",
+        focusCancel: true
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+        axios
+            .patch('karta-postaci/' + props.heroId + '/spend-fate-point')
+            .then(() => {
+                customSwal.fire({
+                    title: "Udało Ci się oszukać przeznaczenie... Tym razem",
+                    text: "Wydano punkt przeznaczenia.",
+                });
+            })
+            .catch(error => {
+                toast.error(getApiErrorMessage(error, 'Nie udało się wydać punktu przeznaczenia'))
+            })
+    });
 };
 </script>
 <style scoped>
@@ -44,6 +60,12 @@ const spendFatePoint = () => {
     position: relative;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.btn-blood-fate.compact {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
 }
 
 .btn-blood-fate:hover {

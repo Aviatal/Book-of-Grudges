@@ -9,6 +9,10 @@ export interface SkillTestResult {
     passed: boolean;
     fumble: boolean;
     levels: number;
+    // Obecny (null dla cechy) tylko w rzutach, które serwer potrafi powtórzyć punktem szczęścia
+    skill_id?: number | null;
+    // Powtórka rzutu za punkt szczęścia
+    fortune_reroll?: boolean;
 }
 
 export interface DiceRollPayload {
